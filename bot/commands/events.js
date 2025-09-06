@@ -1,0 +1,278 @@
+import { InlineKeyboard } from 'grammy';
+import { getFileContent, updateFileContent } from '../utils/github.js';
+import { sessionManager } from '../utils/sessions.js';
+
+const EVENTS_FILE_PATH = 'data/times.json';
+const LOCATIONS_FILE_PATH = 'data/locations.json';
+
+// Validate datetime format (ISO 8601)
+function isValidDateTime(dateTimeString) {
+    try {
+        // Check basic format first
+        if (!dateTimeString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/)) {
+            return false;
+        }
+
+        const date = new Date(dateTimeString);
+
+        // Check if it's a valid date
+        if (isNaN(date.getTime())) {
+            return false;
+        }
+
+        // Check if the parsed date matches the input (catches invalid dates like Feb 30)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hour = String(date.getHours()).padStart(2, '0');
+        const minute = String(date.getMinutes()).padStart(2, '0');
+        const second = String(date.getSeconds()).padStart(2, '0');
+
+        const reconstructed = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+
+        return reconstructed === dateTimeString;
+    } catch (_) {
+        return false;
+    }
+}
+
+
+// Format datetime for display
+function formatDateTime(dateTimeString) {
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('en-GB', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+export function registerEventsCommands(bot, deploymentPoller = null) {
+    // Main events command
+    bot.command('events', async (ctx) => {
+        const keyboard = new InlineKeyboard()
+            .text('Add Event', 'events_add')
+            .text('Remove Event', 'events_remove')
+            .row()
+            .text('View All', 'events_view');
+
+        await ctx.reply('What would you like to do with events?', {
+            reply_markup: keyboard
+        });
+    });
+
+    // View all events
+    bot.callbackQuery('events_view', async (ctx) => {
+        try {
+            const { data: events } = await getFileContent(EVENTS_FILE_PATH);
+            const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+            if (events.length === 0) {
+                await ctx.editMessageText('No events found.');
+                return;
+            }
+
+            // Sort events by datetime
+            const sortedEvents = events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+            let message = '**All Events:**\n\n';
+            sortedEvents.forEach((event, index) => {
+                const location = locations.find(loc => loc.id === event.locationId);
+                const locationName = location ? `${location.location} - ${location.venue}` : `Unknown (${event.locationId})`;
+
+                message += `**${index + 1}. ${formatDateTime(event.datetime)}**\n`;
+                message += `📍 ${locationName}\n`;
+                message += `🆔 Location ID: \`${event.locationId}\`\n\n`;
+            });
+
+            await ctx.editMessageText(message, {
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Add event flow
+    bot.callbackQuery('events_add', async (ctx) => {
+        try {
+            const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+            if (locations.length === 0) {
+                await ctx.editMessageText('No locations available. Please add locations first using /locations.');
+                return;
+            }
+
+            const keyboard = new InlineKeyboard();
+            locations.forEach((location, index) => {
+                keyboard.text(`${location.location} - ${location.venue}`, `events_select_location_${index}`).row();
+            });
+            keyboard.text('Cancel', 'cancel');
+
+            await ctx.editMessageText('Select a location for the event:', {
+                reply_markup: keyboard
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle location selection for new event
+    bot.callbackQuery(/^events_select_location_(\d+)$/, async (ctx) => {
+        try {
+            const locationIndex = parseInt(ctx.match[1]);
+            const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+            const selectedLocation = locations[locationIndex];
+
+            sessionManager.set(ctx.from.id, {
+                command: 'events',
+                action: 'add_datetime',
+                locationId: selectedLocation.id,
+                locationName: `${selectedLocation.location} - ${selectedLocation.venue}`
+            });
+
+            await ctx.editMessageText(
+                `Selected location: **${selectedLocation.location} - ${selectedLocation.venue}**\n\nNow enter the date and time in format: YYYY-MM-DDTHH:MM:SS\n\nExample: 2025-09-06T18:00:00`,
+                { parse_mode: 'Markdown' }
+            );
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Remove event flow
+    bot.callbackQuery('events_remove', async (ctx) => {
+        try {
+            const { data: events } = await getFileContent(EVENTS_FILE_PATH);
+            const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+            if (events.length === 0) {
+                await ctx.editMessageText('No events to remove.');
+                return;
+            }
+
+            // Sort events by datetime for better UX
+            const sortedEvents = events
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+            const keyboard = new InlineKeyboard();
+            sortedEvents.forEach((event, index) => {
+                const location = locations.find(loc => loc.id === event.locationId);
+                const locationName = location ? `${location.location} - ${location.venue}` : event.locationId;
+                const displayText = `${formatDateTime(event.datetime)} - ${locationName}`;
+
+                keyboard.text(displayText, `events_remove_${event.originalIndex}`).row();
+            });
+            keyboard.text('Cancel', 'cancel');
+
+            await ctx.editMessageText('Select an event to remove:', {
+                reply_markup: keyboard
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle remove event selection
+    bot.callbackQuery(/^events_remove_(\d+)$/, async (ctx) => {
+        try {
+            const eventIndex = parseInt(ctx.match[1]);
+            const { data: events, sha } = await getFileContent(EVENTS_FILE_PATH);
+            const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+            const removedEvent = events.splice(eventIndex, 1)[0];
+            const location = locations.find(loc => loc.id === removedEvent.locationId);
+            const locationName = location ? `${location.location} - ${location.venue}` : removedEvent.locationId;
+
+            const commitSha = await updateFileContent(
+                EVENTS_FILE_PATH,
+                events,
+                sha,
+                `Remove event: ${formatDateTime(removedEvent.datetime)} at ${locationName}`
+            );
+
+            const message = await ctx.editMessageText(
+                `✅ Removed event:\n\n**${formatDateTime(removedEvent.datetime)}**\n📍 ${locationName}\n\n🔄 Deploying to website...`,
+                { parse_mode: 'Markdown' }
+            );
+
+            if (deploymentPoller) {
+                deploymentPoller.addPendingDeployment(
+                    ctx.from.id,
+                    ctx.chat.id,
+                    message.message_id,
+                    commitSha
+                );
+            }
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+}
+
+export async function handleEventsTextInput(ctx, deploymentPoller = null) {
+    const session = sessionManager.get(ctx.from.id);
+
+    try {
+        if (session.action === 'add_datetime') {
+            const dateTimeString = ctx.message.text.trim();
+
+            if (!isValidDateTime(dateTimeString)) {
+                await ctx.reply('❌ Invalid date/time format. Please use YYYY-MM-DDTHH:MM:SS format.\n\nExample: 2025-09-06T18:00:00');
+                return;
+            }
+
+            // Check if this exact event already exists
+            const { data: events } = await getFileContent(EVENTS_FILE_PATH);
+            const existingEvent = events.find(event =>
+                event.locationId === session.locationId &&
+                event.datetime === dateTimeString
+            );
+
+            if (existingEvent) {
+                await ctx.reply(`❌ An event already exists at this location and time. Please choose a different date/time.`);
+                return;
+            }
+
+            // Add the new event
+            const { data: eventsData, sha } = await getFileContent(EVENTS_FILE_PATH);
+
+            const newEvent = {
+                locationId: session.locationId,
+                datetime: dateTimeString
+            };
+
+            eventsData.push(newEvent);
+
+            const commitSha = await updateFileContent(
+                EVENTS_FILE_PATH,
+                eventsData,
+                sha,
+                `Add event: ${formatDateTime(dateTimeString)} at ${session.locationName}`
+            );
+
+            const message = await ctx.reply(
+                `✅ Added new event:\n\n**${formatDateTime(dateTimeString)}**\n📍 ${session.locationName}\n🆔 Location ID: \`${session.locationId}\`\n\n🔄 Deploying to website...`,
+                { parse_mode: 'Markdown' }
+            );
+
+            if (deploymentPoller) {
+                deploymentPoller.addPendingDeployment(
+                    ctx.from.id,
+                    ctx.chat.id,
+                    message.message_id,
+                    commitSha
+                );
+            }
+
+            sessionManager.delete(ctx.from.id);
+        }
+    } catch (error) {
+        await ctx.reply(`Error: ${error.message}`);
+        sessionManager.delete(ctx.from.id);
+    }
+}

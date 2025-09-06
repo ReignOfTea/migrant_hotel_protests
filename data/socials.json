@@ -1,0 +1,45 @@
+{
+    "title": "SOCIALS",
+    "sections": [
+        {
+            "heading": "People to Follow",
+            "type": "links",
+            "links": [
+                {
+                    "text": "Jonathan Wong (@WGthink)",
+                    "url": "https://x.com/WGthink"
+                },
+                {
+                    "text": "@Truthhurts101UK (Truth Hurts)",
+                    "url": "https://x.com/Truthhurts101UK"
+                },
+                {
+                    "text": "@Migrant_Auditor",
+                    "url": "https://x.com/Migrant_Auditor"
+                },
+                {
+                    "text": "@JackHadders (Jack Hadfield)",
+                    "url": "https://x.com/JackHadders"
+                }
+            ]
+        },
+        {
+            "heading": "Contact Me",
+            "type": "links",
+            "links": [
+                {
+                    "text": "X (Twitter)",
+                    "url": "https://x.com/ReignTea"
+                },
+                {
+                    "text": "Email",
+                    "url": "mailto:reignoftea@gmail.com"
+                },
+                {
+                    "text": "YouTube",
+                    "url": "https://youtube.com/@ReignOfTea"
+                }
+            ]
+        }
+    ]
+}

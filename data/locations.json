@@ -1,0 +1,90 @@
+[
+    {
+        "id": "altrincham-cresta-court",
+        "location": "ALTRINCHAM",
+        "venue": "CRESTA COURT HOTEL",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cresta+Court+Hotel+Altrincham+UK",
+        "lat": 53.3881,
+        "lng": -2.3477
+    },
+    {
+        "id": "bournemouth-roundhouse",
+        "location": "BOURNEMOUTH",
+        "venue": "ROUNDHOUSE",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Roundhouse+Bournemouth+UK",
+        "lat": 50.7192,
+        "lng": -1.8808
+    },
+    {
+        "id": "cheshunt-marriott-delta",
+        "location": "CHESHUNT",
+        "venue": "MARRIOTT DELTA HOTEL",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Marriott+Delta+Hotel+Cheshunt+UK",
+        "lat": 51.7031,
+        "lng": -0.0356
+    },
+    {
+        "id": "chichester-park-hotel",
+        "location": "CHICHESTER",
+        "venue": "PARK HOTEL",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Park+Hotel+Chichester+UK",
+        "lat": 50.8376,
+        "lng": -0.7749
+    },
+    {
+        "id": "portsmouth-royal-beach",
+        "location": "PORTSMOUTH",
+        "venue": "ROYAL BEACH",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Royal+Beach+Portsmouth+UK",
+        "lat": 50.7892,
+        "lng": -1.0943
+    },
+    {
+        "id": "blackpool-britannia-metropole",
+        "location": "BLACKPOOL",
+        "venue": "BRITANNIA METROPOLE",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Britannia+Metropole+Blackpool+UK",
+        "lat": 53.8175,
+        "lng": -3.0518
+    },
+    {
+        "id": "cannock-roman-hotel",
+        "location": "CANNOCK",
+        "venue": "ROMAN HOTEL",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Roman+Hotel+Cannock+UK",
+        "lat": 52.6906,
+        "lng": -2.0301
+    },
+    {
+        "id": "bristol-hamilton-hilton",
+        "location": "BRISTOL",
+        "venue": "HAMILTON BY HILTON",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hamilton+by+Hilton+Bristol+UK",
+        "lat": 51.4545,
+        "lng": -2.5879
+    },
+    {
+        "id": "chichester-park-hotel-evening",
+        "location": "CHICHESTER",
+        "venue": "PARK HOTEL",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Park+Hotel+Chichester+UK",
+        "lat": 50.8376,
+        "lng": -0.7749
+    },
+    {
+        "id": "london-britannia-canary",
+        "location": "LONDON",
+        "venue": "BRITANNIA CANARY WHARF",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Britannia+Hotel+Canary+Wharf+London+UK",
+        "lat": 51.5074,
+        "lng": -0.0278
+    },
+    {
+        "id": "plymouth-royal-parade",
+        "location": "PLYMOUTH",
+        "venue": "ROYAL PARADE",
+        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Royal+Parade+Plymouth+UK",
+        "lat": 50.3755,
+        "lng": -4.1427
+    }
+]

@@ -1,0 +1,25 @@
+{
+    "title": "ABOUT",
+    "sections": [
+        {
+            "heading": "GRASSROOTS",
+            "content": "This is a grassroots gathering of concerned, local individuals. We've no sponsors, no funding, and no political agenda. We're simply here to raise awareness about the migrant crisis and to demand action from our government."
+        },
+        {
+            "heading": "LOCAL",
+            "content": "From the area? Come on down. These are community-driven events, made by the locals, to tackle local concerns."
+        },
+        {
+            "heading": "PEACEFUL",
+            "content": "We're peaceful protesters, not rioters. We're here to raise awareness and demand action, not to cause chaos or destruction."
+        },
+        {
+            "heading": "LEGAL",
+            "content": "We're legal protesters, not anarchists. We're here to raise awareness and demand action, not to break the law or cause chaos."
+        },
+        {
+            "heading": "SYSTEM",
+            "content": "The system is unfit for purpose. The safety of women, children, and vulnerable people is compromised by the very people our government puts first."
+        }
+    ]
+}
