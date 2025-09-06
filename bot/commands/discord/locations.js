@@ -2,11 +2,21 @@ import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, But
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const FILE_PATH = 'data/locations.json';
+const MAX_SELECT_OPTIONS = 25;
 
 // Helper function to truncate text for Discord select menu options
 function truncateForSelectMenu(text, maxLength = 97) {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+// Helper function to chunk array into pages
+function chunkArray(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
 }
 
 // Generate ID from location and venue
@@ -146,30 +156,86 @@ async function handleRemoveLocation(interaction, deploymentPoller, auditLogger) 
             return;
         }
 
-        // Create select menu with existing locations
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('locations_remove_select')
-            .setPlaceholder('Select a location to remove')
-            .addOptions(
-                locations.map((location, index) => ({
-                    label: truncateForSelectMenu(`${location.location} - ${location.venue}`),
-                    value: index.toString(),
-                    description: truncateForSelectMenu(`ID: ${location.id}`)
-                }))
-            );
+        // Sort locations alphabetically for better UX
+        const sortedLocations = locations
+            .map((location, originalIndex) => ({ ...location, originalIndex }))
+            .sort((a, b) => a.location.localeCompare(b.location));
 
-        const row = new ActionRowBuilder().addComponents(selectMenu);
-
-        await interaction.reply({
-            content: '**🗑️ Remove Location**\n\nSelect the location you want to remove:',
-            components: [row],
-            ephemeral: true
-        });
+        await showLocationSelectPage(interaction, sortedLocations, 0, 'remove');
 
     } catch (error) {
         console.error('Error in handleRemoveLocation:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function showLocationSelectPage(interaction, sortedLocations, page, action) {
+    const chunks = chunkArray(sortedLocations, MAX_SELECT_OPTIONS);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    if (!currentChunk || currentChunk.length === 0) {
+        await interaction.reply({
+            content: '❌ No locations found on this page.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    // Create select menu with current page locations
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('locations_remove_select')
+        .setPlaceholder(`Select a location to remove (Page ${page + 1}/${totalPages})`)
+        .addOptions(
+            currentChunk.map((location) => ({
+                label: truncateForSelectMenu(`${location.location} - ${location.venue}`),
+                value: location.originalIndex.toString(),
+                description: truncateForSelectMenu(`ID: ${location.id}`)
+            }))
+        );
+
+    const components = [new ActionRowBuilder().addComponents(selectMenu)];
+
+    // Add navigation buttons if needed
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`locations_remove_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`locations_remove_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    const content = `**🗑️ Remove Location**\n\nSelect the location you want to remove (Page ${page + 1} of ${totalPages}):`;
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            content,
+            components,
+            embeds: []
+        });
+    } else {
+        await interaction.reply({
+            content,
+            components,
             ephemeral: true
         });
     }
@@ -209,6 +275,34 @@ async function handleViewLocations(interaction) {
         console.error('Error in handleViewLocations:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+// Handle button interactions for pagination
+export async function handleLocationsButton(interaction, deploymentPoller, auditLogger) {
+    const customId = interaction.customId;
+
+    if (customId.includes('_remove_prev_') || customId.includes('_remove_next_')) {
+        await handleLocationPagination(interaction, customId);
+    }
+}
+
+async function handleLocationPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+
+        const { data: locations } = await getFileContent(FILE_PATH);
+        const sortedLocations = locations
+            .map((location, originalIndex) => ({ ...location, originalIndex }))
+            .sort((a, b) => a.location.localeCompare(b.location));
+
+        await showLocationSelectPage(interaction, sortedLocations, page, 'remove');
+    } catch (error) {
+        console.error('Error in handleLocationPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
             ephemeral: true
         });
     }

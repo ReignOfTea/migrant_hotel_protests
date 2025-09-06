@@ -4,6 +4,7 @@ import { sessionManager } from '../utils/sessions.js';
 
 const EVENTS_FILE_PATH = 'data/times.json';
 const LOCATIONS_FILE_PATH = 'data/locations.json';
+const ITEMS_PER_PAGE = 10;
 
 // Validate datetime format (ISO 8601)
 function isValidDateTime(dateTimeString) {
@@ -36,7 +37,6 @@ function isValidDateTime(dateTimeString) {
     }
 }
 
-
 // Format datetime for display
 function formatDateTime(dateTimeString) {
     const date = new Date(dateTimeString);
@@ -48,6 +48,41 @@ function formatDateTime(dateTimeString) {
         hour: '2-digit',
         minute: '2-digit'
     });
+}
+
+// Create paginated keyboard
+function createPaginatedKeyboard(items, page, itemsPerPage, callbackPrefix, displayFunction) {
+    const startIndex = page * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, items.length);
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+
+    const keyboard = new InlineKeyboard();
+
+    // Add items for current page
+    for (let i = startIndex; i < endIndex; i++) {
+        const displayText = displayFunction(items[i], i);
+        keyboard.text(displayText, `${callbackPrefix}_${i}`).row();
+    }
+
+    // Add pagination controls if needed
+    if (totalPages > 1) {
+        const paginationRow = [];
+
+        if (page > 0) {
+            paginationRow.push({ text: '◀️ Previous', callback_data: `${callbackPrefix}_page_${page - 1}` });
+        }
+
+        paginationRow.push({ text: `${page + 1}/${totalPages}`, callback_data: 'noop' });
+
+        if (page < totalPages - 1) {
+            paginationRow.push({ text: 'Next ▶️', callback_data: `${callbackPrefix}_page_${page + 1}` });
+        }
+
+        keyboard.row(...paginationRow);
+    }
+
+    keyboard.text('Cancel', 'cancel');
+    return keyboard;
 }
 
 export function registerEventsCommands(bot, deploymentPoller = null) {
@@ -96,8 +131,18 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
         }
     });
 
-    // Add event flow
+    // Add event flow - show locations with pagination
     bot.callbackQuery('events_add', async (ctx) => {
+        await showLocationSelection(ctx, 0);
+    });
+
+    // Handle location pagination for add event
+    bot.callbackQuery(/^events_select_location_page_(\d+)$/, async (ctx) => {
+        const page = parseInt(ctx.match[1]);
+        await showLocationSelection(ctx, page);
+    });
+
+    async function showLocationSelection(ctx, page) {
         try {
             const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
 
@@ -106,11 +151,13 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
                 return;
             }
 
-            const keyboard = new InlineKeyboard();
-            locations.forEach((location, index) => {
-                keyboard.text(`${location.location} - ${location.venue}`, `events_select_location_${index}`).row();
-            });
-            keyboard.text('Cancel', 'cancel');
+            const keyboard = createPaginatedKeyboard(
+                locations,
+                page,
+                ITEMS_PER_PAGE,
+                'events_select_location',
+                (location, index) => `${location.location} - ${location.venue}`
+            );
 
             await ctx.editMessageText('Select a location for the event:', {
                 reply_markup: keyboard
@@ -118,7 +165,7 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
-    });
+    }
 
     // Handle location selection for new event
     bot.callbackQuery(/^events_select_location_(\d+)$/, async (ctx) => {
@@ -143,8 +190,18 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
         }
     });
 
-    // Remove event flow
+    // Remove event flow - show events with pagination
     bot.callbackQuery('events_remove', async (ctx) => {
+        await showEventSelection(ctx, 0);
+    });
+
+    // Handle event pagination for remove event
+    bot.callbackQuery(/^events_remove_page_(\d+)$/, async (ctx) => {
+        const page = parseInt(ctx.match[1]);
+        await showEventSelection(ctx, page);
+    });
+
+    async function showEventSelection(ctx, page) {
         try {
             const { data: events } = await getFileContent(EVENTS_FILE_PATH);
             const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
@@ -159,23 +216,59 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
                 .map((event, originalIndex) => ({ ...event, originalIndex }))
                 .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
-            const keyboard = new InlineKeyboard();
-            sortedEvents.forEach((event, index) => {
+            const keyboard = createPaginatedKeyboard(
+                sortedEvents,
+                page,
+                ITEMS_PER_PAGE,
+                'events_remove',
+                (event, index) => {
+                    const location = locations.find(loc => loc.id === event.locationId);
+                    const locationName = location ? `${location.location} - ${location.venue}` : event.locationId;
+                    return `${formatDateTime(event.datetime)} - ${locationName}`;
+                }
+            );
+
+            // Override callback data to use originalIndex
+            const startIndex = page * ITEMS_PER_PAGE;
+            const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sortedEvents.length);
+
+            // Rebuild keyboard with correct indices
+            const newKeyboard = new InlineKeyboard();
+            for (let i = startIndex; i < endIndex; i++) {
+                const event = sortedEvents[i];
                 const location = locations.find(loc => loc.id === event.locationId);
                 const locationName = location ? `${location.location} - ${location.venue}` : event.locationId;
                 const displayText = `${formatDateTime(event.datetime)} - ${locationName}`;
+                newKeyboard.text(displayText, `events_remove_${event.originalIndex}`).row();
+            }
 
-                keyboard.text(displayText, `events_remove_${event.originalIndex}`).row();
-            });
-            keyboard.text('Cancel', 'cancel');
+            // Add pagination controls
+            const totalPages = Math.ceil(sortedEvents.length / ITEMS_PER_PAGE);
+            if (totalPages > 1) {
+                const paginationRow = [];
+
+                if (page > 0) {
+                    paginationRow.push({ text: '◀️ Previous', callback_data: `events_remove_page_${page - 1}` });
+                }
+
+                paginationRow.push({ text: `${page + 1}/${totalPages}`, callback_data: 'noop' });
+
+                if (page < totalPages - 1) {
+                    paginationRow.push({ text: 'Next ▶️', callback_data: `events_remove_page_${page + 1}` });
+                }
+
+                newKeyboard.row(...paginationRow);
+            }
+
+            newKeyboard.text('Cancel', 'cancel');
 
             await ctx.editMessageText('Select an event to remove:', {
-                reply_markup: keyboard
+                reply_markup: newKeyboard
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
-    });
+    }
 
     // Handle remove event selection
     bot.callbackQuery(/^events_remove_(\d+)$/, async (ctx) => {
@@ -211,6 +304,11 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
+    });
+
+    // Handle noop callback (for page indicator)
+    bot.callbackQuery('noop', async (ctx) => {
+        await ctx.answerCallbackQuery();
     });
 }
 

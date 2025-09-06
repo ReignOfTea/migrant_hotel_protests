@@ -3,11 +3,21 @@ import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const EVENTS_FILE_PATH = 'data/times.json';
 const LOCATIONS_FILE_PATH = 'data/locations.json';
+const MAX_SELECT_OPTIONS = 25;
 
 // Helper function to truncate text for Discord select menu options
 function truncateForSelectMenu(text, maxLength = 97) {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+// Helper function to chunk array into pages
+function chunkArray(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
 }
 
 // Validate datetime format (ISO 8601)
@@ -100,25 +110,7 @@ async function handleAddEvent(interaction, deploymentPoller, auditLogger) {
             return;
         }
 
-        // Create select menu with available locations
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('events_add_location_select')
-            .setPlaceholder('Select a location for the event')
-            .addOptions(
-                locations.map((location, index) => ({
-                    label: truncateForSelectMenu(`${location.location} - ${location.venue}`),
-                    value: index.toString(),
-                    description: truncateForSelectMenu(`ID: ${location.id}`)
-                }))
-            );
-
-        const row = new ActionRowBuilder().addComponents(selectMenu);
-
-        await interaction.reply({
-            content: '**📅 Add New Event**\n\nFirst, select a location for the event:',
-            components: [row],
-            ephemeral: true
-        });
+        await showLocationSelectPage(interaction, locations, 0, 'add');
 
     } catch (error) {
         console.error('Error in handleAddEvent:', error);
@@ -147,36 +139,156 @@ async function handleRemoveEvent(interaction, deploymentPoller, auditLogger) {
             .map((event, originalIndex) => ({ ...event, originalIndex }))
             .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
-        // Create select menu with existing events
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('events_remove_select')
-            .setPlaceholder('Select an event to remove')
-            .addOptions(
-                sortedEvents.map((event) => {
-                    const location = locations.find(loc => loc.id === event.locationId);
-                    const locationName = location ? `${location.location} - ${location.venue}` : event.locationId;
-                    const displayText = `${formatDateTime(event.datetime)} - ${locationName}`;
-
-                    return {
-                        label: truncateForSelectMenu(displayText),
-                        value: event.originalIndex.toString(),
-                        description: truncateForSelectMenu(`Location ID: ${event.locationId}`)
-                    };
-                })
-            );
-
-        const row = new ActionRowBuilder().addComponents(selectMenu);
-
-        await interaction.reply({
-            content: '**🗑️ Remove Event**\n\nSelect the event you want to remove:',
-            components: [row],
-            ephemeral: true
-        });
+        await showEventSelectPage(interaction, sortedEvents, locations, 0, 'remove');
 
     } catch (error) {
         console.error('Error in handleRemoveEvent:', error);
         await interaction.reply({
             content: `❌ Error reading events: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function showLocationSelectPage(interaction, locations, page, action) {
+    const chunks = chunkArray(locations, MAX_SELECT_OPTIONS);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    if (!currentChunk || currentChunk.length === 0) {
+        await interaction.reply({
+            content: '❌ No locations found on this page.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    // Create select menu with current page locations
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(`events_${action}_location_select`)
+        .setPlaceholder(`Select a location (Page ${page + 1}/${totalPages})`)
+        .addOptions(
+            currentChunk.map((location, index) => ({
+                label: truncateForSelectMenu(`${location.location} - ${location.venue}`),
+                value: (page * MAX_SELECT_OPTIONS + index).toString(),
+                description: truncateForSelectMenu(`ID: ${location.id}`)
+            }))
+        );
+
+    const components = [new ActionRowBuilder().addComponents(selectMenu)];
+
+    // Add navigation buttons if needed
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`events_${action}_location_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`events_${action}_location_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    const content = `**📅 ${action === 'add' ? 'Add New Event' : 'Remove Event'}**\n\nSelect a location (Page ${page + 1} of ${totalPages}):`;
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            content,
+            components,
+            embeds: []
+        });
+    } else {
+        await interaction.reply({
+            content,
+            components,
+            ephemeral: true
+        });
+    }
+}
+
+async function showEventSelectPage(interaction, sortedEvents, locations, page, action) {
+    const chunks = chunkArray(sortedEvents, MAX_SELECT_OPTIONS);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    if (!currentChunk || currentChunk.length === 0) {
+        await interaction.reply({
+            content: '❌ No events found on this page.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    // Create select menu with current page events
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('events_remove_select')
+        .setPlaceholder(`Select an event to remove (Page ${page + 1}/${totalPages})`)
+        .addOptions(
+            currentChunk.map((event) => {
+                const location = locations.find(loc => loc.id === event.locationId);
+                const locationName = location ? `${location.location} - ${location.venue}` : event.locationId;
+                const displayText = `${formatDateTime(event.datetime)} - ${locationName}`;
+
+                return {
+                    label: truncateForSelectMenu(displayText),
+                    value: event.originalIndex.toString(),
+                    description: truncateForSelectMenu(`Location ID: ${event.locationId}`)
+                };
+            })
+        );
+
+    const components = [new ActionRowBuilder().addComponents(selectMenu)];
+
+    // Add navigation buttons if needed
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`events_remove_event_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`events_remove_event_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    const content = `**🗑️ Remove Event**\n\nSelect the event you want to remove (Page ${page + 1} of ${totalPages}):`;
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            content,
+            components,
+            embeds: []
+        });
+    } else {
+        await interaction.reply({
+            content,
+            components,
             ephemeral: true
         });
     }
@@ -223,6 +335,54 @@ async function handleViewEvents(interaction) {
         console.error('Error in handleViewEvents:', error);
         await interaction.reply({
             content: `❌ Error reading events: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+// Handle button interactions for pagination
+export async function handleEventsButton(interaction, deploymentPoller, auditLogger) {
+    const customId = interaction.customId;
+
+    if (customId.includes('_location_prev_') || customId.includes('_location_next_')) {
+        await handleLocationPagination(interaction, customId);
+    } else if (customId.includes('_event_prev_') || customId.includes('_event_next_')) {
+        await handleEventPagination(interaction, customId);
+    }
+}
+
+async function handleLocationPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+        const action = customId.includes('_add_') ? 'add' : 'remove';
+
+        const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+        await showLocationSelectPage(interaction, locations, page, action);
+    } catch (error) {
+        console.error('Error in handleLocationPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function handleEventPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+
+        const { data: events } = await getFileContent(EVENTS_FILE_PATH);
+        const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+        const sortedEvents = events
+            .map((event, originalIndex) => ({ ...event, originalIndex }))
+            .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+        await showEventSelectPage(interaction, sortedEvents, locations, page, 'remove');
+    } catch (error) {
+        console.error('Error in handleEventPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
             ephemeral: true
         });
     }

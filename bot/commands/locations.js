@@ -3,6 +3,7 @@ import { getFileContent, updateFileContent } from '../utils/github.js';
 import { sessionManager } from '../utils/sessions.js';
 
 const FILE_PATH = 'data/locations.json';
+const ITEMS_PER_PAGE = 10;
 
 // Generate ID from location and venue
 function generateId(location, venue) {
@@ -36,6 +37,41 @@ function isValidCoordinate(lat, lng) {
         latitude <= 90 &&
         longitude >= -180 &&
         longitude <= 180;
+}
+
+// Create paginated keyboard
+function createPaginatedKeyboard(items, page, itemsPerPage, callbackPrefix, displayFunction) {
+    const startIndex = page * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, items.length);
+    const totalPages = Math.ceil(items.length / itemsPerPage);
+
+    const keyboard = new InlineKeyboard();
+
+    // Add items for current page
+    for (let i = startIndex; i < endIndex; i++) {
+        const displayText = displayFunction(items[i], i);
+        keyboard.text(displayText, `${callbackPrefix}_${i}`).row();
+    }
+
+    // Add pagination controls if needed
+    if (totalPages > 1) {
+        const paginationRow = [];
+
+        if (page > 0) {
+            paginationRow.push({ text: '◀️ Previous', callback_data: `${callbackPrefix}_page_${page - 1}` });
+        }
+
+        paginationRow.push({ text: `${page + 1}/${totalPages}`, callback_data: 'noop' });
+
+        if (page < totalPages - 1) {
+            paginationRow.push({ text: 'Next ▶️', callback_data: `${callbackPrefix}_page_${page + 1}` });
+        }
+
+        keyboard.row(...paginationRow);
+    }
+
+    keyboard.text('Cancel', 'cancel');
+    return keyboard;
 }
 
 export function registerLocationsCommands(bot, deploymentPoller = null) {
@@ -89,8 +125,18 @@ export function registerLocationsCommands(bot, deploymentPoller = null) {
         await ctx.editMessageText('Please enter the location name (e.g., "ALTRINCHAM"):');
     });
 
-    // Remove location flow
+    // Remove location flow - show locations with pagination
     bot.callbackQuery('locations_remove', async (ctx) => {
+        await showLocationRemovalSelection(ctx, 0);
+    });
+
+    // Handle location pagination for remove location
+    bot.callbackQuery(/^locations_remove_page_(\d+)$/, async (ctx) => {
+        const page = parseInt(ctx.match[1]);
+        await showLocationRemovalSelection(ctx, page);
+    });
+
+    async function showLocationRemovalSelection(ctx, page) {
         try {
             const { data: locations } = await getFileContent(FILE_PATH);
 
@@ -99,11 +145,13 @@ export function registerLocationsCommands(bot, deploymentPoller = null) {
                 return;
             }
 
-            const keyboard = new InlineKeyboard();
-            locations.forEach((location, index) => {
-                keyboard.text(`${location.location} - ${location.venue}`, `locations_remove_${index}`).row();
-            });
-            keyboard.text('Cancel', 'cancel');
+            const keyboard = createPaginatedKeyboard(
+                locations,
+                page,
+                ITEMS_PER_PAGE,
+                'locations_remove',
+                (location, index) => `${location.location} - ${location.venue}`
+            );
 
             await ctx.editMessageText('Select a location to remove:', {
                 reply_markup: keyboard
@@ -111,7 +159,7 @@ export function registerLocationsCommands(bot, deploymentPoller = null) {
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
-    });
+    }
 
     // Handle remove location selection
     bot.callbackQuery(/^locations_remove_(\d+)$/, async (ctx) => {
@@ -144,6 +192,11 @@ export function registerLocationsCommands(bot, deploymentPoller = null) {
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
+    });
+
+    // Handle noop callback (for page indicator)
+    bot.callbackQuery('noop', async (ctx) => {
+        await ctx.answerCallbackQuery();
     });
 }
 
