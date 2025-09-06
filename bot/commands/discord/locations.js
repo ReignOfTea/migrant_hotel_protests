@@ -135,7 +135,7 @@ async function handleAddLocation(interaction, deploymentPoller, auditLogger) {
 
     const locationRow = new ActionRowBuilder().addComponents(locationInput);
     const venueRow = new ActionRowBuilder().addComponents(venueInput);
-    const mapUrlRow = new ActionRowBuilder().addComponents(mapUrlInput);
+    const mapUrlRow = new ActionRowBuilder().addComponents(mapUrlRow);
     const latRow = new ActionRowBuilder().addComponents(latInput);
     const lngRow = new ActionRowBuilder().addComponents(lngInput);
 
@@ -253,28 +253,100 @@ async function handleViewLocations(interaction) {
             return;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle('📍 All Locations')
-            .setColor(0x0099FF)
-            .setDescription(`Found ${locations.length} location(s):`);
+        // Sort locations alphabetically for better display
+        const sortedLocations = locations.sort((a, b) => a.location.localeCompare(b.location));
 
-        locations.forEach((location, index) => {
-            embed.addFields({
-                name: `${index + 1}. ${location.location}`,
-                value: `📍 **Venue:** ${location.venue}\n🆔 **ID:** \`${location.id}\`\n📍 **Coordinates:** ${location.lat}, ${location.lng}\n🗺️ [View on Maps](${location.mapUrl})`,
-                inline: false
-            });
-        });
+        // Discord embed limit is 25 fields, so we need to paginate
+        const LOCATIONS_PER_PAGE = 25;
+        const totalPages = Math.ceil(sortedLocations.length / LOCATIONS_PER_PAGE);
+        const currentPage = 0; // Start with first page
 
-        await interaction.reply({
-            embeds: [embed],
-            ephemeral: true
-        });
+        await showLocationsPage(interaction, sortedLocations, currentPage, totalPages);
 
     } catch (error) {
         console.error('Error in handleViewLocations:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function showLocationsPage(interaction, sortedLocations, page, totalPages) {
+    const LOCATIONS_PER_PAGE = 25;
+    const startIndex = page * LOCATIONS_PER_PAGE;
+    const endIndex = Math.min(startIndex + LOCATIONS_PER_PAGE, sortedLocations.length);
+    const pageLocations = sortedLocations.slice(startIndex, endIndex);
+
+    const embed = new EmbedBuilder()
+        .setTitle('📍 All Locations')
+        .setColor(0x0099FF)
+        .setDescription(`Showing locations ${startIndex + 1}-${endIndex} of ${sortedLocations.length} (Page ${page + 1} of ${totalPages})`);
+
+    pageLocations.forEach((location, index) => {
+        embed.addFields({
+            name: `${startIndex + index + 1}. ${location.location}`,
+            value: `📍 **Venue:** ${location.venue}\n🆔 **ID:** \`${location.id}\`\n📍 **Coordinates:** ${location.lat}, ${location.lng}\n🗺️ [View on Maps](${location.mapUrl})`,
+            inline: false
+        });
+    });
+
+    const components = [];
+
+    // Add navigation buttons if there are multiple pages
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`locations_view_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`locations_view_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            embeds: [embed],
+            components,
+            content: null
+        });
+    } else {
+        await interaction.reply({
+            embeds: [embed],
+            components,
+            ephemeral: true
+        });
+    }
+}
+
+// Add this to handle the view pagination buttons
+async function handleViewLocationsPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+
+        const { data: locations } = await getFileContent(FILE_PATH);
+        const sortedLocations = locations.sort((a, b) => a.location.localeCompare(b.location));
+        const totalPages = Math.ceil(sortedLocations.length / 25);
+
+        await showLocationsPage(interaction, sortedLocations, page, totalPages);
+    } catch (error) {
+        console.error('Error in handleViewLocationsPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
             ephemeral: true
         });
     }
@@ -286,6 +358,8 @@ export async function handleLocationsButton(interaction, deploymentPoller, audit
 
     if (customId.includes('_remove_prev_') || customId.includes('_remove_next_')) {
         await handleLocationPagination(interaction, customId);
+    } else if (customId.includes('_view_prev_') || customId.includes('_view_next_')) {
+        await handleViewLocationsPagination(interaction, customId);
     }
 }
 

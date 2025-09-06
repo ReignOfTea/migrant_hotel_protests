@@ -307,34 +307,111 @@ async function handleViewEvents(interaction) {
             return;
         }
 
-        // Sort events by datetime
-        const sortedEvents = events.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+        // Sort events by date for better display
+        const sortedEvents = events.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-        const embed = new EmbedBuilder()
-            .setTitle('📅 All Events')
-            .setColor(0x0099FF)
-            .setDescription(`Found ${events.length} event(s):`);
+        // Discord embed limit is 25 fields, so we need to paginate
+        const EVENTS_PER_PAGE = 25;
+        const totalPages = Math.ceil(sortedEvents.length / EVENTS_PER_PAGE);
+        const currentPage = 0; // Start with first page
 
-        sortedEvents.forEach((event, index) => {
-            const location = locations.find(loc => loc.id === event.locationId);
-            const locationName = location ? `${location.location} - ${location.venue}` : `Unknown (${event.locationId})`;
-
-            embed.addFields({
-                name: `${index + 1}. ${formatDateTime(event.datetime)}`,
-                value: `📍 **Location:** ${locationName}\n🆔 **Location ID:** \`${event.locationId}\``,
-                inline: false
-            });
-        });
-
-        await interaction.reply({
-            embeds: [embed],
-            ephemeral: true
-        });
+        await showEventsPage(interaction, sortedEvents, locations, currentPage, totalPages);
 
     } catch (error) {
         console.error('Error in handleViewEvents:', error);
         await interaction.reply({
             content: `❌ Error reading events: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function showEventsPage(interaction, sortedEvents, locations, page, totalPages) {
+    const EVENTS_PER_PAGE = 25;
+    const startIndex = page * EVENTS_PER_PAGE;
+    const endIndex = Math.min(startIndex + EVENTS_PER_PAGE, sortedEvents.length);
+    const pageEvents = sortedEvents.slice(startIndex, endIndex);
+
+    const embed = new EmbedBuilder()
+        .setTitle('📅 All Events')
+        .setColor(0x0099FF)
+        .setDescription(`Showing events ${startIndex + 1}-${endIndex} of ${sortedEvents.length} (Page ${page + 1} of ${totalPages})`);
+
+    pageEvents.forEach((event, index) => {
+        const location = locations.find(loc => loc.id === event.locationId);
+        const locationName = location ? `${location.location} - ${location.venue}` : `Unknown (${event.locationId})`;
+        const eventDate = new Date(event.date).toLocaleDateString('en-GB', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        embed.addFields({
+            name: `${startIndex + index + 1}. ${event.name}`,
+            value: `📍 **Location:** ${locationName}\n📅 **Date:** ${eventDate}\n⏰ **Time:** ${event.time}\n🆔 **Event ID:** \`${event.locationId}\``,
+            inline: false
+        });
+    });
+
+    const components = [];
+
+    // Add navigation buttons if there are multiple pages
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`events_view_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`events_view_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            embeds: [embed],
+            components,
+            content: null
+        });
+    } else {
+        await interaction.reply({
+            embeds: [embed],
+            components,
+            ephemeral: true
+        });
+    }
+}
+
+// Add this to handle the view pagination buttons
+async function handleViewEventsPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+
+        const { data: events } = await getFileContent(EVENTS_FILE_PATH);
+        const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+        const sortedEvents = events.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const totalPages = Math.ceil(sortedEvents.length / 25);
+
+        await showEventsPage(interaction, sortedEvents, locations, page, totalPages);
+    } catch (error) {
+        console.error('Error in handleViewEventsPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
             ephemeral: true
         });
     }
@@ -348,6 +425,8 @@ export async function handleEventsButton(interaction, deploymentPoller, auditLog
         await handleLocationPagination(interaction, customId);
     } else if (customId.includes('_event_prev_') || customId.includes('_event_next_')) {
         await handleEventPagination(interaction, customId);
+    } else if (customId.includes('_view_prev_') || customId.includes('_view_next_')) {
+        await handleViewEventsPagination(interaction, customId);
     }
 }
 

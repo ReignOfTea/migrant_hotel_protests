@@ -3,6 +3,7 @@ import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const REPEATING_EVENTS_FILE_PATH = 'data/repeating-events.json';
 const LOCATIONS_FILE_PATH = 'data/locations.json';
+const MAX_SELECT_OPTIONS = 25;
 
 const WEEKDAYS = [
     'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
@@ -12,6 +13,15 @@ const WEEKDAYS = [
 function truncateForSelectMenu(text, maxLength = 97) {
     if (!text) return '';
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+// Helper function to chunk array into pages
+function chunkArray(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
 }
 
 // Validate time format (HH:MM:SS)
@@ -94,25 +104,12 @@ async function handleAddRepeatingEvent(interaction, deploymentPoller, auditLogge
             return;
         }
 
-        // Create select menu with available locations
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('schedule_add_location_select')
-            .setPlaceholder('Select a location for the repeating event')
-            .addOptions(
-                locations.map((location, index) => ({
-                    label: truncateForSelectMenu(`${location.location} - ${location.venue}`),
-                    value: index.toString(),
-                    description: truncateForSelectMenu(`ID: ${location.id}`)
-                }))
-            );
+        // Sort locations alphabetically for better UX
+        const sortedLocations = locations
+            .map((location, originalIndex) => ({ ...location, originalIndex }))
+            .sort((a, b) => a.location.localeCompare(b.location));
 
-        const row = new ActionRowBuilder().addComponents(selectMenu);
-
-        await interaction.reply({
-            content: '**📅 Add Repeating Event**\n\nFirst, select a location for the repeating event:',
-            components: [row],
-            ephemeral: true
-        });
+        await showLocationSelectPage(interaction, sortedLocations, 0, 'add');
 
     } catch (error) {
         console.error('Error in handleAddRepeatingEvent:', error);
@@ -135,25 +132,12 @@ async function handleRemoveRepeatingEvent(interaction, deploymentPoller, auditLo
             return;
         }
 
-        // Create select menu with existing repeating events
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('schedule_remove_select')
-            .setPlaceholder('Select a repeating event to remove')
-            .addOptions(
-                repeatingEvents.map((event, index) => ({
-                    label: truncateForSelectMenu(event.name),
-                    value: index.toString(),
-                    description: truncateForSelectMenu(`${WEEKDAYS[event.weekday]} at ${event.time}`)
-                }))
-            );
+        // Sort events by name for better UX
+        const sortedEvents = repeatingEvents
+            .map((event, originalIndex) => ({ ...event, originalIndex }))
+            .sort((a, b) => a.name.localeCompare(b.name));
 
-        const row = new ActionRowBuilder().addComponents(selectMenu);
-
-        await interaction.reply({
-            content: '**🗑️ Remove Repeating Event**\n\nSelect the repeating event you want to remove:',
-            components: [row],
-            ephemeral: true
-        });
+        await showRepeatingEventSelectPage(interaction, sortedEvents, 0, 'remove');
 
     } catch (error) {
         console.error('Error in handleRemoveRepeatingEvent:', error);
@@ -176,33 +160,159 @@ async function handleToggleRepeatingEvent(interaction, deploymentPoller, auditLo
             return;
         }
 
-        // Create select menu with existing repeating events
-        const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('schedule_toggle_select')
-            .setPlaceholder('Select a repeating event to enable/disable')
-            .addOptions(
-                repeatingEvents.map((event, index) => {
-                    const status = event.enabled ? '✅' : '❌';
-                    return {
-                        label: truncateForSelectMenu(`${status} ${event.name}`),
-                        value: index.toString(),
-                        description: truncateForSelectMenu(`${WEEKDAYS[event.weekday]} at ${event.time}`)
-                    };
-                })
-            );
+        // Sort events by name for better UX
+        const sortedEvents = repeatingEvents
+            .map((event, originalIndex) => ({ ...event, originalIndex }))
+            .sort((a, b) => a.name.localeCompare(b.name));
 
-        const row = new ActionRowBuilder().addComponents(selectMenu);
-
-        await interaction.reply({
-            content: '**🔄 Toggle Repeating Event**\n\nSelect the repeating event you want to enable/disable:',
-            components: [row],
-            ephemeral: true
-        });
+        await showRepeatingEventSelectPage(interaction, sortedEvents, 0, 'toggle');
 
     } catch (error) {
         console.error('Error in handleToggleRepeatingEvent:', error);
         await interaction.reply({
             content: `❌ Error reading repeating events: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function showLocationSelectPage(interaction, sortedLocations, page, action) {
+    const chunks = chunkArray(sortedLocations, MAX_SELECT_OPTIONS);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    if (!currentChunk || currentChunk.length === 0) {
+        await interaction.reply({
+            content: '❌ No locations found on this page.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    // Create select menu with current page locations
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('schedule_add_location_select')
+        .setPlaceholder(`Select a location (Page ${page + 1}/${totalPages})`)
+        .addOptions(
+            currentChunk.map((location) => ({
+                label: truncateForSelectMenu(`${location.location} - ${location.venue}`),
+                value: location.originalIndex.toString(),
+                description: truncateForSelectMenu(`ID: ${location.id}`)
+            }))
+        );
+
+    const components = [new ActionRowBuilder().addComponents(selectMenu)];
+
+    // Add navigation buttons if needed
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`schedule_add_location_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`schedule_add_location_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    const content = `**📅 Add Repeating Event**\n\nSelect a location for the repeating event (Page ${page + 1} of ${totalPages}):`;
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            content,
+            components,
+            embeds: []
+        });
+    } else {
+        await interaction.reply({
+            content,
+            components,
+            ephemeral: true
+        });
+    }
+}
+
+async function showRepeatingEventSelectPage(interaction, sortedEvents, page, action) {
+    const chunks = chunkArray(sortedEvents, MAX_SELECT_OPTIONS);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    if (!currentChunk || currentChunk.length === 0) {
+        await interaction.reply({
+            content: '❌ No repeating events found on this page.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    // Create select menu with current page events
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId(`schedule_${action}_select`)
+        .setPlaceholder(`Select a repeating event to ${action} (Page ${page + 1}/${totalPages})`)
+        .addOptions(
+            currentChunk.map((event) => {
+                const status = action === 'toggle' ? (event.enabled ? '✅' : '❌') : '';
+                return {
+                    label: truncateForSelectMenu(`${status} ${event.name}`),
+                    value: event.originalIndex.toString(),
+                    description: truncateForSelectMenu(`${WEEKDAYS[event.weekday]} at ${event.time}`)
+                };
+            })
+        );
+
+    const components = [new ActionRowBuilder().addComponents(selectMenu)];
+
+    // Add navigation buttons if needed
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`schedule_${action}_event_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`schedule_${action}_event_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    const actionText = action === 'remove' ? 'Remove Repeating Event' : 'Toggle Repeating Event';
+    const content = `**🔄 ${actionText}**\n\nSelect the repeating event you want to ${action} (Page ${page + 1} of ${totalPages}):`;
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            content,
+            components,
+            embeds: []
+        });
+    } else {
+        await interaction.reply({
+            content,
+            components,
             ephemeral: true
         });
     }
@@ -221,32 +331,106 @@ async function handleViewRepeatingEvents(interaction) {
             return;
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle('📅 Repeating Events')
-            .setColor(0x0099FF)
-            .setDescription(`Found ${repeatingEvents.length} repeating event(s):`);
+        // Sort events by name for better display
+        const sortedEvents = repeatingEvents.sort((a, b) => a.name.localeCompare(b.name));
 
-        repeatingEvents.forEach((event, index) => {
-            const location = locations.find(loc => loc.id === event.locationId);
-            const locationName = location ? `${location.location} - ${location.venue}` : `Unknown (${event.locationId})`;
-            const status = event.enabled ? '✅ Enabled' : '❌ Disabled';
+        // Discord embed limit is 25 fields, so we need to paginate
+        const EVENTS_PER_PAGE = 25;
+        const totalPages = Math.ceil(sortedEvents.length / EVENTS_PER_PAGE);
+        const currentPage = 0; // Start with first page
 
-            embed.addFields({
-                name: `${index + 1}. ${event.name}`,
-                value: `📍 **Location:** ${locationName}\n📅 **Schedule:** Every ${WEEKDAYS[event.weekday]} at ${event.time}\n🔄 **Status:** ${status}\n🆔 **Location ID:** \`${event.locationId}\``,
-                inline: false
-            });
-        });
-
-        await interaction.reply({
-            embeds: [embed],
-            ephemeral: true
-        });
+        await showRepeatingEventsPage(interaction, sortedEvents, locations, currentPage, totalPages);
 
     } catch (error) {
         console.error('Error in handleViewRepeatingEvents:', error);
         await interaction.reply({
             content: `❌ Error reading repeating events: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function showRepeatingEventsPage(interaction, sortedEvents, locations, page, totalPages) {
+    const EVENTS_PER_PAGE = 25;
+    const startIndex = page * EVENTS_PER_PAGE;
+    const endIndex = Math.min(startIndex + EVENTS_PER_PAGE, sortedEvents.length);
+    const pageEvents = sortedEvents.slice(startIndex, endIndex);
+
+    const embed = new EmbedBuilder()
+        .setTitle('📅 Repeating Events')
+        .setColor(0x0099FF)
+        .setDescription(`Showing events ${startIndex + 1}-${endIndex} of ${sortedEvents.length} (Page ${page + 1} of ${totalPages})`);
+
+    pageEvents.forEach((event, index) => {
+        const location = locations.find(loc => loc.id === event.locationId);
+        const locationName = location ? `${location.location} - ${location.venue}` : `Unknown (${event.locationId})`;
+        const status = event.enabled ? '✅ Enabled' : '❌ Disabled';
+
+        embed.addFields({
+            name: `${startIndex + index + 1}. ${event.name}`,
+            value: `📍 **Location:** ${locationName}\n📅 **Schedule:** Every ${WEEKDAYS[event.weekday]} at ${event.time}\n🔄 **Status:** ${status}\n🆔 **Location ID:** \`${event.locationId}\``,
+            inline: false
+        });
+    });
+
+    const components = [];
+
+    // Add navigation buttons if there are multiple pages
+    if (totalPages > 1) {
+        const navigationRow = new ActionRowBuilder();
+
+        if (page > 0) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`schedule_view_prev_${page - 1}`)
+                    .setLabel('◀ Previous')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        if (page < totalPages - 1) {
+            navigationRow.addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`schedule_view_next_${page + 1}`)
+                    .setLabel('Next ▶')
+                    .setStyle(ButtonStyle.Secondary)
+            );
+        }
+
+        components.push(navigationRow);
+    }
+
+    if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({
+            embeds: [embed],
+            components,
+            content: null
+        });
+    } else {
+        await interaction.reply({
+            embeds: [embed],
+            components,
+            ephemeral: true
+        });
+    }
+}
+
+// Add this to handle the view pagination buttons
+async function handleViewRepeatingEventsPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+
+        const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+        const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+        const sortedEvents = repeatingEvents.sort((a, b) => a.name.localeCompare(b.name));
+        const totalPages = Math.ceil(sortedEvents.length / 25);
+
+        await showRepeatingEventsPage(interaction, sortedEvents, locations, page, totalPages);
+    } catch (error) {
+        console.error('Error in handleViewRepeatingEventsPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
             ephemeral: true
         });
     }
@@ -364,6 +548,58 @@ async function handleSchedulerStatus(interaction, scheduler) {
         console.error('Error in handleSchedulerStatus:', error);
         await interaction.reply({
             content: `❌ Error getting scheduler status: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+// Handle button interactions for pagination
+export async function handleScheduleButton(interaction, deploymentPoller, auditLogger) {
+    const customId = interaction.customId;
+
+    if (customId.includes('_location_prev_') || customId.includes('_location_next_')) {
+        await handleLocationPagination(interaction, customId);
+    } else if (customId.includes('_event_prev_') || customId.includes('_event_next_')) {
+        await handleEventPagination(interaction, customId);
+    } else if (customId.includes('_view_prev_') || customId.includes('_view_next_')) {
+        await handleViewRepeatingEventsPagination(interaction, customId);
+    }
+}
+
+async function handleLocationPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+
+        const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+        const sortedLocations = locations
+            .map((location, originalIndex) => ({ ...location, originalIndex }))
+            .sort((a, b) => a.location.localeCompare(b.location));
+
+        await showLocationSelectPage(interaction, sortedLocations, page, 'add');
+    } catch (error) {
+        console.error('Error in handleLocationPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
+            ephemeral: true
+        });
+    }
+}
+
+async function handleEventPagination(interaction, customId) {
+    try {
+        const page = parseInt(customId.split('_').pop());
+        const action = customId.includes('_remove_') ? 'remove' : 'toggle';
+
+        const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+        const sortedEvents = repeatingEvents
+            .map((event, originalIndex) => ({ ...event, originalIndex }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        await showRepeatingEventSelectPage(interaction, sortedEvents, page, action);
+    } catch (error) {
+        console.error('Error in handleEventPagination:', error);
+        await interaction.reply({
+            content: `❌ Error loading page: ${error.message}`,
             ephemeral: true
         });
     }

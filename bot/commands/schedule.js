@@ -4,15 +4,92 @@ import { sessionManager } from '../utils/sessions.js';
 
 const REPEATING_EVENTS_FILE_PATH = 'data/repeating-events.json';
 const LOCATIONS_FILE_PATH = 'data/locations.json';
+const MAX_BUTTONS_PER_PAGE = 8; // Telegram inline keyboard limit consideration
 
 const WEEKDAYS = [
     'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'
 ];
 
+// Helper function to chunk array into pages
+function chunkArray(array, size) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+    }
+    return chunks;
+}
+
 // Validate time format (HH:MM:SS)
 function isValidTime(timeString) {
     const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/;
     return timeRegex.test(timeString);
+}
+
+// Create paginated location keyboard
+function createLocationKeyboard(locations, page = 0) {
+    const chunks = chunkArray(locations, MAX_BUTTONS_PER_PAGE);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    const keyboard = new InlineKeyboard();
+
+    currentChunk.forEach((location, index) => {
+        const originalIndex = page * MAX_BUTTONS_PER_PAGE + index;
+        keyboard.text(`${location.location} - ${location.venue}`, `schedule_add_location_${originalIndex}`).row();
+    });
+
+    // Add navigation buttons
+    if (totalPages > 1) {
+        const navRow = [];
+        if (page > 0) {
+            navRow.push({ text: '◀ Previous', callback_data: `schedule_add_location_page_${page - 1}` });
+        }
+        navRow.push({ text: `${page + 1}/${totalPages}`, callback_data: 'noop' });
+        if (page < totalPages - 1) {
+            navRow.push({ text: 'Next ▶', callback_data: `schedule_add_location_page_${page + 1}` });
+        }
+        keyboard.row(...navRow.map(btn => InlineKeyboard.text(btn.text, btn.callback_data)));
+    }
+
+    keyboard.text('Cancel', 'cancel');
+    return keyboard;
+}
+
+// Create paginated repeating events keyboard
+function createRepeatingEventsKeyboard(events, action, page = 0) {
+    const chunks = chunkArray(events, MAX_BUTTONS_PER_PAGE);
+    const currentChunk = chunks[page];
+    const totalPages = chunks.length;
+
+    const keyboard = new InlineKeyboard();
+
+    currentChunk.forEach((event, index) => {
+        const originalIndex = page * MAX_BUTTONS_PER_PAGE + index;
+        let buttonText = event.name;
+
+        if (action === 'toggle') {
+            const status = event.enabled ? '✅' : '❌';
+            buttonText = `${status} ${event.name}`;
+        }
+
+        keyboard.text(buttonText, `schedule_${action}_${originalIndex}`).row();
+    });
+
+    // Add navigation buttons
+    if (totalPages > 1) {
+        const navRow = [];
+        if (page > 0) {
+            navRow.push({ text: '◀ Previous', callback_data: `schedule_${action}_page_${page - 1}` });
+        }
+        navRow.push({ text: `${page + 1}/${totalPages}`, callback_data: 'noop' });
+        if (page < totalPages - 1) {
+            navRow.push({ text: 'Next ▶', callback_data: `schedule_${action}_page_${page + 1}` });
+        }
+        keyboard.row(...navRow.map(btn => InlineKeyboard.text(btn.text, btn.callback_data)));
+    }
+
+    keyboard.text('Cancel', 'cancel');
+    return keyboard;
 }
 
 export function registerScheduleCommands(bot, deploymentPoller = null, scheduler = null) {
@@ -75,14 +152,38 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
                 return;
             }
 
-            const keyboard = new InlineKeyboard();
-            locations.forEach((location, index) => {
-                keyboard.text(`${location.location} - ${location.venue}`, `schedule_add_location_${index}`).row();
-            });
-            keyboard.text('Cancel', 'cancel');
+            // Sort locations alphabetically for better UX
+            const sortedLocations = locations
+                .map((location, originalIndex) => ({ ...location, originalIndex }))
+                .sort((a, b) => a.location.localeCompare(b.location));
 
-            await ctx.editMessageText('Select a location for the repeating event:', {
-                reply_markup: keyboard
+            const keyboard = createLocationKeyboard(sortedLocations, 0);
+
+            await ctx.editMessageText('**📅 Add Repeating Event**\n\nSelect a location for the repeating event (Page 1):', {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle location pagination
+    bot.callbackQuery(/^schedule_add_location_page_(\d+)$/, async (ctx) => {
+        try {
+            const page = parseInt(ctx.match[1]);
+            const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
+
+            const sortedLocations = locations
+                .map((location, originalIndex) => ({ ...location, originalIndex }))
+                .sort((a, b) => a.location.localeCompare(b.location));
+
+            const keyboard = createLocationKeyboard(sortedLocations, page);
+            const totalPages = Math.ceil(sortedLocations.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**📅 Add Repeating Event**\n\nSelect a location for the repeating event (Page ${page + 1} of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
@@ -94,7 +195,13 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
         try {
             const locationIndex = parseInt(ctx.match[1]);
             const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
-            const selectedLocation = locations[locationIndex];
+
+            // Get original location from sorted array
+            const sortedLocations = locations
+                .map((location, originalIndex) => ({ ...location, originalIndex }))
+                .sort((a, b) => a.location.localeCompare(b.location));
+
+            const selectedLocation = locations[sortedLocations[locationIndex].originalIndex];
 
             sessionManager.set(ctx.from.id, {
                 command: 'schedule',
@@ -122,14 +229,39 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
                 return;
             }
 
-            const keyboard = new InlineKeyboard();
-            repeatingEvents.forEach((event, index) => {
-                keyboard.text(`${event.name}`, `schedule_remove_${index}`).row();
-            });
-            keyboard.text('Cancel', 'cancel');
+            // Sort events by name for better UX
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
 
-            await ctx.editMessageText('Select a repeating event to remove:', {
-                reply_markup: keyboard
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'remove', 0);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**🗑️ Remove Repeating Event**\n\nSelect a repeating event to remove (Page 1 of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle remove event pagination
+    bot.callbackQuery(/^schedule_remove_page_(\d+)$/, async (ctx) => {
+        try {
+            const page = parseInt(ctx.match[1]);
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'remove', page);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**🗑️ Remove Repeating Event**\n\nSelect a repeating event to remove (Page ${page + 1} of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
@@ -142,7 +274,13 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
             const eventIndex = parseInt(ctx.match[1]);
             const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
 
-            const removedEvent = repeatingEvents.splice(eventIndex, 1)[0];
+            // Get original event from sorted array
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const originalIndex = sortedEvents[eventIndex].originalIndex;
+            const removedEvent = repeatingEvents.splice(originalIndex, 1)[0];
 
             const commitSha = await updateFileContent(
                 REPEATING_EVENTS_FILE_PATH,
@@ -179,15 +317,39 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
                 return;
             }
 
-            const keyboard = new InlineKeyboard();
-            repeatingEvents.forEach((event, index) => {
-                const status = event.enabled ? '✅' : '❌';
-                keyboard.text(`${status} ${event.name}`, `schedule_toggle_${index}`).row();
-            });
-            keyboard.text('Cancel', 'cancel');
+            // Sort events by name for better UX
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
 
-            await ctx.editMessageText('Select a repeating event to enable/disable:', {
-                reply_markup: keyboard
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'toggle', 0);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**🔄 Toggle Repeating Event**\n\nSelect a repeating event to enable/disable (Page 1 of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle toggle event pagination
+    bot.callbackQuery(/^schedule_toggle_page_(\d+)$/, async (ctx) => {
+        try {
+            const page = parseInt(ctx.match[1]);
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'toggle', page);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**🔄 Toggle Repeating Event**\n\nSelect a repeating event to enable/disable (Page ${page + 1} of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
@@ -200,9 +362,14 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
             const eventIndex = parseInt(ctx.match[1]);
             const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
 
-            repeatingEvents[eventIndex].enabled = !repeatingEvents[eventIndex].enabled;
-            const event = repeatingEvents[eventIndex];
-            const status = event.enabled ? 'enabled' : 'disabled';
+            // Get original event from sorted array
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const originalIndex = sortedEvents[eventIndex].originalIndex;
+            repeatingEvents[originalIndex].enabled = !repeatingEvents[originalIndex].enabled;
+            const event = repeatingEvents[originalIndex];
 
             const commitSha = await updateFileContent(
                 REPEATING_EVENTS_FILE_PATH,
@@ -249,6 +416,11 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
         } else {
             await ctx.editMessageText('❌ Scheduler not available.');
         }
+    });
+
+    // No-op callback for page indicators
+    bot.callbackQuery('noop', async (ctx) => {
+        await ctx.answerCallbackQuery();
     });
 }
 
