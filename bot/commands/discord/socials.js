@@ -1,7 +1,7 @@
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
-const FILE_PATH = 'data/socials.json';
+const FILE_PATH = 'data/more.json';
 
 // Helper function to truncate text for Discord select menu options
 function truncateForSelectMenu(text, maxLength = 97) {
@@ -19,18 +19,18 @@ function isValidUrl(string) {
     }
 }
 
-export function createSocialsCommand() {
+export function createmoreCommand() {
     return new SlashCommandBuilder()
-        .setName('socials')
-        .setDescription('Manage socials sections and links')
+        .setName('more')
+        .setDescription('Manage more sections and links')
         .addSubcommandGroup(group =>
             group
                 .setName('section')
-                .setDescription('Manage socials sections')
+                .setDescription('Manage more sections')
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName('add')
-                        .setDescription('Add a new socials section')
+                        .setDescription('Add a new more section')
                         .addStringOption(option =>
                             option.setName('heading')
                                 .setDescription('Heading of the section')
@@ -39,11 +39,11 @@ export function createSocialsCommand() {
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName('remove')
-                        .setDescription('Remove a socials section'))
+                        .setDescription('Remove a more section'))
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName('view')
-                        .setDescription('View all socials sections')))
+                        .setDescription('View all more sections')))
         .addSubcommandGroup(group =>
             group
                 .setName('link')
@@ -58,7 +58,7 @@ export function createSocialsCommand() {
                         .setDescription('Remove a link from a section')));
 }
 
-export async function handleSocialsCommand(interaction, deploymentPoller, auditLogger) {
+export async function handlemoreCommand(interaction, deploymentPoller, auditLogger) {
     const subcommandGroup = interaction.options.getSubcommandGroup();
     const subcommand = interaction.options.getSubcommand();
 
@@ -105,8 +105,8 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
         }
 
         // Add new section
-        const { data: socialsData, sha } = await getFileContent(FILE_PATH);
-        socialsData.sections.push({
+        const { data: moreData, sha } = await getFileContent(FILE_PATH);
+        moreData.sections.push({
             heading: heading,
             type: 'links',
             links: []
@@ -114,9 +114,9 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
 
         const commitSha = await updateFileContent(
             FILE_PATH,
-            socialsData,
+            moreData,
             sha,
-            `Add socials section: ${heading}`
+            `Add more section: ${heading}`
         );
 
         await interaction.reply({
@@ -157,7 +157,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
 
         if (data.sections.length === 0) {
             await interaction.reply({
-                content: '❌ No socials sections found.',
+                content: '❌ No more sections found.',
                 ephemeral: true
             });
             return;
@@ -165,7 +165,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
 
         // Create select menu with existing sections
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('socials_remove_section_select')
+            .setCustomId('more_remove_section_select')
             .setPlaceholder('Select a section to remove')
             .addOptions(
                 data.sections.map((section, index) => ({
@@ -178,7 +178,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
         await interaction.reply({
-            content: '**🗑️ Remove Socials Section**\n\nSelect the section you want to remove:',
+            content: '**🗑️ Remove more Section**\n\nSelect the section you want to remove:',
             components: [row],
             ephemeral: true
         });
@@ -186,7 +186,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
     } catch (error) {
         console.error('Error in handleRemoveSection:', error);
         await interaction.reply({
-            content: `❌ Error reading socials sections: ${error.message}`,
+            content: `❌ Error reading more sections: ${error.message}`,
             ephemeral: true
         });
     }
@@ -198,7 +198,7 @@ async function handleViewSections(interaction) {
 
         if (data.sections.length === 0) {
             await interaction.reply({
-                content: '❌ No socials sections found.',
+                content: '❌ No more sections found.',
                 ephemeral: true
             });
             return;
@@ -234,7 +234,7 @@ async function handleViewSections(interaction) {
     } catch (error) {
         console.error('Error in handleViewSections:', error);
         await interaction.reply({
-            content: `❌ Error reading socials sections: ${error.message}`,
+            content: `❌ Error reading more sections: ${error.message}`,
             ephemeral: true
         });
     }
@@ -246,7 +246,7 @@ async function handleAddLink(interaction, deploymentPoller, auditLogger) {
 
         if (data.sections.length === 0) {
             await interaction.reply({
-                content: '❌ No socials sections found. Add a section first using `/socials section add`.',
+                content: '❌ No more sections found. Add a section first using `/more section add`.',
                 ephemeral: true
             });
             return;
@@ -254,7 +254,7 @@ async function handleAddLink(interaction, deploymentPoller, auditLogger) {
 
         // Create select menu with existing sections
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('socials_add_link_select')
+            .setCustomId('more_add_link_select')
             .setPlaceholder('Select a section to add a link to')
             .addOptions(
                 data.sections.map((section, index) => ({
@@ -275,7 +275,7 @@ async function handleAddLink(interaction, deploymentPoller, auditLogger) {
     } catch (error) {
         console.error('Error in handleAddLink:', error);
         await interaction.reply({
-            content: `❌ Error reading socials sections: ${error.message}`,
+            content: `❌ Error reading more sections: ${error.message}`,
             ephemeral: true
         });
     }
@@ -287,7 +287,7 @@ async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
 
         if (data.sections.length === 0) {
             await interaction.reply({
-                content: '❌ No socials sections found.',
+                content: '❌ No more sections found.',
                 ephemeral: true
             });
             return;
@@ -306,7 +306,7 @@ async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
 
         // Create select menu with sections that have links
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('socials_remove_link_section_select')
+            .setCustomId('more_remove_link_section_select')
             .setPlaceholder('Select a section to remove a link from')
             .addOptions(
                 data.sections.map((section, index) => {
@@ -331,17 +331,17 @@ async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
     } catch (error) {
         console.error('Error in handleRemoveLink:', error);
         await interaction.reply({
-            content: `❌ Error reading socials sections: ${error.message}`,
+            content: `❌ Error reading more sections: ${error.message}`,
             ephemeral: true
         });
     }
 }
 
 // Handle modal submissions
-export async function handleSocialsModal(interaction, deploymentPoller, auditLogger) {
+export async function handlemoreModal(interaction, deploymentPoller, auditLogger) {
     const customId = interaction.customId;
 
-    if (customId.startsWith('socials_add_link_')) {
+    if (customId.startsWith('more_add_link_')) {
         await handleAddLinkModal(interaction, deploymentPoller, auditLogger);
     }
 }
@@ -350,7 +350,7 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
     const linkText = interaction.fields.getTextInputValue('link_text').trim();
     const linkUrl = interaction.fields.getTextInputValue('link_url').trim();
 
-    const pendingLink = interaction.client.pendingSocialsLinks?.get(interaction.user.id);
+    const pendingLink = interaction.client.pendingmoreLinks?.get(interaction.user.id);
 
     if (!pendingLink) {
         await interaction.reply({
@@ -370,8 +370,8 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
     }
 
     try {
-        const { data: socialsData, sha } = await getFileContent(FILE_PATH);
-        const section = socialsData.sections[pendingLink.sectionIndex];
+        const { data: moreData, sha } = await getFileContent(FILE_PATH);
+        const section = moreData.sections[pendingLink.sectionIndex];
 
         if (!section.links) {
             section.links = [];
@@ -384,7 +384,7 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
 
         const commitSha = await updateFileContent(
             FILE_PATH,
-            socialsData,
+            moreData,
             sha,
             `Add link: ${linkText} to ${section.heading}`
         );
@@ -413,7 +413,7 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
         );
 
         // Clean up
-        interaction.client.pendingSocialsLinks.delete(interaction.user.id);
+        interaction.client.pendingmoreLinks.delete(interaction.user.id);
 
     } catch (error) {
         console.error('Error adding link:', error);
@@ -425,17 +425,17 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
 }
 
 // Handle select menu interactions
-export async function handleSocialsSelect(interaction, deploymentPoller, auditLogger) {
+export async function handlemoreSelect(interaction, deploymentPoller, auditLogger) {
     const customId = interaction.customId;
     const selectedIndex = parseInt(interaction.values[0]);
 
-    if (customId === 'socials_remove_section_select') {
+    if (customId === 'more_remove_section_select') {
         await handleRemoveSectionSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
-    } else if (customId === 'socials_add_link_select') {
+    } else if (customId === 'more_add_link_select') {
         await handleAddLinkSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
-    } else if (customId === 'socials_remove_link_section_select') {
+    } else if (customId === 'more_remove_link_section_select') {
         await handleRemoveLinkSectionSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
-    } else if (customId.startsWith('socials_remove_link_')) {
+    } else if (customId.startsWith('more_remove_link_')) {
         const sectionIndex = parseInt(customId.split('_')[3]);
         await handleRemoveLinkSelect(interaction, sectionIndex, selectedIndex, deploymentPoller, auditLogger);
     }
@@ -443,9 +443,9 @@ export async function handleSocialsSelect(interaction, deploymentPoller, auditLo
 
 async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPoller, auditLogger) {
     try {
-        const { data: socialsData, sha } = await getFileContent(FILE_PATH);
+        const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
-        if (sectionIndex < 0 || sectionIndex >= socialsData.sections.length) {
+        if (sectionIndex < 0 || sectionIndex >= moreData.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
                 ephemeral: true
@@ -454,13 +454,13 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
         }
 
         // Remove section
-        const removedSection = socialsData.sections.splice(sectionIndex, 1)[0];
+        const removedSection = moreData.sections.splice(sectionIndex, 1)[0];
 
         const commitSha = await updateFileContent(
             FILE_PATH,
-            socialsData,
+            moreData,
             sha,
-            `Remove socials section: ${removedSection.heading}`
+            `Remove more section: ${removedSection.heading}`
         );
 
         await interaction.reply({
@@ -511,7 +511,7 @@ async function handleAddLinkSelect(interaction, sectionIndex, deploymentPoller, 
 
         // Show modal for link input
         const modal = new ModalBuilder()
-            .setCustomId(`socials_add_link_${Date.now()}`)
+            .setCustomId(`more_add_link_${Date.now()}`)
             .setTitle(`Add Link to "${section.heading}"`);
 
         const textInput = new TextInputBuilder()
@@ -537,8 +537,8 @@ async function handleAddLinkSelect(interaction, sectionIndex, deploymentPoller, 
         await interaction.showModal(modal);
 
         // Store the section index for when modal is submitted
-        interaction.client.pendingSocialsLinks = interaction.client.pendingSocialsLinks || new Map();
-        interaction.client.pendingSocialsLinks.set(interaction.user.id, { sectionIndex });
+        interaction.client.pendingmoreLinks = interaction.client.pendingmoreLinks || new Map();
+        interaction.client.pendingmoreLinks.set(interaction.user.id, { sectionIndex });
 
     } catch (error) {
         console.error('Error in handleAddLinkSelect:', error);
@@ -573,7 +573,7 @@ async function handleRemoveLinkSectionSelect(interaction, sectionIndex, deployme
 
         // Create select menu with links in this section
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId(`socials_remove_link_${sectionIndex}`)
+            .setCustomId(`more_remove_link_${sectionIndex}`)
             .setPlaceholder('Select a link to remove')
             .addOptions(
                 section.links.map((link, index) => ({
@@ -602,9 +602,9 @@ async function handleRemoveLinkSectionSelect(interaction, sectionIndex, deployme
 
 async function handleRemoveLinkSelect(interaction, sectionIndex, linkIndex, deploymentPoller, auditLogger) {
     try {
-        const { data: socialsData, sha } = await getFileContent(FILE_PATH);
+        const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
-        if (sectionIndex < 0 || sectionIndex >= socialsData.sections.length) {
+        if (sectionIndex < 0 || sectionIndex >= moreData.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
                 ephemeral: true
@@ -612,7 +612,7 @@ async function handleRemoveLinkSelect(interaction, sectionIndex, linkIndex, depl
             return;
         }
 
-        const section = socialsData.sections[sectionIndex];
+        const section = moreData.sections[sectionIndex];
 
         if (!section.links || linkIndex < 0 || linkIndex >= section.links.length) {
             await interaction.reply({
@@ -627,7 +627,7 @@ async function handleRemoveLinkSelect(interaction, sectionIndex, linkIndex, depl
 
         const commitSha = await updateFileContent(
             FILE_PATH,
-            socialsData,
+            moreData,
             sha,
             `Remove link: ${removedLink.text} from ${section.heading}`
         );

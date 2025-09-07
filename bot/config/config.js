@@ -27,5 +27,5 @@ export const config = {
     GITHUB_REPO_URL: process.env.GITHUB_REPO_URL || 'https://github.com/ReignOfTea/hotels',
 
     EVENT_CLEANUP_DAYS: parseInt(process.env.EVENT_CLEANUP_DAYS) || 7,
-    REPEATING_EVENT_ADVANCE_WEEKS: parseInt(process.env.REPEATING_EVENT_ADVANCE_WEEKS) || 2
+    REPEATING_EVENT_ADVANCE_WEEKS: parseInt(process.env.REPEATING_EVENT_ADVANCE_WEEKS) || 4
 };

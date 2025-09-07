@@ -6,7 +6,7 @@ import { DiscordAuditLogger } from './utils/discord-audit.js';
 import { EventScheduler } from './utils/scheduler.js';
 import { createAboutCommand, handleAboutCommand, handleAboutModal, handleAboutSelect } from './commands/discord/about.js';
 import { createAttendCommand, handleAttendCommand, handleAttendModal, handleAttendSelect } from './commands/discord/attend.js';
-import { createSocialsCommand, handleSocialsCommand, handleSocialsModal, handleSocialsSelect } from './commands/discord/socials.js';
+import { createmoreCommand, handlemoreCommand, handlemoreModal, handlemoreSelect } from './commands/discord/more.js';
 import { createLocationsCommand, handleLocationsCommand, handleLocationsModal, handleLocationsSelect } from './commands/discord/locations.js';
 import { createEventsCommand, handleEventsCommand, handleEventsModal, handleEventsSelect } from './commands/discord/events.js';
 import { createScheduleCommand, handleScheduleCommand, handleScheduleModal, handleScheduleSelect } from './commands/discord/schedule.js';
@@ -68,7 +68,7 @@ function isAuthorized(interaction) {
 const commands = [
     createAboutCommand(),
     createAttendCommand(),
-    createSocialsCommand(),
+    createmoreCommand(),
     createLocationsCommand(),
     createEventsCommand(),
     createScheduleCommand(),
@@ -136,8 +136,8 @@ client.on('interactionCreate', async interaction => {
         case 'attend':
             await handleAttendCommand(interaction, deploymentPoller, auditLogger);
             break;
-        case 'socials':
-            await handleSocialsCommand(interaction, deploymentPoller, auditLogger);
+        case 'more':
+            await handlemoreCommand(interaction, deploymentPoller, auditLogger);
             break;
         case 'locations':
             await handleLocationsCommand(interaction, deploymentPoller, auditLogger);
@@ -167,8 +167,8 @@ client.on('interactionCreate', async interaction => {
         await handleAboutModal(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('attend_')) {
         await handleAttendModal(interaction, deploymentPoller, auditLogger);
-    } else if (interaction.customId.startsWith('socials_')) {
-        await handleSocialsModal(interaction, deploymentPoller, auditLogger);
+    } else if (interaction.customId.startsWith('more_')) {
+        await handlemoreModal(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('locations_')) {
         await handleLocationsModal(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('events_')) {
@@ -194,8 +194,8 @@ client.on('interactionCreate', async interaction => {
         await handleAboutSelect(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('attend_')) {
         await handleAttendSelect(interaction, deploymentPoller, auditLogger);
-    } else if (interaction.customId.startsWith('socials_')) {
-        await handleSocialsSelect(interaction, deploymentPoller, auditLogger);
+    } else if (interaction.customId.startsWith('more_')) {
+        await handlemoreSelect(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('locations_')) {
         await handleLocationsSelect(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('events_')) {

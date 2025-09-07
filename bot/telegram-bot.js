@@ -4,12 +4,12 @@ import { InlineKeyboard } from 'grammy';
 import { config } from './config/config.js';
 import { sessionManager } from './utils/sessions.js';
 import { authMiddleware } from './middleware/auth.js';
-import { registerAboutCommands, handleAboutTextInput } from './commands/about.js';
-import { registerAttendCommands, handleAttendTextInput } from './commands/attend.js';
-import { registerSocialsCommands, handleSocialsTextInput } from './commands/socials.js';
-import { registerLocationsCommands, handleLocationsTextInput } from './commands/locations.js';
-import { registerEventsCommands, handleEventsTextInput } from './commands/events.js';
-import { registerScheduleCommands, handleScheduleTextInput, registerScheduleCallbacks } from './commands/schedule.js';
+import { registerAboutCommands, handleAboutTextInput } from './commands/telegram/about.js';
+import { registerAttendCommands, handleAttendTextInput } from './commands/telegram/attend.js';
+import { registermoreCommands, handlemoreTextInput } from './commands/telegram/more.js';
+import { registerLocationsCommands, handleLocationsTextInput } from './commands/telegram/locations.js';
+import { registerEventsCommands, handleEventsTextInput } from './commands/telegram/events.js';
+import { registerScheduleCommands, handleScheduleTextInput, registerScheduleCallbacks } from './commands/telegram/schedule.js';
 import { DeploymentPoller } from './utils/polling.js';
 import { AuditLogger } from './utils/audit.js';
 import { EventScheduler } from './utils/scheduler.js';
@@ -32,7 +32,7 @@ bot.command('start', async (ctx) => {
         .text('📖 About Sections', 'cmd_about')
         .text('📋 Attend Guidelines', 'cmd_attend')
         .row()
-        .text('🔗 Social Links', 'cmd_socials')
+        .text('🔗 Social Links', 'cmd_more')
         .text('📍 Locations', 'cmd_locations')
         .row()
         .text('📅 Events', 'cmd_events')
@@ -141,13 +141,13 @@ bot.callbackQuery('cmd_attend', async (ctx) => {
     });
 });
 
-bot.callbackQuery('cmd_socials', async (ctx) => {
+bot.callbackQuery('cmd_more', async (ctx) => {
     const keyboard = new InlineKeyboard()
-        .text('Add Section', 'socials_add_section')
-        .text('Remove Section', 'socials_remove_section')
+        .text('Add Section', 'more_add_section')
+        .text('Remove Section', 'more_remove_section')
         .row()
-        .text('Manage Links', 'socials_manage_links')
-        .text('View Current', 'socials_view')
+        .text('Manage Links', 'more_manage_links')
+        .text('View Current', 'more_view')
         .row()
         .text('🔙 Back to Menu', 'back_to_start');
 
@@ -286,7 +286,7 @@ bot.callbackQuery('back_to_start', async (ctx) => {
         .text('📖 About Sections', 'cmd_about')
         .text('📋 Attend Guidelines', 'cmd_attend')
         .row()
-        .text('🔗 Social Links', 'cmd_socials')
+        .text('🔗 Social Links', 'cmd_more')
         .text('📍 Locations', 'cmd_locations')
         .row()
         .text('📅 Events', 'cmd_events')
@@ -310,7 +310,7 @@ bot.use(authMiddleware);
 // Register other commands with audit logging
 registerAboutCommands(bot, deploymentPoller, auditLogger);
 registerAttendCommands(bot, deploymentPoller, auditLogger);
-registerSocialsCommands(bot, deploymentPoller, auditLogger);
+registermoreCommands(bot, deploymentPoller, auditLogger);
 registerLocationsCommands(bot, deploymentPoller, auditLogger);
 registerEventsCommands(bot, deploymentPoller, auditLogger);
 registerScheduleCommands(bot, deploymentPoller, scheduler);
@@ -328,8 +328,8 @@ bot.on('message:text', async (ctx) => {
         case 'attend':
             await handleAttendTextInput(ctx, deploymentPoller, auditLogger);
             break;
-        case 'socials':
-            await handleSocialsTextInput(ctx, deploymentPoller, auditLogger);
+        case 'more':
+            await handlemoreTextInput(ctx, deploymentPoller, auditLogger);
             break;
         case 'locations':
             await handleLocationsTextInput(ctx, deploymentPoller, auditLogger);
@@ -368,15 +368,15 @@ bot.command('attend', async (ctx) => {
     });
 });
 
-bot.command('socials', async (ctx) => {
+bot.command('more', async (ctx) => {
     const keyboard = new InlineKeyboard()
-        .text('Add Section', 'socials_add_section')
-        .text('Remove Section', 'socials_remove_section')
+        .text('Add Section', 'more_add_section')
+        .text('Remove Section', 'more_remove_section')
         .row()
-        .text('Manage Links', 'socials_manage_links')
-        .text('View Current', 'socials_view');
+        .text('Manage Links', 'more_manage_links')
+        .text('View Current', 'more_view');
 
-    await ctx.reply('What would you like to do with the Socials?', {
+    await ctx.reply('What would you like to do with the more?', {
         reply_markup: keyboard
     });
 });

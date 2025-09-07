@@ -67,19 +67,19 @@ function formatDateTime(datetimeString) {
 async function loadSidebarContent() {
     try {
         const cacheBuster = getCacheBuster();
-        const [aboutResponse, attendResponse, socialsResponse] = await Promise.all([
+        const [aboutResponse, attendResponse, moreResponse] = await Promise.all([
             fetch(`data/about.json?v=${cacheBuster}`),
             fetch(`data/attend.json?v=${cacheBuster}`),
-            fetch(`data/socials.json?v=${cacheBuster}`)
+            fetch(`data/more.json?v=${cacheBuster}`)
         ]);
 
         const aboutData = await aboutResponse.json();
         const attendData = await attendResponse.json();
-        const socialsData = await socialsResponse.json();
+        const moreData = await moreResponse.json();
 
         populateAboutSidebar(aboutData);
         populateAttendSidebar(attendData);
-        populateSocialsSidebar(socialsData);
+        populatemoreSidebar(moreData);
 
     } catch (error) {
         console.error('Error loading sidebar content:', error);
@@ -117,8 +117,8 @@ function populateAttendSidebar(data) {
     attendBox.innerHTML = html;
 }
 
-function populateSocialsSidebar(data) {
-    const socialsBox = document.querySelector('.sidebar-box:last-child .sidebar-content');
+function populatemoreSidebar(data) {
+    const moreBox = document.querySelector('.sidebar-box:last-child .sidebar-content');
 
     let html = `<h3>${data.title}</h3>`;
 
@@ -137,7 +137,7 @@ function populateSocialsSidebar(data) {
         }
     });
 
-    socialsBox.innerHTML = html;
+    moreBox.innerHTML = html;
 }
 
 async function loadData() {

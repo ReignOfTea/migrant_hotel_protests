@@ -1,6 +1,6 @@
 import { InlineKeyboard } from 'grammy';
-import { getFileContent, updateFileContent } from '../utils/github.js';
-import { sessionManager } from '../utils/sessions.js';
+import { getFileContent, updateFileContent } from '../../utils/github.js';
+import { sessionManager } from '../../utils/sessions.js';
 
 const REPEATING_EVENTS_FILE_PATH = 'data/repeating-events.json';
 const LOCATIONS_FILE_PATH = 'data/locations.json';

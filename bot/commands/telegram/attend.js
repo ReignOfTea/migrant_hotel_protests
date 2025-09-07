@@ -1,6 +1,6 @@
 import { InlineKeyboard } from 'grammy';
-import { getFileContent, updateFileContent } from '../utils/github.js';
-import { sessionManager } from '../utils/sessions.js';
+import { getFileContent, updateFileContent } from '../../utils/github.js';
+import { sessionManager } from '../../utils/sessions.js';
 
 const FILE_PATH = 'data/attend.json';
 

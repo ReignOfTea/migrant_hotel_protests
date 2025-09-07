@@ -1,8 +1,8 @@
 import { InlineKeyboard } from 'grammy';
-import { getFileContent, updateFileContent } from '../utils/github.js';
-import { sessionManager } from '../utils/sessions.js';
+import { getFileContent, updateFileContent } from '../../utils/github.js';
+import { sessionManager } from '../../utils/sessions.js';
 
-const FILE_PATH = 'data/socials.json';
+const FILE_PATH = 'data/more.json';
 
 // URL validation function
 function isValidUrl(string) {
@@ -14,23 +14,23 @@ function isValidUrl(string) {
     }
 }
 
-export function registerSocialsCommands(bot, deploymentPoller = null) {
-    // Main socials command
-    bot.command('socials', async (ctx) => {
+export function registermoreCommands(bot, deploymentPoller = null) {
+    // Main more command
+    bot.command('more', async (ctx) => {
         const keyboard = new InlineKeyboard()
-            .text('Add Section', 'socials_add_section')
-            .text('Remove Section', 'socials_remove_section')
+            .text('Add Section', 'more_add_section')
+            .text('Remove Section', 'more_remove_section')
             .row()
-            .text('Manage Links', 'socials_manage_links')
-            .text('View Current', 'socials_view');
+            .text('Manage Links', 'more_manage_links')
+            .text('View Current', 'more_view');
 
-        await ctx.reply('What would you like to do with the Socials?', {
+        await ctx.reply('What would you like to do with the more?', {
             reply_markup: keyboard
         });
     });
 
     // View current sections
-    bot.callbackQuery('socials_view', async (ctx) => {
+    bot.callbackQuery('more_view', async (ctx) => {
         try {
             const { data } = await getFileContent(FILE_PATH);
 
@@ -55,16 +55,16 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Add new section
-    bot.callbackQuery('socials_add_section', async (ctx) => {
+    bot.callbackQuery('more_add_section', async (ctx) => {
         sessionManager.set(ctx.from.id, {
-            command: 'socials',
+            command: 'more',
             action: 'add_section_heading'
         });
-        await ctx.editMessageText('Please enter the heading for the new socials section:');
+        await ctx.editMessageText('Please enter the heading for the new more section:');
     });
 
     // Remove section
-    bot.callbackQuery('socials_remove_section', async (ctx) => {
+    bot.callbackQuery('more_remove_section', async (ctx) => {
         try {
             const { data } = await getFileContent(FILE_PATH);
 
@@ -75,7 +75,7 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
 
             const keyboard = new InlineKeyboard();
             data.sections.forEach((section, index) => {
-                keyboard.text(`${section.heading}`, `socials_remove_section_${index}`).row();
+                keyboard.text(`${section.heading}`, `more_remove_section_${index}`).row();
             });
             keyboard.text('Cancel', 'cancel');
 
@@ -88,18 +88,18 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Handle remove section selection
-    bot.callbackQuery(/^socials_remove_section_(\d+)$/, async (ctx) => {
+    bot.callbackQuery(/^more_remove_section_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
-            const { data: socialsData, sha } = await getFileContent(FILE_PATH);
+            const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
-            const removedSection = socialsData.sections.splice(sectionIndex, 1)[0];
+            const removedSection = moreData.sections.splice(sectionIndex, 1)[0];
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
-                socialsData,
+                moreData,
                 sha,
-                `Remove socials section: ${removedSection.heading}`
+                `Remove more section: ${removedSection.heading}`
             );
 
             const message = await ctx.editMessageText(
@@ -121,7 +121,7 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Manage links in sections
-    bot.callbackQuery('socials_manage_links', async (ctx) => {
+    bot.callbackQuery('more_manage_links', async (ctx) => {
         try {
             const { data } = await getFileContent(FILE_PATH);
 
@@ -132,7 +132,7 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
 
             const keyboard = new InlineKeyboard();
             data.sections.forEach((section, index) => {
-                keyboard.text(`${section.heading} (${section.links?.length || 0} links)`, `socials_section_${index}`).row();
+                keyboard.text(`${section.heading} (${section.links?.length || 0} links)`, `more_section_${index}`).row();
             });
             keyboard.text('Cancel', 'cancel');
 
@@ -145,17 +145,17 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Handle section selection for link management
-    bot.callbackQuery(/^socials_section_(\d+)$/, async (ctx) => {
+    bot.callbackQuery(/^more_section_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
             const { data } = await getFileContent(FILE_PATH);
             const section = data.sections[sectionIndex];
 
             const keyboard = new InlineKeyboard()
-                .text('Add Link', `socials_add_link_${sectionIndex}`)
-                .text('Remove Link', `socials_remove_link_${sectionIndex}`)
+                .text('Add Link', `more_add_link_${sectionIndex}`)
+                .text('Remove Link', `more_remove_link_${sectionIndex}`)
                 .row()
-                .text('Back', 'socials_manage_links');
+                .text('Back', 'more_manage_links');
 
             let message = `**${section.heading}**\n\nCurrent links:\n`;
             if (section.links && section.links.length > 0) {
@@ -177,10 +177,10 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Add link to section
-    bot.callbackQuery(/^socials_add_link_(\d+)$/, async (ctx) => {
+    bot.callbackQuery(/^more_add_link_(\d+)$/, async (ctx) => {
         const sectionIndex = parseInt(ctx.match[1]);
         sessionManager.set(ctx.from.id, {
-            command: 'socials',
+            command: 'more',
             action: 'add_link_text',
             sectionIndex: sectionIndex
         });
@@ -188,7 +188,7 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Remove link from section
-    bot.callbackQuery(/^socials_remove_link_(\d+)$/, async (ctx) => {
+    bot.callbackQuery(/^more_remove_link_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
             const { data } = await getFileContent(FILE_PATH);
@@ -201,9 +201,9 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
 
             const keyboard = new InlineKeyboard();
             section.links.forEach((link, index) => {
-                keyboard.text(`${link.text}`, `socials_remove_link_${sectionIndex}_${index}`).row();
+                keyboard.text(`${link.text}`, `more_remove_link_${sectionIndex}_${index}`).row();
             });
-            keyboard.text('Back', `socials_section_${sectionIndex}`);
+            keyboard.text('Back', `more_section_${sectionIndex}`);
 
             await ctx.editMessageText('Select a link to remove:', {
                 reply_markup: keyboard
@@ -214,19 +214,19 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 
     // Handle specific link removal
-    bot.callbackQuery(/^socials_remove_link_(\d+)_(\d+)$/, async (ctx) => {
+    bot.callbackQuery(/^more_remove_link_(\d+)_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
             const linkIndex = parseInt(ctx.match[2]);
-            const { data: socialsData, sha } = await getFileContent(FILE_PATH);
+            const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
-            const removedLink = socialsData.sections[sectionIndex].links.splice(linkIndex, 1)[0];
+            const removedLink = moreData.sections[sectionIndex].links.splice(linkIndex, 1)[0];
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
-                socialsData,
+                moreData,
                 sha,
-                `Remove link: ${removedLink.text} from ${socialsData.sections[sectionIndex].heading}`
+                `Remove link: ${removedLink.text} from ${moreData.sections[sectionIndex].heading}`
             );
 
             const message = await ctx.editMessageText(
@@ -248,7 +248,7 @@ export function registerSocialsCommands(bot, deploymentPoller = null) {
     });
 }
 
-export async function handleSocialsTextInput(ctx, deploymentPoller = null) {
+export async function handlemoreTextInput(ctx, deploymentPoller = null) {
     const session = sessionManager.get(ctx.from.id);
 
     try {
@@ -267,8 +267,8 @@ export async function handleSocialsTextInput(ctx, deploymentPoller = null) {
             }
 
             // Add new section
-            const { data: socialsData, sha } = await getFileContent(FILE_PATH);
-            socialsData.sections.push({
+            const { data: moreData, sha } = await getFileContent(FILE_PATH);
+            moreData.sections.push({
                 heading: heading,
                 type: 'links',
                 links: []
@@ -276,9 +276,9 @@ export async function handleSocialsTextInput(ctx, deploymentPoller = null) {
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
-                socialsData,
+                moreData,
                 sha,
-                `Add socials section: ${heading}`
+                `Add more section: ${heading}`
             );
 
             const message = await ctx.reply(
@@ -312,8 +312,8 @@ export async function handleSocialsTextInput(ctx, deploymentPoller = null) {
                 return;
             }
 
-            const { data: socialsData, sha } = await getFileContent(FILE_PATH);
-            const section = socialsData.sections[session.sectionIndex];
+            const { data: moreData, sha } = await getFileContent(FILE_PATH);
+            const section = moreData.sections[session.sectionIndex];
 
             if (!section.links) {
                 section.links = [];
@@ -326,7 +326,7 @@ export async function handleSocialsTextInput(ctx, deploymentPoller = null) {
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
-                socialsData,
+                moreData,
                 sha,
                 `Add link: ${session.linkText} to ${section.heading}`
             );
