@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, REST, Routes } from 'discord.js';
+import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
 import { config } from './config/config.js';
 import { DeploymentPoller } from './utils/polling.js';
 import { DiscordAuditLogger } from './utils/discord-audit.js';
@@ -10,6 +10,7 @@ import { createmoreCommand, handlemoreCommand, handlemoreModal, handlemoreSelect
 import { createLocationsCommand, handleLocationsCommand, handleLocationsModal, handleLocationsSelect } from './commands/discord/locations.js';
 import { createEventsCommand, handleEventsCommand, handleEventsModal, handleEventsSelect } from './commands/discord/events.js';
 import { createScheduleCommand, handleScheduleCommand, handleScheduleModal, handleScheduleSelect } from './commands/discord/schedule.js';
+import { createLiveCommand, handleLiveCommand, handleLiveModal, handleLiveSelect } from './commands/discord/live.js';
 
 // Initialize Discord client
 const client = new Client({
@@ -72,6 +73,7 @@ const commands = [
     createLocationsCommand(),
     createEventsCommand(),
     createScheduleCommand(),
+    createLiveCommand(),
     // Add other commands here later
 ];
 
@@ -148,6 +150,9 @@ client.on('interactionCreate', async interaction => {
         case 'schedule':
             await handleScheduleCommand(interaction, deploymentPoller, auditLogger, scheduler);
             break;
+        case 'live':
+            await handleLiveCommand(interaction, deploymentPoller, auditLogger);
+            break;
     }
 });
 
@@ -175,6 +180,8 @@ client.on('interactionCreate', async interaction => {
         await handleEventsModal(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('schedule_')) {
         await handleScheduleModal(interaction, deploymentPoller, auditLogger);
+    } else if (interaction.customId.startsWith('live_')) {
+        await handleLiveModal(interaction, deploymentPoller, auditLogger);
     }
 });
 
@@ -202,6 +209,8 @@ client.on('interactionCreate', async interaction => {
         await handleEventsSelect(interaction, deploymentPoller, auditLogger);
     } else if (interaction.customId.startsWith('schedule_')) {
         await handleScheduleSelect(interaction, deploymentPoller, auditLogger);
+    } else if (interaction.customId.startsWith('live_')) {
+        await handleLiveSelect(interaction, deploymentPoller, auditLogger);
     }
 });
 

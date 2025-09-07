@@ -9,9 +9,41 @@ function truncateForSelectMenu(text, maxLength = 97) {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
+// Helper function to strip HTML tags for display
+function stripHtml(html) {
+    return html.replace(/<[^>]*>/g, '').trim();
+}
+
+// Helper function to extract URL from HTML link
+function extractUrl(html) {
+    const match = html.match(/href=['"]([^'"]*)['"]/);
+    return match ? match[1] : null;
+}
+
+// Helper function to extract text content from HTML
+function extractTextContent(html) {
+    // Remove image tags first
+    let text = html.replace(/<img[^>]*>/g, '');
+    // Extract text from links
+    text = text.replace(/<a[^>]*>([^<]*)<\/a>/g, '$1');
+    // Remove any remaining HTML tags
+    text = text.replace(/<[^>]*>/g, '');
+    return text.trim();
+}
+
 // Text validation function
 function isValidText(text) {
     return text && text.trim().length > 0;
+}
+
+// URL validation function
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
 }
 
 export function createmoreCommand() {
@@ -125,9 +157,9 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
             'discord'
         );
 
-        await auditLogger.logSectionAdd(
-            heading,
-            FILE_PATH,
+        await auditLogger.log(
+            'Section Added',
+            `Added section "${heading}" to ${FILE_PATH}`,
             interaction.user.id,
             interaction.user.username
         );
@@ -203,7 +235,13 @@ async function handleViewSections(interaction) {
 
             if (section.content && section.content.length > 0) {
                 section.content.forEach(item => {
-                    fieldValue += `• ${item.text}\n`;
+                    const displayText = extractTextContent(item.text);
+                    const url = extractUrl(item.text);
+                    if (url) {
+                        fieldValue += `• [${displayText}](${url})\n`;
+                    } else {
+                        fieldValue += `• ${displayText}\n`;
+                    }
                 });
             } else {
                 fieldValue = '_No content yet_';
@@ -335,7 +373,9 @@ export async function handlemoreModal(interaction, deploymentPoller, auditLogger
 }
 
 async function handleAddContentModal(interaction, deploymentPoller, auditLogger) {
-    const textContent = interaction.fields.getTextInputValue('text_content').trim();
+    const displayText = interaction.fields.getTextInputValue('display_text').trim();
+    const url = interaction.fields.getTextInputValue('url').trim();
+    const iconType = interaction.fields.getTextInputValue('icon_type').trim().toLowerCase();
 
     const pendingContent = interaction.client.pendingmoreContent?.get(interaction.user.id);
 
@@ -347,9 +387,18 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
         return;
     }
 
-    if (!isValidText(textContent)) {
+    if (!isValidText(displayText)) {
         await interaction.reply({
-            content: '❌ Invalid text content. Please enter valid text.',
+            content: '❌ Invalid display text. Please enter valid text.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    // Validate URL if provided
+    if (url && !isValidUrl(url)) {
+        await interaction.reply({
+            content: '❌ Invalid URL format. Please provide a valid URL or leave empty for plain text.',
             ephemeral: true
         });
         return;
@@ -363,19 +412,51 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
             section.content = [];
         }
 
+        let htmlContent;
+
+        if (url) {
+            // Create HTML with link and optional icon
+            if (iconType) {
+                const iconMap = {
+                    'x': 'x.png',
+                    'twitter': 'x.png',
+                    'youtube': 'youtube.png',
+                    'gmail': 'gmail.png',
+                    'email': 'gmail.png',
+                    'github': 'github.png',
+                    'github_pages': 'github_pages.png'
+                };
+
+                const iconFile = iconMap[iconType] || `${iconType}.png`;
+                const iconClass = iconType === 'github_pages' ? 'icon-github-pages-large icon-github-pages' : `inline-icon icon-${iconType}`;
+
+                htmlContent = `<a href='${url}'><img src='images/icons/${iconFile}' alt='' class='${iconClass}'>${displayText}</a>`;
+            } else {
+                htmlContent = `<a href='${url}'>${displayText}</a>`;
+            }
+        } else {
+            // Plain text content
+            htmlContent = displayText;
+        }
+
         section.content.push({
-            text: textContent
+            text: htmlContent
         });
 
         const commitSha = await updateFileContent(
             FILE_PATH,
             moreData,
             sha,
-            `Add content: ${textContent} to ${section.heading}`
+            `Add content: ${displayText} to ${section.heading}`
         );
 
+        let responseText = `✅ **Content Added Successfully!**\n\n**Text:** ${displayText}\n**Section:** ${section.heading}`;
+        if (url) responseText += `\n**URL:** ${url}`;
+        if (iconType) responseText += `\n**Icon:** ${iconType}`;
+        responseText += '\n\n🚀 Deploying changes...';
+
         await interaction.reply({
-            content: `✅ **Content Added Successfully!**\n\n**Text:** ${textContent}\n**Section:** ${section.heading}\n\n🚀 Deploying changes...`,
+            content: responseText,
             ephemeral: true
         });
 
@@ -390,7 +471,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
 
         await auditLogger.log(
             'Content Added',
-            `Added "${textContent}" to ${section.heading} in ${FILE_PATH}`,
+            `Added "${displayText}" to ${section.heading} in ${FILE_PATH}`,
             interaction.user.id,
             interaction.user.username
         );
@@ -457,9 +538,9 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
             'discord'
         );
 
-        await auditLogger.logSectionRemove(
-            removedSection.heading,
-            FILE_PATH,
+        await auditLogger.log(
+            'Section Removed',
+            `Removed section "${removedSection.heading}" from ${FILE_PATH}`,
             interaction.user.id,
             interaction.user.username
         );
@@ -491,16 +572,35 @@ async function handleAddContentSelect(interaction, sectionIndex, deploymentPolle
             .setCustomId(`more_add_content_${Date.now()}`)
             .setTitle(`Add Content to "${section.heading}"`);
 
-        const textInput = new TextInputBuilder()
-            .setCustomId('text_content')
-            .setLabel('Text Content')
-            .setStyle(TextInputStyle.Paragraph)
-            .setPlaceholder('e.g., @WGthink')
+        const displayTextInput = new TextInputBuilder()
+            .setCustomId('display_text')
+            .setLabel('Display Text')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('e.g., DJE Media')
             .setRequired(true)
-            .setMaxLength(2000);
+            .setMaxLength(200);
 
-        const textRow = new ActionRowBuilder().addComponents(textInput);
-        modal.addComponents(textRow);
+        const urlInput = new TextInputBuilder()
+            .setCustomId('url')
+            .setLabel('URL (Optional)')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('e.g., https://youtube.com/...')
+            .setRequired(false)
+            .setMaxLength(500);
+
+        const iconInput = new TextInputBuilder()
+            .setCustomId('icon_type')
+            .setLabel('Icon Type (Optional)')
+            .setStyle(TextInputStyle.Short)
+            .setPlaceholder('Allowed values: x, youtube, facebook, web, none')
+            .setRequired(false)
+            .setMaxLength(50);
+
+        const displayRow = new ActionRowBuilder().addComponents(displayTextInput);
+        const urlRow = new ActionRowBuilder().addComponents(urlInput);
+        const iconRow = new ActionRowBuilder().addComponents(iconInput);
+
+        modal.addComponents(displayRow, urlRow, iconRow);
 
         await interaction.showModal(modal);
 
@@ -542,11 +642,14 @@ async function handleRemoveContentSectionSelect(interaction, sectionIndex, deplo
             .setCustomId(`more_remove_content_${sectionIndex}`)
             .setPlaceholder('Select content to remove')
             .addOptions(
-                section.content.map((item, index) => ({
-                    label: truncateForSelectMenu(item.text),
-                    value: index.toString(),
-                    description: truncateForSelectMenu(item.text, 50)
-                }))
+                section.content.map((item, index) => {
+                    const displayText = extractTextContent(item.text);
+                    return {
+                        label: truncateForSelectMenu(displayText),
+                        value: index.toString(),
+                        description: truncateForSelectMenu(displayText, 50)
+                    };
+                })
             );
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
@@ -589,16 +692,17 @@ async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex
         }
 
         const removedItem = section.content.splice(contentIndex, 1)[0];
+        const displayText = extractTextContent(removedItem.text);
 
         const commitSha = await updateFileContent(
             FILE_PATH,
             moreData,
             sha,
-            `Remove content: ${removedItem.text} from ${section.heading}`
+            `Remove content: ${displayText} from ${section.heading}`
         );
 
         await interaction.reply({
-            content: `✅ **Content Removed Successfully!**\n\n**Removed:** ${removedItem.text}\n**From:** ${section.heading}\n\n🚀 Deploying changes...`,
+            content: `✅ **Content Removed Successfully!**\n\n**Removed:** ${displayText}\n**From:** ${section.heading}\n\n🚀 Deploying changes...`,
             ephemeral: true
         });
 
@@ -613,7 +717,7 @@ async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex
 
         await auditLogger.log(
             'Content Removed',
-            `Removed "${removedItem.text}" from ${section.heading} in ${FILE_PATH}`,
+            `Removed "${displayText}" from ${section.heading} in ${FILE_PATH}`,
             interaction.user.id,
             interaction.user.username
         );

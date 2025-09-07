@@ -4,9 +4,36 @@ import { sessionManager } from '../../utils/sessions.js';
 
 const FILE_PATH = 'data/more.json';
 
+// Helper function to extract text content from HTML
+function extractTextContent(html) {
+    // Remove image tags first
+    let text = html.replace(/<img[^>]*>/g, '');
+    // Extract text from links
+    text = text.replace(/<a[^>]*>([^<]*)<\/a>/g, '$1');
+    // Remove any remaining HTML tags
+    text = text.replace(/<[^>]*>/g, '');
+    return text.trim();
+}
+
+// Helper function to extract URL from HTML link
+function extractUrl(html) {
+    const match = html.match(/href=['"]([^'"]*)['"]/);
+    return match ? match[1] : null;
+}
+
 // Text validation function
 function isValidText(text) {
     return text && text.trim().length > 0;
+}
+
+// URL validation function
+function isValidUrl(string) {
+    try {
+        new URL(string);
+        return true;
+    } catch (_) {
+        return false;
+    }
 }
 
 export function registermoreCommands(bot, deploymentPoller = null) {
@@ -34,7 +61,13 @@ export function registermoreCommands(bot, deploymentPoller = null) {
                 message += `**${index + 1}. ${section.heading}**\n`;
                 if (section.content && section.content.length > 0) {
                     section.content.forEach(item => {
-                        message += `• ${item.text}\n`;
+                        const displayText = extractTextContent(item.text);
+                        const url = extractUrl(item.text);
+                        if (url) {
+                            message += `• [${displayText}](${url})\n`;
+                        } else {
+                            message += `• ${displayText}\n`;
+                        }
                     });
                 } else {
                     message += '_No content yet_\n';
@@ -43,7 +76,8 @@ export function registermoreCommands(bot, deploymentPoller = null) {
             });
 
             await ctx.editMessageText(message, {
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
@@ -157,7 +191,13 @@ export function registermoreCommands(bot, deploymentPoller = null) {
             let message = `**${section.heading}**\n\nCurrent content:\n`;
             if (section.content && section.content.length > 0) {
                 section.content.forEach((item, index) => {
-                    message += `${index + 1}. ${item.text}\n`;
+                    const displayText = extractTextContent(item.text);
+                    const url = extractUrl(item.text);
+                    if (url) {
+                        message += `${index + 1}. [${displayText}](${url})\n`;
+                    } else {
+                        message += `${index + 1}. ${displayText}\n`;
+                    }
                 });
             } else {
                 message += '_No content yet_\n';
@@ -165,7 +205,8 @@ export function registermoreCommands(bot, deploymentPoller = null) {
 
             await ctx.editMessageText(message, {
                 reply_markup: keyboard,
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
@@ -177,10 +218,10 @@ export function registermoreCommands(bot, deploymentPoller = null) {
         const sectionIndex = parseInt(ctx.match[1]);
         sessionManager.set(ctx.from.id, {
             command: 'more',
-            action: 'add_content_text',
+            action: 'add_content_display_text',
             sectionIndex: sectionIndex
         });
-        await ctx.editMessageText('Please enter the text content (e.g., "@WGthink"):');
+        await ctx.editMessageText('Please enter the display text (e.g., "@WGthink" or "Email"):');
     });
 
     // Remove content from section
@@ -197,7 +238,8 @@ export function registermoreCommands(bot, deploymentPoller = null) {
 
             const keyboard = new InlineKeyboard();
             section.content.forEach((item, index) => {
-                keyboard.text(`${item.text}`, `more_remove_content_${sectionIndex}_${index}`).row();
+                const displayText = extractTextContent(item.text);
+                keyboard.text(`${displayText}`, `more_remove_content_${sectionIndex}_${index}`).row();
             });
             keyboard.text('Back', `more_section_${sectionIndex}`);
 
@@ -217,16 +259,17 @@ export function registermoreCommands(bot, deploymentPoller = null) {
             const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
             const removedItem = moreData.sections[sectionIndex].content.splice(contentIndex, 1)[0];
+            const displayText = extractTextContent(removedItem.text);
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
                 moreData,
                 sha,
-                `Remove content: ${removedItem.text} from ${moreData.sections[sectionIndex].heading}`
+                `Remove content: ${displayText} from ${moreData.sections[sectionIndex].heading}`
             );
 
             const message = await ctx.editMessageText(
-                `✅ Removed content: **${removedItem.text}**\n\n🔄 Deploying to website...`,
+                `✅ Removed content: **${displayText}**\n\n🔄 Deploying to website...`,
                 { parse_mode: 'Markdown' }
             );
 
@@ -292,13 +335,38 @@ export async function handlemoreTextInput(ctx, deploymentPoller = null) {
 
             sessionManager.delete(ctx.from.id);
 
-        } else if (session.action === 'add_content_text') {
-            const textContent = ctx.message.text.trim();
+        } else if (session.action === 'add_content_display_text') {
+            const displayText = ctx.message.text.trim();
 
-            if (!isValidText(textContent)) {
-                await ctx.reply('❌ Invalid text content. Please enter valid text:');
+            if (!isValidText(displayText)) {
+                await ctx.reply('❌ Invalid display text. Please enter valid text:');
                 return;
             }
+
+            session.displayText = displayText;
+            session.action = 'add_content_url';
+            sessionManager.set(ctx.from.id, session);
+            await ctx.reply('Now enter the URL (optional, or type "skip"):');
+
+        } else if (session.action === 'add_content_url') {
+            const url = ctx.message.text.trim();
+
+            if (url.toLowerCase() === 'skip') {
+                session.url = '';
+            } else if (!isValidUrl(url)) {
+                await ctx.reply('❌ Invalid URL format. Please provide a valid URL or type "skip":');
+                return;
+            } else {
+                session.url = url;
+            }
+
+            session.action = 'add_content_icon';
+            sessionManager.set(ctx.from.id, session);
+            await ctx.reply('Finally, enter the icon type (optional, Options: "x", "youtube", "facebook", "web" or type "skip"):');
+
+        } else if (session.action === 'add_content_icon') {
+            const iconType = ctx.message.text.trim().toLowerCase();
+            const finalIconType = iconType === 'skip' ? '' : iconType;
 
             const { data: moreData, sha } = await getFileContent(FILE_PATH);
             const section = moreData.sections[session.sectionIndex];
@@ -307,21 +375,53 @@ export async function handlemoreTextInput(ctx, deploymentPoller = null) {
                 section.content = [];
             }
 
+            let htmlContent;
+
+            if (session.url) {
+                // Create HTML with link and optional icon
+                if (finalIconType) {
+                    const iconMap = {
+                        'x': 'x.png',
+                        'twitter': 'x.png',
+                        'youtube': 'youtube.png',
+                        'gmail': 'gmail.png',
+                        'email': 'gmail.png',
+                        'github': 'github.png',
+                        'github_pages': 'github_pages.png'
+                    };
+
+                    const iconFile = iconMap[finalIconType] || `${finalIconType}.png`;
+                    const iconClass = finalIconType === 'github_pages' ? 'icon-github-pages-large icon-github-pages' : `inline-icon icon-${finalIconType}`;
+
+                    htmlContent = `<a href='${session.url}'><img src='images/icons/${iconFile}' alt='' class='${iconClass}'>${session.displayText}</a>`;
+                } else {
+                    htmlContent = `<a href='${session.url}'>${session.displayText}</a>`;
+                }
+            } else {
+                // Plain text content
+                htmlContent = session.displayText;
+            }
+
             section.content.push({
-                text: textContent
+                text: htmlContent
             });
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
                 moreData,
                 sha,
-                `Add content: ${textContent} to ${section.heading}`
+                `Add content: ${session.displayText} to ${section.heading}`
             );
 
-            const message = await ctx.reply(
-                `✅ Added content: **${textContent}**\n\n🔄 Deploying to website...`,
-                { parse_mode: 'Markdown' }
-            );
+            let messageText = `✅ Added content: **${session.displayText}**`;
+            if (session.url) messageText += `\n🔗 URL: ${session.url}`;
+            if (finalIconType) messageText += `\n🏷️ Icon: ${finalIconType}`;
+            messageText += '\n\n🔄 Deploying to website...';
+
+            const message = await ctx.reply(messageText, {
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
+            });
 
             if (deploymentPoller) {
                 deploymentPoller.addPendingDeployment(

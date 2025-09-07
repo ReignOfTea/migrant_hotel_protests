@@ -1,9 +1,8 @@
-// v1
-
 let allEvents = [];
 let filteredEvents = [];
 let locations = [];
 let times = [];
+let liveData = [];
 let userLocation = null;
 
 // Generate cache buster timestamp
@@ -28,6 +27,64 @@ function isEventPast(datetimeString) {
     const oneDayAgo = new Date(now.getTime() - (24 * 60 * 60 * 1000));
 
     return eventDate < oneDayAgo;
+}
+
+// Check if event is currently live (started within last 3 hours)
+function isEventLive(datetimeString) {
+    const eventDate = new Date(datetimeString);
+    const now = new Date();
+    const threeHoursAgo = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+
+    return eventDate >= threeHoursAgo && eventDate <= now;
+}
+
+// Check if event is starting soon (within next 3 hours)
+function isEventStartingSoon(datetimeString) {
+    const eventDate = new Date(datetimeString);
+    const now = new Date();
+    const threeHoursFromNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+
+    return eventDate > now && eventDate <= threeHoursFromNow;
+}
+
+// Check if event has live content
+function getEventLiveContent(locationId, datetime) {
+    return liveData.find(live =>
+        live.locationId === locationId &&
+        live.datetime === datetime
+    );
+}
+
+// Load live data
+async function loadLiveData() {
+    try {
+        const cacheBuster = getCacheBuster();
+        const response = await fetch(`data/live.json?v=${cacheBuster}`);
+        if (response.ok) {
+            liveData = await response.json();
+        } else {
+            liveData = []; // File doesn't exist or error, use empty array
+        }
+    } catch (error) {
+        console.log('No live.json file found or error loading it');
+        liveData = [];
+    }
+}
+
+// Toggle live content visibility
+function toggleLiveContent(eventId) {
+    const contentRow = document.getElementById(`live-${eventId}`);
+    const button = document.querySelector(`button[onclick="toggleLiveContent('${eventId}')"]`);
+
+    if (contentRow.style.display === 'none') {
+        contentRow.style.display = 'table-row';
+        button.innerHTML = '▲';
+        button.classList.add('expanded');
+    } else {
+        contentRow.style.display = 'none';
+        button.innerHTML = '▼';
+        button.classList.remove('expanded');
+    }
 }
 
 // Format datetime for display
@@ -142,7 +199,8 @@ async function loadData() {
         const cacheBuster = getCacheBuster();
         const [locationsResponse, timesResponse] = await Promise.all([
             fetch(`data/locations.json?v=${cacheBuster}`),
-            fetch(`data/times.json?v=${cacheBuster}`)
+            fetch(`data/times.json?v=${cacheBuster}`),
+            loadLiveData()
         ]);
 
         if (!locationsResponse.ok || !timesResponse.ok) {
@@ -290,7 +348,6 @@ function mergeEventData() {
     filteredEvents = [...allEvents];
 }
 
-
 function initializeEvents() {
     setupFilter();
     loadSidebarContent(); // Load sidebar content
@@ -324,6 +381,20 @@ function showError(message) {
     if (container) {
         container.innerHTML = `<div class="no-events">${message}</div>`;
     }
+}
+
+function addPulseToExpandButtons() {
+    const expandButtons = document.querySelectorAll('.expand-btn');
+    expandButtons.forEach(button => {
+        button.classList.add('pulse');
+    });
+
+    // Remove pulse after 4 seconds
+    setTimeout(() => {
+        expandButtons.forEach(button => {
+            button.classList.remove('pulse');
+        });
+    }, 4000);
 }
 
 function renderEvents() {
@@ -364,6 +435,7 @@ function renderEvents() {
                         <th>TIME</th>
                         ${userLocation ? '<th>DISTANCE</th>' : ''}
                         <th>MAPS</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -382,22 +454,67 @@ function renderEvents() {
         });
 
         eventsByDate[date].forEach(event => {
+            const isLive = isEventLive(event.datetime);
+            const isStartingSoon = isEventStartingSoon(event.datetime);
+            const liveContent = getEventLiveContent(event.locationId, event.datetime);
+            const hasLiveContent = liveContent && liveContent.live && liveContent.live.length > 0;
+
+            let rowClass = '';
+            let badge = '';
+
+            if (isLive) {
+                rowClass = ' class="live-event"';
+                badge = ' <span class="live-badge">NOW</span>';
+            } else if (isStartingSoon) {
+                rowClass = ' class="starting-soon-event"';
+                badge = ' <span class="starting-soon-badge">STARTING SOON</span>';
+            }
+
             const distanceCell = userLocation && event.distance !== null && event.distance !== Infinity ?
                 `<td>${event.distance.toFixed(1)} MI</td>` :
                 (userLocation ? '<td>-</td>' : '');
 
+            const expandButton = hasLiveContent ?
+                `<td><button class="expand-btn" onclick="toggleLiveContent('${event.locationId}-${event.datetime}')">▼</button></td>` :
+                '<td></td>';
+
             html += `
-                <tr>
+                <tr${rowClass}>
                     <td>${event.location}</td>
-                    <td>${event.venue}</td>
+                    <td>${event.venue}${badge}</td>
                     <td>${event.time}</td>
                     ${distanceCell}
                     <td>
                         <a href="${event.googleMapsUrl}" target="_blank" class="map-link">GMAPS</a> | 
                         <a href="${event.what3WordsUrl}" target="_blank" class="map-link">W3W</a>
                     </td>
+                    ${expandButton}
                 </tr>
             `;
+
+            // Add live content row (initially hidden)
+            if (hasLiveContent) {
+                const colSpan = userLocation ? 6 : 5;
+                html += `
+                    <tr class="live-content-row" id="live-${event.locationId}-${event.datetime}" style="display: none;">
+                        <td colspan="${colSpan}" class="live-content">
+                            <div class="live-items">
+                `;
+
+                liveContent.live.forEach(item => {
+                    let logoHtml = '';
+                    if (item.logo && item.logo !== 'none') {
+                        logoHtml = `<img src='images/icons/${item.logo}.png' alt='' class='inline-icon icon-${item.logo}'>`;
+                    }
+                    html += `<div class="live-item"><a href="${item.link}" class="live-link" target="_blank">${logoHtml}${item.name}</a> ${item.comment}</div>`;
+                });
+
+                html += `
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
         });
 
         html += `
@@ -407,6 +524,8 @@ function renderEvents() {
     });
 
     container.innerHTML = html;
+
+    addPulseToExpandButtons();
 }
 
 // Initialize when page loads

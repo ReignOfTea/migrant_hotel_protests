@@ -5,16 +5,16 @@
             "heading": "People to Follow",
             "content": [
                 {
-                    "text": "<a href='https://x.com/WGthink'>@WGthink</a>"
+                    "text": "<a href='https://x.com/WGthink'><img src='images/icons/x.png' alt='' class='inline-icon icon-x'>@WGthink</a>"
                 },
                 {
-                    "text": "<a href='https://x.com/Truthhurts101UK'>@Truthhurts101UK</a>"
+                    "text": "<a href='https://x.com/Truthhurts101UK'><img src='images/icons/x.png' alt='' class='inline-icon icon-x'>@Truthhurts101UK</a>"
                 },
                 {
-                    "text": "<a href='https://x.com/Migrant_Auditor'>@Migrant_Auditor</a>"
+                    "text": "<a href='https://x.com/Migrant_Auditor'><img src='images/icons/x.png' alt='' class='inline-icon icon-x'>@Migrant_Auditor</a>"
                 },
                 {
-                    "text": "<a href='https://x.com/JackHadders'>@JackHadders</a>"
+                    "text": "<a href='https://x.com/JackHadders'><img src='images/icons/x.png' alt='' class='inline-icon icon-x'>@JackHadders</a>"
                 }
             ]
         },
@@ -22,24 +22,27 @@
             "heading": "Contact Me",
             "content": [
                 {
-                    "text": "<a href='https://x.com/ReignTea'>X (Twitter)</a>"
+                    "text": "<a href='https://x.com/ReignTea'><img src='images/icons/x.png' alt='' class='inline-icon icon-x'>@ReignTea</a>"
                 },
                 {
-                    "text": "<a href='mailto:reignoftea@gmail.com'>Email</a>"
+                    "text": "<a href='mailto:reignoftea@gmail.com'><img src='images/icons/gmail.png' alt='' class='inline-icon icon-gmail'>Email</a>"
                 },
                 {
-                    "text": "<a href='https://youtube.com/@ReignOfTea'>YouTube</a>"
-                },
-                {
-                    "text": "<a href='https://github.com/ReignOfTea/migrant_hotel_protests'>Source Code</a>"
+                    "text": "<a href='https://youtube.com/@ReignOfTea'><img src='images/icons/youtube.png' alt='' class='inline-icon icon-youtube'>@ReignOfTea</a>"
                 }
             ]
         },
         {
-            "heading": "Privacy",
+            "heading": "About this site",
             "content": [
                 {
-                    "text": "This site has <b>zero</b> data collection, <b>zero</b> cookies set. If you allow location, it stays on your device."
+                    "text": "Privacy: This site has zero data collection, zero cookies set. If you allow location, it stays on your device."
+                },
+                {
+                    "text": "Source Code: <a href='https://github.com/ReignOfTea/migrant_hotel_protests'><img src='images/icons/github.png' alt='' class='inline-icon icon-github'>GitHub</a>"
+                },
+                {
+                    "text": "Statically hosted on: <a href='https://github.com/ReignOfTea/migrant_hotel_protests'><img src='images/icons/github_pages.png' alt='GitHub Pages' class='icon-github-pages-large icon-github-pages'></a>"
                 }
             ]
         }

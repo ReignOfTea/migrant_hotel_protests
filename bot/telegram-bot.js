@@ -9,6 +9,7 @@ import { registerAttendCommands, handleAttendTextInput } from './commands/telegr
 import { registermoreCommands, handlemoreTextInput } from './commands/telegram/more.js';
 import { registerLocationsCommands, handleLocationsTextInput } from './commands/telegram/locations.js';
 import { registerEventsCommands, handleEventsTextInput } from './commands/telegram/events.js';
+import { registerLiveCommands, handleLiveTextInput } from './commands/telegram/live.js';
 import { registerScheduleCommands, handleScheduleTextInput, registerScheduleCallbacks } from './commands/telegram/schedule.js';
 import { DeploymentPoller } from './utils/polling.js';
 import { AuditLogger } from './utils/audit.js';
@@ -38,7 +39,8 @@ bot.command('start', async (ctx) => {
         .text('📅 Events', 'cmd_events')
         .text('⏰ Schedule', 'cmd_schedule')
         .row()
-        .text('🚀 Deployments', 'cmd_deployments')
+        .text('� Live Streams', 'cmd_live')
+        .text('�🚀 Deployments', 'cmd_deployments')
         .text('❓ Help', 'cmd_help');
 
     await ctx.reply(

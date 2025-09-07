@@ -1,0 +1,14 @@
+[
+    {
+        "locationId": "epping-bell-hotel",
+        "datetime": "2025-09-07T18:00:00",
+        "live": [
+            {
+                "link": "https://www.youtube.com/watch?v=R-1XiQGSufM",
+                "name": "Ay Audits",
+                "comment": "is covering this protest!",
+                "logo": "youtube"
+            }
+        ]
+    }
+]
