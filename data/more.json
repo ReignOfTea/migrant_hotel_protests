@@ -37,7 +37,11 @@
         },
         {
             "heading": "Privacy",
-            "content": []
+            "content": [
+                {
+                    "text": "This site has <b>zero</b> data collection, <b>zero</b> cookies set. If you allow location, it stays on your device."
+                }
+            ]
         }
     ]
 }
