@@ -1,3 +1,5 @@
+// v1
+
 let allEvents = [];
 let filteredEvents = [];
 let locations = [];
@@ -7,6 +9,16 @@ let userLocation = null;
 // Generate cache buster timestamp
 function getCacheBuster() {
     return Date.now();
+}
+
+// Generate Google Maps URL from coordinates and venue info
+function generateGoogleMapsUrl(lat, lng) {
+    return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+}
+
+// Generate What3Words URL from coordinates
+function generateWhat3WordsUrl(lat, lng) {
+    return `https://what3words.com/${lat},${lng}`;
 }
 
 // Check if event is in the past (more than 1 day ago)
@@ -269,16 +281,18 @@ function mergeEventData() {
                 location: location.location,
                 venue: location.venue,
                 time: dateTimeInfo.timeDisplay,
-                mapUrl: location.mapUrl,
                 lat: location.lat,
                 lng: location.lng,
                 distance: null,
-                sortKey: dateTimeInfo.sortKey
+                sortKey: dateTimeInfo.sortKey,
+                googleMapsUrl: generateGoogleMapsUrl(location.lat, location.lng),
+                what3WordsUrl: generateWhat3WordsUrl(location.lat, location.lng)
             };
         }).filter(event => event !== null);
 
     filteredEvents = [...allEvents];
 }
+
 
 function initializeEvents() {
     setupFilter();
@@ -352,7 +366,7 @@ function renderEvents() {
                         <th>VENUE</th>
                         <th>TIME</th>
                         ${userLocation ? '<th>DISTANCE</th>' : ''}
-                        <th>MAP</th>
+                        <th>MAPS</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -381,7 +395,10 @@ function renderEvents() {
                     <td>${event.venue}</td>
                     <td>${event.time}</td>
                     ${distanceCell}
-                    <td><a href="${event.mapUrl}" target="_blank" class="map-link">VIEW MAP</a></td>
+                    <td>
+                        <a href="${event.googleMapsUrl}" target="_blank" class="map-link">GMAPS</a> | 
+                        <a href="${event.what3WordsUrl}" target="_blank" class="map-link">W3W</a>
+                    </td>
                 </tr>
             `;
         });

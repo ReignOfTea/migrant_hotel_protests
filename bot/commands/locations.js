@@ -15,17 +15,6 @@ function generateId(location, venue) {
         .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
 
-// Validate Google Maps URL
-function isValidGoogleMapsUrl(url) {
-    try {
-        const urlObj = new URL(url);
-        return urlObj.hostname === 'www.google.com' &&
-            urlObj.pathname.startsWith('/maps/');
-    } catch (_) {
-        return false;
-    }
-}
-
 // Validate coordinates
 function isValidCoordinate(lat, lng) {
     const latitude = parseFloat(lat);
@@ -103,8 +92,7 @@ export function registerLocationsCommands(bot, deploymentPoller = null) {
                 message += `**${index + 1}. ${location.location}**\n`;
                 message += `📍 ${location.venue}\n`;
                 message += `🆔 ID: \`${location.id}\`\n`;
-                message += `📍 Coordinates: ${location.lat}, ${location.lng}\n`;
-                message += `🗺️ [View on Maps](${location.mapUrl})\n\n`;
+                message += `📍 Coordinates: ${location.lat}, ${location.lng}\n\n`;
             });
 
             await ctx.editMessageText(message, {
@@ -226,22 +214,9 @@ export async function handleLocationsTextInput(ctx, deploymentPoller = null) {
 
             session.venue = venue;
             session.id = id;
-            session.action = 'add_map_url';
-            sessionManager.set(ctx.from.id, session);
-            await ctx.reply(`Perfect! Generated ID: \`${id}\`\n\nNow enter the Google Maps URL:`);
-
-        } else if (session.action === 'add_map_url') {
-            const mapUrl = ctx.message.text.trim();
-
-            if (!isValidGoogleMapsUrl(mapUrl)) {
-                await ctx.reply('❌ Invalid Google Maps URL. Please enter a valid Google Maps URL (must start with https://www.google.com/maps/):');
-                return;
-            }
-
-            session.mapUrl = mapUrl;
             session.action = 'add_latitude';
             sessionManager.set(ctx.from.id, session);
-            await ctx.reply('Great! Now enter the latitude (e.g., 53.3881):');
+            await ctx.reply(`Perfect! Generated ID: \`${id}\`\n\nNow enter the latitude (e.g., 53.3881):`);
 
         } else if (session.action === 'add_latitude') {
             const lat = ctx.message.text.trim();
@@ -278,7 +253,6 @@ export async function handleLocationsTextInput(ctx, deploymentPoller = null) {
                 id: session.id,
                 location: session.location,
                 venue: session.venue,
-                mapUrl: session.mapUrl,
                 lat: session.lat,
                 lng: longitude
             };

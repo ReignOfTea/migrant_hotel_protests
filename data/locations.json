@@ -3,287 +3,245 @@
         "id": "altrincham-cresta-court",
         "location": "ALTRINCHAM",
         "venue": "CRESTA COURT HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cresta+Court+Hotel+Altrincham+UK",
-        "lat": 53.3906,
-        "lng": -2.35070
+        "lat": 53.39072560178334,
+        "lng": -2.3501626240187683
     },
     {
         "id": "bournemouth-roundhouse",
         "location": "BOURNEMOUTH",
         "venue": "ROUNDHOUSE",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Roundhouse+Bournemouth+UK",
-        "lat": 50.7192,
-        "lng": -1.8808
+        "lat": 50.72129825921555,
+        "lng": -1.866489717276996
     },
     {
         "id": "cheshunt-marriott-delta",
         "location": "CHESHUNT",
         "venue": "MARRIOTT DELTA HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Marriott+Delta+Hotel+Cheshunt+UK",
-        "lat": 51.7031,
-        "lng": -0.0356
+        "lat": 51.7205230478307,
+        "lng": -0.032006390277519024
     },
     {
         "id": "chichester-park-hotel",
         "location": "CHICHESTER",
         "venue": "PARK HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Park+Hotel+Chichester+UK",
-        "lat": 50.8376,
-        "lng": -0.7749
+        "lat": 50.84627744377054,
+        "lng": -0.7567736933513585
     },
     {
         "id": "portsmouth-royal-beach",
         "location": "PORTSMOUTH",
         "venue": "ROYAL BEACH",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Royal+Beach+Portsmouth+UK",
-        "lat": 50.7892,
-        "lng": -1.0943
+        "lat": 50.77960348702557,
+        "lng": -1.0760812200034668
     },
     {
         "id": "rhoose-holiday-inn-carfiff-airport",
         "location": "RHOOSE",
         "venue": "HOLIDAY INN CARDIFF AIRPORT",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Holiday+Inn+Cardiff+Airport",
-        "lat": 51.3979,
-        "lng": -3.3336
+        "lat": 51.39791271385114,
+        "lng": -3.3335754988016557
     },
     {
         "id": "southampton-highfield-house",
         "location": "SOUTHAMPTON",
         "venue": "HIGHFIELD HOUSE HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Southampton+Highfield+House+Hotel",
-        "lat": 50.9277,
-        "lng": -1.3916
+        "lat": 50.92779986302174,
+        "lng": -1.3916862327022155
     },
     {
         "id": "warwick-county-council-offices",
         "location": "WARWICK",
         "venue": "COUNTY COUNCIL OFFICES",
-        "mapUrl": "https://www.google.com/maps/place/Warwickshire+County+Council/@52.2826",
-        "lat": 52.2825,
-        "lng": -1.5902
+        "lat": 52.282555700560735,
+        "lng": -1.590113726580797
     },
     {
         "id": "blackpool-britannia-metropole",
         "location": "BLACKPOOL",
         "venue": "BRITANNIA METROPOLE",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Britannia+Metropole+Blackpool+UK",
-        "lat": 53.8175,
-        "lng": -3.0518
+        "lat": 53.82076868540347,
+        "lng": -3.0553454093925323
     },
     {
         "id": "cannock-roman-hotel",
         "location": "CANNOCK",
         "venue": "ROMAN HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Roman+Hotel+Cannock+UK",
-        "lat": 52.6906,
-        "lng": -2.0301
-    },
-    {
-        "id": "chichester-park-hotel-evening",
-        "location": "CHICHESTER",
-        "venue": "PARK HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Park+Hotel+Chichester+UK",
-        "lat": 50.8376,
-        "lng": -0.7749
+        "lat": 52.67995451585906,
+        "lng": -2.05299172958631
     },
     {
         "id": "crewe-arms-hotel",
         "location": "CREWE",
         "venue": "CREWE ARMS",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Crewe+Arms+Hotel",
-        "lat": 53.0900,
-        "lng": -2.432
+        "lat": 53.090144095084554,
+        "lng": -2.4326039030956936
     },
     {
         "id": "dalton-crooklands-brow",
         "location": "DALTON",
         "venue": "CROOKLANDS BROW HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Dalton+Crooklands+Brow",
-        "lat": 54.1593,
-        "lng": -3.1710
+        "lat": 54.159403548683436,
+        "lng": -3.171051170492159
     },
     {
         "id": "exeter-hampton-by-hilton",
         "location": "EXETER",
         "venue": "HAMPTION BY HILTON",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hampton+By+Hilton+Exeter",
-        "lat": 50.7293,
-        "lng": 3.4037
+        "lat": 50.729438326183384,
+        "lng": -3.4037858550619795
     },
     {
         "id": "faversham-kiln-court",
         "location": "FAVERSHAM",
         "venue": "KILN COURT",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Kiln+Court+Faversham",
-        "lat": 51.3168,
-        "lng": 0.8706
+        "lat": 51.316919659992955,
+        "lng": 0.8706425567765709
     },
     {
         "id": "horley-four-points-hotel",
         "location": "HORLEY",
         "venue": "FOUR POINTS HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Four+Points+Hotel+Horley",
-        "lat": 51.1817,
-        "lng": -0.1638
+        "lat": 51.181746647760626,
+        "lng": -0.1639899172567548
     },
     {
         "id": "hull-royal-hotel",
         "location": "HULL",
         "venue": "ROYAL HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Royal+Hotel+Hull",
-        "lat": 53.7440, 
-        "lng": -0.3450
+        "lat": 53.744130706289425,
+        "lng": -0.34504296235937476
     },
     {
         "id": "long-eaton-best-western",
         "location": "LONG EATON",
         "venue": "BEST WESTERN HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Best+Western+Long+Eaton",
-        "lat": 52.9095, 
-        "lng": -1.2993
+        "lat": 52.90953482586874,
+        "lng": -1.299318233615059
     },
     {
         "id": "mold-wrexham-hotel",
         "location": "MOLD",
         "venue": "WREXHAM STREET",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Wrexham+Street+Mold",
-        "lat": 53.1650, 
-        "lng": -3.1405
-    },    {
+        "lat": 53.16508917758825,
+        "lng": -3.140608652435582
+    },
+    {
         "id": "newcastle-new-bridge-hotel",
         "location": "NEWCASTLE",
         "venue": "NEW BRIDGE HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=New+Bridge+Hotel+Newcastle",
-        "lat": 54.9783,
-        "lng": -1.6178
+        "lat": 54.974707206483245,
+        "lng": -1.6077950183664538
     },
     {
         "id": "nuneaton-town-hall",
         "location": "NUNEATON",
         "venue": "TOWN HALL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Town+Hall+Nuneaton",
-        "lat": 52.5225,
-        "lng": -1.4681
+        "lat": 52.52189726534407,
+        "lng": -1.467482534219599
     },
     {
         "id": "oldbury-ibis",
         "location": "OLDBURY",
         "venue": "IBIS",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Ibis+Hotel+Oldbury",
-        "lat": 52.5089,
-        "lng": -2.0147
+        "lat": 52.49121434792427,
+        "lng": -2.02183243843053
     },
     {
         "id": "oxford-carfax-tower",
         "location": "OXFORD",
         "venue": "CARFAX TOWER",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Carfax+Tower+Oxford",
-        "lat": 51.7520,
-        "lng": -1.2577
+        "lat": 51.751918584787056,
+        "lng": -1.2580774336453246
     },
     {
         "id": "sheffield-holiday-inn-express",
         "location": "SHEFFIELD",
         "venue": "HOLIDAY INN EXPRESS",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Holiday+Inn+Express+Sheffield",
-        "lat": 53.3811,
-        "lng": -1.4701
+        "lat": 53.3861962150937,
+        "lng": -1.4604784304684373
     },
     {
         "id": "stockport-britannia",
         "location": "STOCKPORT",
         "venue": "BRITANNIA",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Britannia+Hotel+Stockport",
-        "lat": 53.4106,
-        "lng": -2.1575
+        "lat": 53.39893629306522,
+        "lng": -2.1350502420897057
     },
     {
         "id": "southampton-m27-bridge",
         "location": "SOUTHAMPTON",
         "venue": "M27 BRIDGE",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=M27+Bridge+Southampton",
-        "lat": 50.9097,
-        "lng": -1.4044
+        "lat": 50.90195732477989,
+        "lng": -1.314455496428631
     },
     {
         "id": "wakefield-cedar-court-hotel",
         "location": "WAKEFIELD",
         "venue": "CEDAR COURT HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Cedar+Court+Hotel+Wakefield",
-        "lat": 53.6833,
-        "lng": -1.5000
+        "lat": 53.64903620489205,
+        "lng": -1.5320281450416775
     },
     {
         "id": "woolston-holiday-inn",
         "location": "WOOLSTON",
         "venue": "HOLIDAY INN",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Holiday+Inn+Woolston",
-        "lat": 50.8833,
-        "lng": -1.3667
+        "lat": 53.39932164430549,
+        "lng": -2.5133907961977333
     },
     {
         "id": "bristol-hamilton-by-hilton",
         "location": "BRISTOL",
         "venue": "HAMILTON BY HILTON",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Hamilton+by+Hilton+Bristol",
-        "lat": 51.4545,
-        "lng": -2.5879
+        "lat": 51.45968269559015,
+        "lng": -2.5888431728426147
     },
     {
         "id": "dudley-quality-hotel",
         "location": "DUDLEY",
         "venue": "QUALITY HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Quality+Hotel+Dudley",
-        "lat": 52.5122,
-        "lng": -2.0811
+        "lat": 52.51285456014217,
+        "lng": -2.0675731002099265
     },
     {
         "id": "epping-bell-hotel",
         "location": "EPPING",
         "venue": "BELL HOTEL",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Bell+Hotel+Epping",
-        "lat": 51.6944,
-        "lng": 0.1042
+        "lat": 51.69214500517931,
+        "lng": 0.09623138879111577
     },
     {
         "id": "falkirk-falkirk-council-unison",
         "location": "FALKIRK",
         "venue": "FALKIRK COUNCIL UNISON",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Falkirk+Council+Unison+Falkirk",
-        "lat": 56.0019,
-        "lng": -3.7839
+        "lat": 56.00071984791773,
+        "lng": -3.785625193528384
     },
     {
         "id": "fallowfield-manchester-south",
         "location": "FALLOWFIELD",
         "venue": "MANCHESTER SOUTH",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Manchester+South+Fallowfield",
-        "lat": 53.4403,
-        "lng": -2.2161
+        "lat": 53.439644503146496,
+        "lng": -2.2207193554533395
     },
     {
         "id": "london-britannia-canary-wharf",
         "location": "LONDON",
         "venue": "BRITANNIA CANARY WHARF",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Britannia+Canary+Wharf+London",
-        "lat": 51.5074,
-        "lng": -0.0278
+        "lat": 51.50194338768638,
+        "lng": -0.023336945552232275
     },
     {
         "id": "norwich-the-norkie",
         "location": "NORWICH",
         "venue": "THE NORKIE",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=The+Norkie+Norwich",
-        "lat": 52.6309,
-        "lng": 1.2974
+        "lat": 52.637113916335686,
+        "lng": 1.2166130770083652
     },
     {
         "id": "plymouth-royal-parade",
         "location": "PLYMOUTH",
         "venue": "ROYAL PARADE",
-        "mapUrl": "https://www.google.com/maps/search/?api=1&query=Royal+Parade+Plymouth",
-        "lat": 50.3755,
-        "lng": -4.1427
+        "lat": 50.3702824620142,
+        "lng": -4.142397173249416
     }
 ]

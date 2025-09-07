@@ -29,17 +29,6 @@ function generateId(location, venue) {
         .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
 }
 
-// Validate Google Maps URL
-function isValidGoogleMapsUrl(url) {
-    try {
-        const urlObj = new URL(url);
-        return urlObj.hostname === 'www.google.com' &&
-            urlObj.pathname.startsWith('/maps/');
-    } catch (_) {
-        return false;
-    }
-}
-
 // Validate coordinates
 function isValidCoordinate(lat, lng) {
     const latitude = parseFloat(lat);
@@ -109,14 +98,6 @@ async function handleAddLocation(interaction, deploymentPoller, auditLogger) {
         .setRequired(true)
         .setMaxLength(200);
 
-    const mapUrlInput = new TextInputBuilder()
-        .setCustomId('mapUrl')
-        .setLabel('Google Maps URL')
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder('https://www.google.com/maps/...')
-        .setRequired(true)
-        .setMaxLength(500);
-
     const latInput = new TextInputBuilder()
         .setCustomId('lat')
         .setLabel('Latitude')
@@ -135,11 +116,10 @@ async function handleAddLocation(interaction, deploymentPoller, auditLogger) {
 
     const locationRow = new ActionRowBuilder().addComponents(locationInput);
     const venueRow = new ActionRowBuilder().addComponents(venueInput);
-    const mapUrlRow = new ActionRowBuilder().addComponents(mapUrlRow);
     const latRow = new ActionRowBuilder().addComponents(latInput);
     const lngRow = new ActionRowBuilder().addComponents(lngInput);
 
-    modal.addComponents(locationRow, venueRow, mapUrlRow, latRow, lngRow);
+    modal.addComponents(locationRow, venueRow, latRow, lngRow);
 
     await interaction.showModal(modal);
 }
@@ -286,7 +266,7 @@ async function showLocationsPage(interaction, sortedLocations, page, totalPages)
     pageLocations.forEach((location, index) => {
         embed.addFields({
             name: `${startIndex + index + 1}. ${location.location}`,
-            value: `📍 **Venue:** ${location.venue}\n🆔 **ID:** \`${location.id}\`\n📍 **Coordinates:** ${location.lat}, ${location.lng}\n🗺️ [View on Maps](${location.mapUrl})`,
+            value: `📍 **Venue:** ${location.venue}\n🆔 **ID:** \`${location.id}\`\n📍 **Coordinates:** ${location.lat}, ${location.lng}`,
             inline: false
         });
     });
@@ -394,22 +374,12 @@ export async function handleLocationsModal(interaction, deploymentPoller, auditL
 async function handleAddLocationModal(interaction, deploymentPoller, auditLogger) {
     const location = interaction.fields.getTextInputValue('location').trim().toUpperCase();
     const venue = interaction.fields.getTextInputValue('venue').trim().toUpperCase();
-    const mapUrl = interaction.fields.getTextInputValue('mapUrl').trim();
     const latStr = interaction.fields.getTextInputValue('lat').trim();
     const lngStr = interaction.fields.getTextInputValue('lng').trim();
 
     // Validate inputs
     const lat = parseFloat(latStr);
     const lng = parseFloat(lngStr);
-
-    // Validate Google Maps URL
-    if (!isValidGoogleMapsUrl(mapUrl)) {
-        await interaction.reply({
-            content: '❌ Invalid Google Maps URL. Please enter a valid Google Maps URL (must start with https://www.google.com/maps/).',
-            ephemeral: true
-        });
-        return;
-    }
 
     // Validate coordinates
     if (!isValidCoordinate(lat, lng)) {
@@ -440,7 +410,6 @@ async function handleAddLocationModal(interaction, deploymentPoller, auditLogger
             id: id,
             location: location,
             venue: venue,
-            mapUrl: mapUrl,
             lat: lat,
             lng: lng
         };
