@@ -3,45 +3,35 @@
     "sections": [
         {
             "heading": "People to Follow",
-            "type": "links",
-            "links": [
+            "content": [
                 {
-                    "text": "@WGthink",
-                    "url": "https://x.com/WGthink"
+                    "text": "<a href='https://x.com/WGthink'>@WGthink</a>"
                 },
                 {
-                    "text": "@Truthhurts101UK",
-                    "url": "https://x.com/Truthhurts101UK"
+                    "text": "<a href='https://x.com/Truthhurts101UK'>@Truthhurts101UK</a>"
                 },
                 {
-                    "text": "@Migrant_Auditor",
-                    "url": "https://x.com/Migrant_Auditor"
+                    "text": "<a href='https://x.com/Migrant_Auditor'>@Migrant_Auditor</a>"
                 },
                 {
-                    "text": "@JackHadders",
-                    "url": "https://x.com/JackHadders"
+                    "text": "<a href='https://x.com/JackHadders'>@JackHadders</a>"
                 }
             ]
         },
         {
             "heading": "Contact Me",
-            "type": "links",
-            "links": [
+            "content": [
                 {
-                    "text": "X (Twitter)",
-                    "url": "https://x.com/ReignTea"
+                    "text": "<a href='https://x.com/ReignTea'>X (Twitter)</a>"
                 },
                 {
-                    "text": "Email",
-                    "url": "mailto:reignoftea@gmail.com"
+                    "text": "<a href='mailto:reignoftea@gmail.com'>Email</a>"
                 },
                 {
-                    "text": "YouTube",
-                    "url": "https://youtube.com/@ReignOfTea"
+                    "text": "<a href='https://youtube.com/@ReignOfTea'>YouTube</a>"
                 },
                 {
-                    "text": "Source Code",
-                    "url": "https://github.com/ReignOfTea/migrant_hotel_protests"
+                    "text": "<a href='https://github.com/ReignOfTea/migrant_hotel_protests'>Source Code</a>"
                 }
             ]
         }

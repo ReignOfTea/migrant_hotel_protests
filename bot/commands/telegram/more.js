@@ -4,14 +4,9 @@ import { sessionManager } from '../../utils/sessions.js';
 
 const FILE_PATH = 'data/more.json';
 
-// URL validation function
-function isValidUrl(string) {
-    try {
-        const url = new URL(string);
-        return ['http:', 'https:', 'mailto:'].includes(url.protocol);
-    } catch (_) {
-        return false;
-    }
+// Text validation function
+function isValidText(text) {
+    return text && text.trim().length > 0;
 }
 
 export function registermoreCommands(bot, deploymentPoller = null) {
@@ -21,7 +16,7 @@ export function registermoreCommands(bot, deploymentPoller = null) {
             .text('Add Section', 'more_add_section')
             .text('Remove Section', 'more_remove_section')
             .row()
-            .text('Manage Links', 'more_manage_links')
+            .text('Manage Content', 'more_manage_content')
             .text('View Current', 'more_view');
 
         await ctx.reply('What would you like to do with the more?', {
@@ -37,17 +32,18 @@ export function registermoreCommands(bot, deploymentPoller = null) {
             let message = `**${data.title}**\n\n`;
             data.sections.forEach((section, index) => {
                 message += `**${index + 1}. ${section.heading}**\n`;
-                if (section.type === 'links' && section.links) {
-                    section.links.forEach(link => {
-                        message += `• [${link.text}](${link.url})\n`;
+                if (section.content && section.content.length > 0) {
+                    section.content.forEach(item => {
+                        message += `• ${item.text}\n`;
                     });
+                } else {
+                    message += '_No content yet_\n';
                 }
                 message += '\n';
             });
 
             await ctx.editMessageText(message, {
-                parse_mode: 'Markdown',
-                disable_web_page_preview: true
+                parse_mode: 'Markdown'
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
@@ -120,8 +116,8 @@ export function registermoreCommands(bot, deploymentPoller = null) {
         }
     });
 
-    // Manage links in sections
-    bot.callbackQuery('more_manage_links', async (ctx) => {
+    // Manage content in sections
+    bot.callbackQuery('more_manage_content', async (ctx) => {
         try {
             const { data } = await getFileContent(FILE_PATH);
 
@@ -132,11 +128,12 @@ export function registermoreCommands(bot, deploymentPoller = null) {
 
             const keyboard = new InlineKeyboard();
             data.sections.forEach((section, index) => {
-                keyboard.text(`${section.heading} (${section.links?.length || 0} links)`, `more_section_${index}`).row();
+                const itemCount = section.content?.length || 0;
+                keyboard.text(`${section.heading} (${itemCount} items)`, `more_section_${index}`).row();
             });
             keyboard.text('Cancel', 'cancel');
 
-            await ctx.editMessageText('Select a section to manage links:', {
+            await ctx.editMessageText('Select a section to manage content:', {
                 reply_markup: keyboard
             });
         } catch (error) {
@@ -144,7 +141,7 @@ export function registermoreCommands(bot, deploymentPoller = null) {
         }
     });
 
-    // Handle section selection for link management
+    // Handle section selection for content management
     bot.callbackQuery(/^more_section_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
@@ -152,60 +149,59 @@ export function registermoreCommands(bot, deploymentPoller = null) {
             const section = data.sections[sectionIndex];
 
             const keyboard = new InlineKeyboard()
-                .text('Add Link', `more_add_link_${sectionIndex}`)
-                .text('Remove Link', `more_remove_link_${sectionIndex}`)
+                .text('Add Content', `more_add_content_${sectionIndex}`)
+                .text('Remove Content', `more_remove_content_${sectionIndex}`)
                 .row()
-                .text('Back', 'more_manage_links');
+                .text('Back', 'more_manage_content');
 
-            let message = `**${section.heading}**\n\nCurrent links:\n`;
-            if (section.links && section.links.length > 0) {
-                section.links.forEach((link, index) => {
-                    message += `${index + 1}. [${link.text}](${link.url})\n`;
+            let message = `**${section.heading}**\n\nCurrent content:\n`;
+            if (section.content && section.content.length > 0) {
+                section.content.forEach((item, index) => {
+                    message += `${index + 1}. ${item.text}\n`;
                 });
             } else {
-                message += '_No links yet_\n';
+                message += '_No content yet_\n';
             }
 
             await ctx.editMessageText(message, {
                 reply_markup: keyboard,
-                parse_mode: 'Markdown',
-                disable_web_page_preview: true
+                parse_mode: 'Markdown'
             });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
     });
 
-    // Add link to section
-    bot.callbackQuery(/^more_add_link_(\d+)$/, async (ctx) => {
+    // Add content to section
+    bot.callbackQuery(/^more_add_content_(\d+)$/, async (ctx) => {
         const sectionIndex = parseInt(ctx.match[1]);
         sessionManager.set(ctx.from.id, {
             command: 'more',
-            action: 'add_link_text',
+            action: 'add_content_text',
             sectionIndex: sectionIndex
         });
-        await ctx.editMessageText('Please enter the text for the link (e.g., "Jonathan Wong (@WGthink)"):');
+        await ctx.editMessageText('Please enter the text content (e.g., "@WGthink"):');
     });
 
-    // Remove link from section
-    bot.callbackQuery(/^more_remove_link_(\d+)$/, async (ctx) => {
+    // Remove content from section
+    bot.callbackQuery(/^more_remove_content_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
             const { data } = await getFileContent(FILE_PATH);
             const section = data.sections[sectionIndex];
 
-            if (!section.links || section.links.length === 0) {
-                await ctx.editMessageText('No links to remove in this section.');
+            if (!section.content || section.content.length === 0) {
+                await ctx.editMessageText('No content to remove in this section.');
                 return;
             }
 
             const keyboard = new InlineKeyboard();
-            section.links.forEach((link, index) => {
-                keyboard.text(`${link.text}`, `more_remove_link_${sectionIndex}_${index}`).row();
+            section.content.forEach((item, index) => {
+                keyboard.text(`${item.text}`, `more_remove_content_${sectionIndex}_${index}`).row();
             });
             keyboard.text('Back', `more_section_${sectionIndex}`);
 
-            await ctx.editMessageText('Select a link to remove:', {
+            await ctx.editMessageText('Select content to remove:', {
                 reply_markup: keyboard
             });
         } catch (error) {
@@ -213,24 +209,24 @@ export function registermoreCommands(bot, deploymentPoller = null) {
         }
     });
 
-    // Handle specific link removal
-    bot.callbackQuery(/^more_remove_link_(\d+)_(\d+)$/, async (ctx) => {
+    // Handle specific content removal
+    bot.callbackQuery(/^more_remove_content_(\d+)_(\d+)$/, async (ctx) => {
         try {
             const sectionIndex = parseInt(ctx.match[1]);
-            const linkIndex = parseInt(ctx.match[2]);
+            const contentIndex = parseInt(ctx.match[2]);
             const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
-            const removedLink = moreData.sections[sectionIndex].links.splice(linkIndex, 1)[0];
+            const removedItem = moreData.sections[sectionIndex].content.splice(contentIndex, 1)[0];
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
                 moreData,
                 sha,
-                `Remove link: ${removedLink.text} from ${moreData.sections[sectionIndex].heading}`
+                `Remove content: ${removedItem.text} from ${moreData.sections[sectionIndex].heading}`
             );
 
             const message = await ctx.editMessageText(
-                `✅ Removed link: **${removedLink.text}**\n\n🔄 Deploying to website...`,
+                `✅ Removed content: **${removedItem.text}**\n\n🔄 Deploying to website...`,
                 { parse_mode: 'Markdown' }
             );
 
@@ -270,8 +266,7 @@ export async function handlemoreTextInput(ctx, deploymentPoller = null) {
             const { data: moreData, sha } = await getFileContent(FILE_PATH);
             moreData.sections.push({
                 heading: heading,
-                type: 'links',
-                links: []
+                content: []
             });
 
             const commitSha = await updateFileContent(
@@ -297,42 +292,34 @@ export async function handlemoreTextInput(ctx, deploymentPoller = null) {
 
             sessionManager.delete(ctx.from.id);
 
-        } else if (session.action === 'add_link_text') {
-            const linkText = ctx.message.text.trim();
-            session.linkText = linkText;
-            session.action = 'add_link_url';
-            sessionManager.set(ctx.from.id, session);
-            await ctx.reply(`Great! Now enter the URL for "${linkText}":`);
+        } else if (session.action === 'add_content_text') {
+            const textContent = ctx.message.text.trim();
 
-        } else if (session.action === 'add_link_url') {
-            const url = ctx.message.text.trim();
-
-            if (!isValidUrl(url)) {
-                await ctx.reply('❌ Invalid URL. Please enter a valid URL (must start with http://, https://, or mailto:):');
+            if (!isValidText(textContent)) {
+                await ctx.reply('❌ Invalid text content. Please enter valid text:');
                 return;
             }
 
             const { data: moreData, sha } = await getFileContent(FILE_PATH);
             const section = moreData.sections[session.sectionIndex];
 
-            if (!section.links) {
-                section.links = [];
+            if (!section.content) {
+                section.content = [];
             }
 
-            section.links.push({
-                text: session.linkText,
-                url: url
+            section.content.push({
+                text: textContent
             });
 
             const commitSha = await updateFileContent(
                 FILE_PATH,
                 moreData,
                 sha,
-                `Add link: ${session.linkText} to ${section.heading}`
+                `Add content: ${textContent} to ${section.heading}`
             );
 
             const message = await ctx.reply(
-                `✅ Added link: **${session.linkText}**\n\n🔄 Deploying to website...`,
+                `✅ Added content: **${textContent}**\n\n🔄 Deploying to website...`,
                 { parse_mode: 'Markdown' }
             );
 

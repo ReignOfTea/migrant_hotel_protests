@@ -123,18 +123,15 @@ function populatemoreSidebar(data) {
     let html = `<h3>${data.title}</h3>`;
 
     data.sections.forEach(section => {
-        if (section.type === 'links') {
-            html += `<h5>${section.heading}</h5><ul>`;
-            section.links.forEach(link => {
-                html += `<li><a href="${link.url}" target="_blank">${link.text}</a></li>`;
+        html += `<h5>${section.heading}</h5><ul>`;
+
+        if (section.content && section.content.length > 0) {
+            section.content.forEach(item => {
+                html += `<li>${item.text}</li>`;
             });
-            html += '</ul>';
-        } else {
-            html += `
-                <h4>${section.heading}</h4>
-                <p>${section.content}</p>
-            `;
         }
+
+        html += '</ul>';
     });
 
     moreBox.innerHTML = html;

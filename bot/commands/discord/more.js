@@ -9,20 +9,15 @@ function truncateForSelectMenu(text, maxLength = 97) {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
-// URL validation function
-function isValidUrl(string) {
-    try {
-        const url = new URL(string);
-        return ['http:', 'https:', 'mailto:'].includes(url.protocol);
-    } catch (_) {
-        return false;
-    }
+// Text validation function
+function isValidText(text) {
+    return text && text.trim().length > 0;
 }
 
 export function createmoreCommand() {
     return new SlashCommandBuilder()
         .setName('more')
-        .setDescription('Manage more sections and links')
+        .setDescription('Manage more sections and content')
         .addSubcommandGroup(group =>
             group
                 .setName('section')
@@ -46,16 +41,16 @@ export function createmoreCommand() {
                         .setDescription('View all more sections')))
         .addSubcommandGroup(group =>
             group
-                .setName('link')
-                .setDescription('Manage links within sections')
+                .setName('content')
+                .setDescription('Manage content within sections')
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName('add')
-                        .setDescription('Add a link to a section'))
+                        .setDescription('Add content to a section'))
                 .addSubcommand(subcommand =>
                     subcommand
                         .setName('remove')
-                        .setDescription('Remove a link from a section')));
+                        .setDescription('Remove content from a section')));
 }
 
 export async function handlemoreCommand(interaction, deploymentPoller, auditLogger) {
@@ -74,13 +69,13 @@ export async function handlemoreCommand(interaction, deploymentPoller, auditLogg
                 await handleViewSections(interaction);
                 break;
         }
-    } else if (subcommandGroup === 'link') {
+    } else if (subcommandGroup === 'content') {
         switch (subcommand) {
             case 'add':
-                await handleAddLink(interaction, deploymentPoller, auditLogger);
+                await handleAddContent(interaction, deploymentPoller, auditLogger);
                 break;
             case 'remove':
-                await handleRemoveLink(interaction, deploymentPoller, auditLogger);
+                await handleRemoveContent(interaction, deploymentPoller, auditLogger);
                 break;
         }
     }
@@ -90,7 +85,6 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
     const heading = interaction.options.getString('heading').trim();
 
     try {
-        // Check if heading already exists
         const { data } = await getFileContent(FILE_PATH);
         const existingHeading = data.sections.find(
             section => section.heading.toLowerCase() === heading.toLowerCase()
@@ -104,12 +98,10 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
             return;
         }
 
-        // Add new section
         const { data: moreData, sha } = await getFileContent(FILE_PATH);
         moreData.sections.push({
             heading: heading,
-            type: 'links',
-            links: []
+            content: []
         });
 
         const commitSha = await updateFileContent(
@@ -124,7 +116,6 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
             ephemeral: true
         });
 
-        // Track deployment
         deploymentPoller.addPendingDeployment(
             interaction.user.id,
             interaction.channel.id,
@@ -134,7 +125,6 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
             'discord'
         );
 
-        // Log audit
         await auditLogger.logSectionAdd(
             heading,
             FILE_PATH,
@@ -163,7 +153,6 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
             return;
         }
 
-        // Create select menu with existing sections
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('more_remove_section_select')
             .setPlaceholder('Select a section to remove')
@@ -171,7 +160,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
                 data.sections.map((section, index) => ({
                     label: truncateForSelectMenu(section.heading),
                     value: index.toString(),
-                    description: `${section.links?.length || 0} links`
+                    description: `${section.content?.length || 0} items`
                 }))
             );
 
@@ -211,12 +200,13 @@ async function handleViewSections(interaction) {
 
         data.sections.forEach((section, index) => {
             let fieldValue = '';
-            if (section.links && section.links.length > 0) {
-                section.links.forEach(link => {
-                    fieldValue += `• [${link.text}](${link.url})\n`;
+
+            if (section.content && section.content.length > 0) {
+                section.content.forEach(item => {
+                    fieldValue += `• ${item.text}\n`;
                 });
             } else {
-                fieldValue = '_No links yet_';
+                fieldValue = '_No content yet_';
             }
 
             embed.addFields({
@@ -240,7 +230,7 @@ async function handleViewSections(interaction) {
     }
 }
 
-async function handleAddLink(interaction, deploymentPoller, auditLogger) {
+async function handleAddContent(interaction, deploymentPoller, auditLogger) {
     try {
         const { data } = await getFileContent(FILE_PATH);
 
@@ -252,28 +242,27 @@ async function handleAddLink(interaction, deploymentPoller, auditLogger) {
             return;
         }
 
-        // Create select menu with existing sections
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('more_add_link_select')
-            .setPlaceholder('Select a section to add a link to')
+            .setCustomId('more_add_content_select')
+            .setPlaceholder('Select a section to add content to')
             .addOptions(
                 data.sections.map((section, index) => ({
                     label: truncateForSelectMenu(section.heading),
                     value: index.toString(),
-                    description: `${section.links?.length || 0} links`
+                    description: `${section.content?.length || 0} items`
                 }))
             );
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
         await interaction.reply({
-            content: '**🔗 Add Link to Section**\n\nSelect the section you want to add a link to:',
+            content: '**📝 Add Content to Section**\n\nSelect the section you want to add content to:',
             components: [row],
             ephemeral: true
         });
 
     } catch (error) {
-        console.error('Error in handleAddLink:', error);
+        console.error('Error in handleAddContent:', error);
         await interaction.reply({
             content: `❌ Error reading more sections: ${error.message}`,
             ephemeral: true
@@ -281,7 +270,7 @@ async function handleAddLink(interaction, deploymentPoller, auditLogger) {
     }
 }
 
-async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
+async function handleRemoveContent(interaction, deploymentPoller, auditLogger) {
     try {
         const { data } = await getFileContent(FILE_PATH);
 
@@ -293,28 +282,28 @@ async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
             return;
         }
 
-        // Filter sections that have links
-        const sectionsWithLinks = data.sections.filter(section => section.links && section.links.length > 0);
+        const sectionsWithContent = data.sections.filter(section =>
+            section.content && section.content.length > 0
+        );
 
-        if (sectionsWithLinks.length === 0) {
+        if (sectionsWithContent.length === 0) {
             await interaction.reply({
-                content: '❌ No sections with links found.',
+                content: '❌ No sections with content found.',
                 ephemeral: true
             });
             return;
         }
 
-        // Create select menu with sections that have links
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId('more_remove_link_section_select')
-            .setPlaceholder('Select a section to remove a link from')
+            .setCustomId('more_remove_content_section_select')
+            .setPlaceholder('Select a section to remove content from')
             .addOptions(
                 data.sections.map((section, index) => {
-                    if (section.links && section.links.length > 0) {
+                    if (section.content && section.content.length > 0) {
                         return {
                             label: truncateForSelectMenu(section.heading),
                             value: index.toString(),
-                            description: `${section.links.length} links`
+                            description: `${section.content.length} items`
                         };
                     }
                 }).filter(Boolean)
@@ -323,13 +312,13 @@ async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
         await interaction.reply({
-            content: '**🗑️ Remove Link from Section**\n\nSelect the section you want to remove a link from:',
+            content: '**🗑️ Remove Content from Section**\n\nSelect the section you want to remove content from:',
             components: [row],
             ephemeral: true
         });
 
     } catch (error) {
-        console.error('Error in handleRemoveLink:', error);
+        console.error('Error in handleRemoveContent:', error);
         await interaction.reply({
             content: `❌ Error reading more sections: ${error.message}`,
             ephemeral: true
@@ -337,22 +326,20 @@ async function handleRemoveLink(interaction, deploymentPoller, auditLogger) {
     }
 }
 
-// Handle modal submissions
 export async function handlemoreModal(interaction, deploymentPoller, auditLogger) {
     const customId = interaction.customId;
 
-    if (customId.startsWith('more_add_link_')) {
-        await handleAddLinkModal(interaction, deploymentPoller, auditLogger);
+    if (customId.startsWith('more_add_content_')) {
+        await handleAddContentModal(interaction, deploymentPoller, auditLogger);
     }
 }
 
-async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
-    const linkText = interaction.fields.getTextInputValue('link_text').trim();
-    const linkUrl = interaction.fields.getTextInputValue('link_url').trim();
+async function handleAddContentModal(interaction, deploymentPoller, auditLogger) {
+    const textContent = interaction.fields.getTextInputValue('text_content').trim();
 
-    const pendingLink = interaction.client.pendingmoreLinks?.get(interaction.user.id);
+    const pendingContent = interaction.client.pendingmoreContent?.get(interaction.user.id);
 
-    if (!pendingLink) {
+    if (!pendingContent) {
         await interaction.reply({
             content: '❌ Session expired. Please try again.',
             ephemeral: true
@@ -360,10 +347,9 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
         return;
     }
 
-    // Validate URL
-    if (!isValidUrl(linkUrl)) {
+    if (!isValidText(textContent)) {
         await interaction.reply({
-            content: '❌ Invalid URL. Please enter a valid URL (must start with http://, https://, or mailto:).',
+            content: '❌ Invalid text content. Please enter valid text.',
             ephemeral: true
         });
         return;
@@ -371,30 +357,28 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
 
     try {
         const { data: moreData, sha } = await getFileContent(FILE_PATH);
-        const section = moreData.sections[pendingLink.sectionIndex];
+        const section = moreData.sections[pendingContent.sectionIndex];
 
-        if (!section.links) {
-            section.links = [];
+        if (!section.content) {
+            section.content = [];
         }
 
-        section.links.push({
-            text: linkText,
-            url: linkUrl
+        section.content.push({
+            text: textContent
         });
 
         const commitSha = await updateFileContent(
             FILE_PATH,
             moreData,
             sha,
-            `Add link: ${linkText} to ${section.heading}`
+            `Add content: ${textContent} to ${section.heading}`
         );
 
         await interaction.reply({
-            content: `✅ **Link Added Successfully!**\n\n**Text:** ${linkText}\n**URL:** ${linkUrl}\n**Section:** ${section.heading}\n\n🚀 Deploying changes...`,
+            content: `✅ **Content Added Successfully!**\n\n**Text:** ${textContent}\n**Section:** ${section.heading}\n\n🚀 Deploying changes...`,
             ephemeral: true
         });
 
-        // Track deployment
         deploymentPoller.addPendingDeployment(
             interaction.user.id,
             interaction.channel.id,
@@ -404,40 +388,37 @@ async function handleAddLinkModal(interaction, deploymentPoller, auditLogger) {
             'discord'
         );
 
-        // Log audit
         await auditLogger.log(
-            'Link Added',
-            `Added "${linkText}" to ${section.heading} in ${FILE_PATH}`,
+            'Content Added',
+            `Added "${textContent}" to ${section.heading} in ${FILE_PATH}`,
             interaction.user.id,
             interaction.user.username
         );
 
-        // Clean up
-        interaction.client.pendingmoreLinks.delete(interaction.user.id);
+        interaction.client.pendingmoreContent.delete(interaction.user.id);
 
     } catch (error) {
-        console.error('Error adding link:', error);
+        console.error('Error adding content:', error);
         await interaction.reply({
-            content: `❌ Error adding link: ${error.message}`,
+            content: `❌ Error adding content: ${error.message}`,
             ephemeral: true
         });
     }
 }
 
-// Handle select menu interactions
 export async function handlemoreSelect(interaction, deploymentPoller, auditLogger) {
     const customId = interaction.customId;
     const selectedIndex = parseInt(interaction.values[0]);
 
     if (customId === 'more_remove_section_select') {
         await handleRemoveSectionSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
-    } else if (customId === 'more_add_link_select') {
-        await handleAddLinkSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
-    } else if (customId === 'more_remove_link_section_select') {
-        await handleRemoveLinkSectionSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
-    } else if (customId.startsWith('more_remove_link_')) {
+    } else if (customId === 'more_add_content_select') {
+        await handleAddContentSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
+    } else if (customId === 'more_remove_content_section_select') {
+        await handleRemoveContentSectionSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('more_remove_content_')) {
         const sectionIndex = parseInt(customId.split('_')[3]);
-        await handleRemoveLinkSelect(interaction, sectionIndex, selectedIndex, deploymentPoller, auditLogger);
+        await handleRemoveContentSelect(interaction, sectionIndex, selectedIndex, deploymentPoller, auditLogger);
     }
 }
 
@@ -453,7 +434,6 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
             return;
         }
 
-        // Remove section
         const removedSection = moreData.sections.splice(sectionIndex, 1)[0];
 
         const commitSha = await updateFileContent(
@@ -468,7 +448,6 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
             ephemeral: true
         });
 
-        // Track deployment
         deploymentPoller.addPendingDeployment(
             interaction.user.id,
             interaction.channel.id,
@@ -478,7 +457,6 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
             'discord'
         );
 
-        // Log audit
         await auditLogger.logSectionRemove(
             removedSection.heading,
             FILE_PATH,
@@ -495,7 +473,7 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
     }
 }
 
-async function handleAddLinkSelect(interaction, sectionIndex, deploymentPoller, auditLogger) {
+async function handleAddContentSelect(interaction, sectionIndex, deploymentPoller, auditLogger) {
     try {
         const { data } = await getFileContent(FILE_PATH);
 
@@ -509,39 +487,28 @@ async function handleAddLinkSelect(interaction, sectionIndex, deploymentPoller, 
 
         const section = data.sections[sectionIndex];
 
-        // Show modal for link input
         const modal = new ModalBuilder()
-            .setCustomId(`more_add_link_${Date.now()}`)
-            .setTitle(`Add Link to "${section.heading}"`);
+            .setCustomId(`more_add_content_${Date.now()}`)
+            .setTitle(`Add Content to "${section.heading}"`);
 
         const textInput = new TextInputBuilder()
-            .setCustomId('link_text')
-            .setLabel('Link Text')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('e.g., Jonathan Wong (@WGthink)')
+            .setCustomId('text_content')
+            .setLabel('Text Content')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder('e.g., @WGthink')
             .setRequired(true)
-            .setMaxLength(100);
-
-        const urlInput = new TextInputBuilder()
-            .setCustomId('link_url')
-            .setLabel('Link URL')
-            .setStyle(TextInputStyle.Short)
-            .setPlaceholder('e.g., https://twitter.com/WGthink')
-            .setRequired(true)
-            .setMaxLength(500);
+            .setMaxLength(2000);
 
         const textRow = new ActionRowBuilder().addComponents(textInput);
-        const urlRow = new ActionRowBuilder().addComponents(urlInput);
-        modal.addComponents(textRow, urlRow);
+        modal.addComponents(textRow);
 
         await interaction.showModal(modal);
 
-        // Store the section index for when modal is submitted
-        interaction.client.pendingmoreLinks = interaction.client.pendingmoreLinks || new Map();
-        interaction.client.pendingmoreLinks.set(interaction.user.id, { sectionIndex });
+        interaction.client.pendingmoreContent = interaction.client.pendingmoreContent || new Map();
+        interaction.client.pendingmoreContent.set(interaction.user.id, { sectionIndex });
 
     } catch (error) {
-        console.error('Error in handleAddLinkSelect:', error);
+        console.error('Error in handleAddContentSelect:', error);
         await interaction.reply({
             content: `❌ Error reading section: ${error.message}`,
             ephemeral: true
@@ -549,7 +516,7 @@ async function handleAddLinkSelect(interaction, sectionIndex, deploymentPoller, 
     }
 }
 
-async function handleRemoveLinkSectionSelect(interaction, sectionIndex, deploymentPoller, auditLogger) {
+async function handleRemoveContentSectionSelect(interaction, sectionIndex, deploymentPoller, auditLogger) {
     try {
         const { data } = await getFileContent(FILE_PATH);
 
@@ -563,36 +530,35 @@ async function handleRemoveLinkSectionSelect(interaction, sectionIndex, deployme
 
         const section = data.sections[sectionIndex];
 
-        if (!section.links || section.links.length === 0) {
+        if (!section.content || section.content.length === 0) {
             await interaction.reply({
-                content: '❌ No links found in this section.',
+                content: '❌ No content found in this section.',
                 ephemeral: true
             });
             return;
         }
 
-        // Create select menu with links in this section
         const selectMenu = new StringSelectMenuBuilder()
-            .setCustomId(`more_remove_link_${sectionIndex}`)
-            .setPlaceholder('Select a link to remove')
+            .setCustomId(`more_remove_content_${sectionIndex}`)
+            .setPlaceholder('Select content to remove')
             .addOptions(
-                section.links.map((link, index) => ({
-                    label: truncateForSelectMenu(link.text),
+                section.content.map((item, index) => ({
+                    label: truncateForSelectMenu(item.text),
                     value: index.toString(),
-                    description: truncateForSelectMenu(link.url)
+                    description: truncateForSelectMenu(item.text, 50)
                 }))
             );
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
         await interaction.reply({
-            content: `**🗑️ Remove Link from "${section.heading}"**\n\nSelect the link you want to remove:`,
+            content: `**🗑️ Remove Content from "${section.heading}"**\n\nSelect the content you want to remove:`,
             components: [row],
             ephemeral: true
         });
 
     } catch (error) {
-        console.error('Error in handleRemoveLinkSectionSelect:', error);
+        console.error('Error in handleRemoveContentSectionSelect:', error);
         await interaction.reply({
             content: `❌ Error reading section: ${error.message}`,
             ephemeral: true
@@ -600,7 +566,7 @@ async function handleRemoveLinkSectionSelect(interaction, sectionIndex, deployme
     }
 }
 
-async function handleRemoveLinkSelect(interaction, sectionIndex, linkIndex, deploymentPoller, auditLogger) {
+async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex, deploymentPoller, auditLogger) {
     try {
         const { data: moreData, sha } = await getFileContent(FILE_PATH);
 
@@ -614,30 +580,28 @@ async function handleRemoveLinkSelect(interaction, sectionIndex, linkIndex, depl
 
         const section = moreData.sections[sectionIndex];
 
-        if (!section.links || linkIndex < 0 || linkIndex >= section.links.length) {
+        if (!section.content || contentIndex < 0 || contentIndex >= section.content.length) {
             await interaction.reply({
-                content: '❌ Link not found.',
+                content: '❌ Content not found.',
                 ephemeral: true
             });
             return;
         }
 
-        // Remove link
-        const removedLink = section.links.splice(linkIndex, 1)[0];
+        const removedItem = section.content.splice(contentIndex, 1)[0];
 
         const commitSha = await updateFileContent(
             FILE_PATH,
             moreData,
             sha,
-            `Remove link: ${removedLink.text} from ${section.heading}`
+            `Remove content: ${removedItem.text} from ${section.heading}`
         );
 
         await interaction.reply({
-            content: `✅ **Link Removed Successfully!**\n\n**Removed:** ${removedLink.text}\n**From:** ${section.heading}\n\n🚀 Deploying changes...`,
+            content: `✅ **Content Removed Successfully!**\n\n**Removed:** ${removedItem.text}\n**From:** ${section.heading}\n\n🚀 Deploying changes...`,
             ephemeral: true
         });
 
-        // Track deployment
         deploymentPoller.addPendingDeployment(
             interaction.user.id,
             interaction.channel.id,
@@ -647,18 +611,17 @@ async function handleRemoveLinkSelect(interaction, sectionIndex, linkIndex, depl
             'discord'
         );
 
-        // Log audit
         await auditLogger.log(
-            'Link Removed',
-            `Removed "${removedLink.text}" from ${section.heading} in ${FILE_PATH}`,
+            'Content Removed',
+            `Removed "${removedItem.text}" from ${section.heading} in ${FILE_PATH}`,
             interaction.user.id,
             interaction.user.username
         );
 
     } catch (error) {
-        console.error('Error removing link:', error);
+        console.error('Error removing content:', error);
         await interaction.reply({
-            content: `❌ Error removing link: ${error.message}`,
+            content: `❌ Error removing content: ${error.message}`,
             ephemeral: true
         });
     }
