@@ -174,5 +174,13 @@
         "time": "12:00:00",
         "enabled": true,
         "created": "2025-09-09T18:06:31.359Z"
+    },
+    {
+        "name": "Carfax Tower",
+        "locationId": "oxford-carfax-tower",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:07:42.565Z"
     }
 ]
