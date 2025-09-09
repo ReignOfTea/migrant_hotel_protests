@@ -1,16 +1,16 @@
 import 'dotenv/config';
-import { Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { Client, GatewayIntentBits, REST, Routes, MessageFlags } from 'discord.js';
 import { config } from './config/config.js';
 import { DeploymentPoller } from './utils/polling.js';
 import { DiscordAuditLogger } from './utils/discord-audit.js';
 import { EventScheduler } from './utils/scheduler.js';
-import { createAboutCommand, handleAboutCommand, handleAboutModal, handleAboutSelect } from './commands/discord/about.js';
-import { createAttendCommand, handleAttendCommand, handleAttendModal, handleAttendSelect } from './commands/discord/attend.js';
-import { createmoreCommand, handlemoreCommand, handlemoreModal, handlemoreSelect } from './commands/discord/more.js';
-import { createLocationsCommand, handleLocationsCommand, handleLocationsModal, handleLocationsSelect } from './commands/discord/locations.js';
-import { createEventsCommand, handleEventsCommand, handleEventsModal, handleEventsSelect } from './commands/discord/events.js';
+import { createAboutCommand, handleAboutCommand, handleAboutModal, handleAboutSelect, handleAboutButton } from './commands/discord/about.js';
+import { createAttendCommand, handleAttendCommand, handleAttendModal, handleAttendSelect, handleAttendButton } from './commands/discord/attend.js';
+import { createmoreCommand, handlemoreCommand, handlemoreModal, handlemoreSelect, handleMoreButton } from './commands/discord/more.js';
+import { createLocationsCommand, handleLocationsCommand, handleLocationsModal, handleLocationsSelect, handleLocationsButton } from './commands/discord/locations.js';
+import { createEventsCommand, handleEventsCommand, handleEventsModal, handleEventsSelect, handleEventsButton } from './commands/discord/events.js';
 import { createScheduleCommand, handleScheduleCommand, handleScheduleModal, handleScheduleSelect, handleScheduleButton } from './commands/discord/schedule.js';
-import { createLiveCommand, handleLiveCommand, handleLiveModal, handleLiveSelect } from './commands/discord/live.js';
+import { createLiveCommand, handleLiveCommand, handleLiveModal, handleLiveSelect, handleLiveButton } from './commands/discord/live.js';
 
 // Initialize Discord client
 const client = new Client({
@@ -125,7 +125,7 @@ client.on('interactionCreate', async interaction => {
     if (!isAuthorized(interaction)) {
         await interaction.reply({
             content: '❌ You are not authorized to use this bot.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -163,7 +163,7 @@ client.on('interactionCreate', async interaction => {
     if (!isAuthorized(interaction)) {
         await interaction.reply({
             content: '❌ You are not authorized to use this bot.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -192,22 +192,35 @@ client.on('interactionCreate', async interaction => {
     if (!isAuthorized(interaction)) {
         await interaction.reply({
             content: '❌ You are not authorized to use this bot.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
 
     try {
-        if (interaction.customId.startsWith('schedule_')) {
+        const customId = interaction.customId;
+        
+        if (customId.startsWith('about_')) {
+            await handleAboutButton(interaction, deploymentPoller, auditLogger);
+        } else if (customId.startsWith('attend_')) {
+            await handleAttendButton(interaction, deploymentPoller, auditLogger);
+        } else if (customId.startsWith('more_')) {
+            await handleMoreButton(interaction, deploymentPoller, auditLogger);
+        } else if (customId.startsWith('locations_')) {
+            await handleLocationsButton(interaction, deploymentPoller, auditLogger);
+        } else if (customId.startsWith('events_')) {
+            await handleEventsButton(interaction, deploymentPoller, auditLogger);
+        } else if (customId.startsWith('schedule_')) {
             await handleScheduleButton(interaction, deploymentPoller, auditLogger);
+        } else if (customId.startsWith('live_')) {
+            await handleLiveButton(interaction, deploymentPoller, auditLogger);
         }
-        // Add other button handlers as needed for other commands
     } catch (error) {
         console.error('Error handling button interaction:', error);
         if (!interaction.replied && !interaction.deferred) {
             await interaction.reply({
                 content: '❌ An error occurred while processing your request.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     }
@@ -221,7 +234,7 @@ client.on('interactionCreate', async interaction => {
     if (!isAuthorized(interaction)) {
         await interaction.reply({
             content: '❌ You are not authorized to use this bot.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }

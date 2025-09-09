@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
+import { MessageFlags, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const FILE_PATH = 'data/live.json';
@@ -108,7 +108,7 @@ async function handleAddLive(interaction, deploymentPoller, auditLogger) {
         if (times.length === 0) {
             await interaction.reply({
                 content: '❌ No scheduled times found. Please add times first using `/times add`.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -124,7 +124,7 @@ async function handleAddLive(interaction, deploymentPoller, auditLogger) {
         console.error('Error in handleAddLive:', error);
         await interaction.reply({
             content: `❌ Error loading times: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -137,7 +137,7 @@ async function showTimeSelectPage(interaction, sortedTimes, page, action) {
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No times found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -198,7 +198,7 @@ async function showTimeSelectPage(interaction, sortedTimes, page, action) {
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -210,7 +210,7 @@ async function handleRemoveLive(interaction, deploymentPoller, auditLogger) {
         if (liveStreams.length === 0) {
             await interaction.reply({
                 content: '❌ No live streams found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -246,7 +246,7 @@ async function handleRemoveLive(interaction, deploymentPoller, auditLogger) {
         console.error('Error in handleRemoveLive:', error);
         await interaction.reply({
             content: `❌ Error reading live streams: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -259,7 +259,7 @@ async function showLiveSelectPage(interaction, flattenedStreams, page, action) {
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No live streams found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -318,7 +318,7 @@ async function showLiveSelectPage(interaction, flattenedStreams, page, action) {
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -330,7 +330,7 @@ async function handleViewLive(interaction) {
         if (liveStreams.length === 0) {
             await interaction.reply({
                 content: '❌ No live streams found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -355,7 +355,7 @@ async function handleViewLive(interaction) {
         console.error('Error in handleViewLive:', error);
         await interaction.reply({
             content: `❌ Error reading live streams: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -421,7 +421,7 @@ async function showLivePage(interaction, sortedStreams, page, totalPages) {
         await interaction.reply({
             embeds: [embed],
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -453,7 +453,7 @@ async function handleTimeSelectPagination(interaction, customId, action) {
         console.error('Error in handleTimeSelectPagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -491,7 +491,7 @@ async function handleLivePagination(interaction, customId) {
         console.error('Error in handleLivePagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -516,7 +516,7 @@ async function handleViewLivePagination(interaction, customId) {
         console.error('Error in handleViewLivePagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -541,7 +541,7 @@ async function handleTimeSelectForAdd(interaction) {
         if (selectedTimeIndex < 0 || selectedTimeIndex >= times.length) {
             await interaction.reply({
                 content: '❌ Selected time not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -598,7 +598,7 @@ async function handleTimeSelectForAdd(interaction) {
         console.error('Error in handleTimeSelectForAdd:', error);
         await interaction.reply({
             content: `❌ Error processing selection: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -626,7 +626,7 @@ async function handleAddLiveModal(interaction, deploymentPoller, auditLogger) {
     if (!isValidUrl(link)) {
         await interaction.reply({
             content: '❌ Invalid URL format. Please provide a valid URL.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -674,7 +674,7 @@ async function handleAddLiveModal(interaction, deploymentPoller, auditLogger) {
         const status = getTimeStatus(datetime);
         await interaction.reply({
             content: `✅ **Live Stream Added Successfully!**\n\n**Location:** ${locationId}\n**Date/Time:** ${formatDateTime(datetime)} ${status}\n**Stream:** ${name}\n**Link:** ${link}\n${comment ? `**Comment:** ${comment}\n` : ''}${logo ? `**Platform:** ${logo}\n` : ''}\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -699,7 +699,7 @@ async function handleAddLiveModal(interaction, deploymentPoller, auditLogger) {
         console.error('Error adding live stream:', error);
         await interaction.reply({
             content: `❌ Error adding live stream: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -711,7 +711,7 @@ async function handleRemoveLiveSelect(interaction, eventIndex, streamIndex, depl
         if (eventIndex < 0 || eventIndex >= liveStreams.length) {
             await interaction.reply({
                 content: '❌ Event not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -720,7 +720,7 @@ async function handleRemoveLiveSelect(interaction, eventIndex, streamIndex, depl
         if (streamIndex < 0 || streamIndex >= event.live.length) {
             await interaction.reply({
                 content: '❌ Stream not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -743,7 +743,7 @@ async function handleRemoveLiveSelect(interaction, eventIndex, streamIndex, depl
         const status = getTimeStatus(event.datetime);
         await interaction.reply({
             content: `✅ **Live Stream Removed Successfully!**\n\n**Removed:** ${removedStream.name}\n**Location:** ${event.locationId}\n**Date/Time:** ${formatDateTime(event.datetime)} ${status}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -768,7 +768,7 @@ async function handleRemoveLiveSelect(interaction, eventIndex, streamIndex, depl
         console.error('Error removing live stream:', error);
         await interaction.reply({
             content: `❌ Error removing live stream: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }

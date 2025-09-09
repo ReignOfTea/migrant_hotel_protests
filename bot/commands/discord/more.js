@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
+import { MessageFlags, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const FILE_PATH = 'data/more.json';
@@ -85,6 +85,27 @@ export function createmoreCommand() {
                         .setDescription('Remove content from a section')));
 }
 
+// Handle button interactions for more commands
+export async function handleMoreButton(interaction, deploymentPoller, auditLogger) {
+    const customId = interaction.customId;
+    
+    if (customId === 'more_view') {
+        await handleViewSections(interaction);
+    } else if (customId.startsWith('more_remove_section_')) {
+        const sectionIndex = parseInt(customId.split('_')[3]);
+        await handleRemoveSectionSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('more_remove_content_section_')) {
+        const sectionIndex = parseInt(customId.split('_')[4]);
+        await handleRemoveContentSectionSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('more_remove_content_')) {
+        const [sectionIndex, contentIndex] = customId.split('_').slice(3).map(Number);
+        await handleRemoveContentSelect(interaction, sectionIndex, contentIndex, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('more_add_content_')) {
+        const sectionIndex = parseInt(customId.split('_')[3]);
+        await handleAddContentSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    }
+}
+
 export async function handlemoreCommand(interaction, deploymentPoller, auditLogger) {
     const subcommandGroup = interaction.options.getSubcommandGroup();
     const subcommand = interaction.options.getSubcommand();
@@ -125,7 +146,7 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
         if (existingHeading) {
             await interaction.reply({
                 content: `❌ A section with heading "${heading}" already exists. Please choose a different heading.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -145,7 +166,7 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
 
         await interaction.reply({
             content: `✅ **Section Added Successfully!**\n\n**Heading:** ${heading}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         deploymentPoller.addPendingDeployment(
@@ -168,7 +189,7 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
         console.error('Error in handleAddSection:', error);
         await interaction.reply({
             content: `❌ Error adding section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -180,7 +201,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No more sections found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -201,14 +222,14 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
         await interaction.reply({
             content: '**🗑️ Remove more Section**\n\nSelect the section you want to remove:',
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleRemoveSection:', error);
         await interaction.reply({
             content: `❌ Error reading more sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -220,7 +241,7 @@ async function handleViewSections(interaction) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No more sections found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -256,14 +277,14 @@ async function handleViewSections(interaction) {
 
         await interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleViewSections:', error);
         await interaction.reply({
             content: `❌ Error reading more sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -275,7 +296,7 @@ async function handleAddContent(interaction, deploymentPoller, auditLogger) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No more sections found. Add a section first using `/more section add`.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -296,14 +317,14 @@ async function handleAddContent(interaction, deploymentPoller, auditLogger) {
         await interaction.reply({
             content: '**📝 Add Content to Section**\n\nSelect the section you want to add content to:',
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleAddContent:', error);
         await interaction.reply({
             content: `❌ Error reading more sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -315,7 +336,7 @@ async function handleRemoveContent(interaction, deploymentPoller, auditLogger) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No more sections found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -327,7 +348,7 @@ async function handleRemoveContent(interaction, deploymentPoller, auditLogger) {
         if (sectionsWithContent.length === 0) {
             await interaction.reply({
                 content: '❌ No sections with content found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -352,14 +373,14 @@ async function handleRemoveContent(interaction, deploymentPoller, auditLogger) {
         await interaction.reply({
             content: '**🗑️ Remove Content from Section**\n\nSelect the section you want to remove content from:',
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleRemoveContent:', error);
         await interaction.reply({
             content: `❌ Error reading more sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -382,7 +403,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
     if (!pendingContent) {
         await interaction.reply({
             content: '❌ Session expired. Please try again.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -390,7 +411,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
     if (!isValidText(displayText)) {
         await interaction.reply({
             content: '❌ Invalid display text. Please enter valid text.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -399,7 +420,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
     if (url && !isValidUrl(url)) {
         await interaction.reply({
             content: '❌ Invalid URL format. Please provide a valid URL or leave empty for plain text.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -457,7 +478,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
 
         await interaction.reply({
             content: responseText,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         deploymentPoller.addPendingDeployment(
@@ -482,7 +503,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
         console.error('Error adding content:', error);
         await interaction.reply({
             content: `❌ Error adding content: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -510,7 +531,7 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
         if (sectionIndex < 0 || sectionIndex >= moreData.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -526,7 +547,7 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
 
         await interaction.reply({
             content: `✅ **Section Removed Successfully!**\n\n**Removed:** ${removedSection.heading}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         deploymentPoller.addPendingDeployment(
@@ -549,7 +570,7 @@ async function handleRemoveSectionSelect(interaction, sectionIndex, deploymentPo
         console.error('Error removing section:', error);
         await interaction.reply({
             content: `❌ Error removing section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -561,7 +582,7 @@ async function handleAddContentSelect(interaction, sectionIndex, deploymentPolle
         if (sectionIndex < 0 || sectionIndex >= data.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -611,7 +632,7 @@ async function handleAddContentSelect(interaction, sectionIndex, deploymentPolle
         console.error('Error in handleAddContentSelect:', error);
         await interaction.reply({
             content: `❌ Error reading section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -623,7 +644,7 @@ async function handleRemoveContentSectionSelect(interaction, sectionIndex, deplo
         if (sectionIndex < 0 || sectionIndex >= data.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -633,7 +654,7 @@ async function handleRemoveContentSectionSelect(interaction, sectionIndex, deplo
         if (!section.content || section.content.length === 0) {
             await interaction.reply({
                 content: '❌ No content found in this section.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -657,14 +678,14 @@ async function handleRemoveContentSectionSelect(interaction, sectionIndex, deplo
         await interaction.reply({
             content: `**🗑️ Remove Content from "${section.heading}"**\n\nSelect the content you want to remove:`,
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleRemoveContentSectionSelect:', error);
         await interaction.reply({
             content: `❌ Error reading section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -676,7 +697,7 @@ async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex
         if (sectionIndex < 0 || sectionIndex >= moreData.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -686,7 +707,7 @@ async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex
         if (!section.content || contentIndex < 0 || contentIndex >= section.content.length) {
             await interaction.reply({
                 content: '❌ Content not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -703,7 +724,7 @@ async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex
 
         await interaction.reply({
             content: `✅ **Content Removed Successfully!**\n\n**Removed:** ${displayText}\n**From:** ${section.heading}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         deploymentPoller.addPendingDeployment(
@@ -726,7 +747,7 @@ async function handleRemoveContentSelect(interaction, sectionIndex, contentIndex
         console.error('Error removing content:', error);
         await interaction.reply({
             content: `❌ Error removing content: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }

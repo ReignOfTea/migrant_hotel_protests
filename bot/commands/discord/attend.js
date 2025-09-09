@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, MessageFlags, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const FILE_PATH = 'data/attend.json';
@@ -35,6 +35,21 @@ export function createAttendCommand() {
                 .setDescription('View all attend sections'));
 }
 
+// Handle button interactions for attend commands
+export async function handleAttendButton(interaction, deploymentPoller, auditLogger) {
+    const customId = interaction.customId;
+    
+    if (customId === 'attend_view') {
+        await handleViewSections(interaction);
+    } else if (customId.startsWith('attend_remove_')) {
+        const sectionIndex = parseInt(customId.split('_')[2]);
+        await handleRemoveSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('attend_edit_')) {
+        const sectionIndex = parseInt(customId.split('_')[2]);
+        await handleEditSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    }
+}
+
 export async function handleAttendCommand(interaction, deploymentPoller, auditLogger) {
     const subcommand = interaction.options.getSubcommand();
 
@@ -67,7 +82,7 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
         if (existingHeading) {
             await interaction.reply({
                 content: `❌ A section with heading "${heading}" already exists. Please choose a different heading.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -98,7 +113,7 @@ async function handleAddSection(interaction, deploymentPoller, auditLogger) {
         console.error('Error in handleAddSection:', error);
         await interaction.reply({
             content: `❌ Error reading attend sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -110,7 +125,7 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No attend sections found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -132,14 +147,14 @@ async function handleRemoveSection(interaction, deploymentPoller, auditLogger) {
         await interaction.reply({
             content: '**🗑️ Remove Attend Section**\n\nSelect the section you want to remove:',
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleRemoveSection:', error);
         await interaction.reply({
             content: `❌ Error reading attend sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -151,7 +166,7 @@ async function handleEditSection(interaction, deploymentPoller, auditLogger) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No attend sections found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -173,14 +188,14 @@ async function handleEditSection(interaction, deploymentPoller, auditLogger) {
         await interaction.reply({
             content: '**✏️ Edit Attend Section**\n\nSelect the section you want to edit:',
             components: [row],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleEditSection:', error);
         await interaction.reply({
             content: `❌ Error reading attend sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -192,7 +207,7 @@ async function handleViewSections(interaction) {
         if (data.sections.length === 0) {
             await interaction.reply({
                 content: '❌ No attend sections found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -214,14 +229,14 @@ async function handleViewSections(interaction) {
 
         await interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleViewSections:', error);
         await interaction.reply({
             content: `❌ Error reading attend sections: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -244,7 +259,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
     if (!pendingSection) {
         await interaction.reply({
             content: '❌ Session expired. Please try again.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -267,7 +282,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
 
         await interaction.reply({
             content: `✅ **Section Added Successfully!**\n\n**Heading:** ${pendingSection.heading}\n**Content:** ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -295,7 +310,7 @@ async function handleAddContentModal(interaction, deploymentPoller, auditLogger)
         console.error('Error adding attend section:', error);
         await interaction.reply({
             content: `❌ Error adding section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -307,7 +322,7 @@ async function handleEditContentModal(interaction, deploymentPoller, auditLogger
     if (!pendingSection) {
         await interaction.reply({
             content: '❌ Session expired. Please try again.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -320,7 +335,7 @@ async function handleEditContentModal(interaction, deploymentPoller, auditLogger
         if (sectionIndex < 0 || sectionIndex >= attendData.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -337,7 +352,7 @@ async function handleEditContentModal(interaction, deploymentPoller, auditLogger
 
         await interaction.reply({
             content: `✅ **Section Updated Successfully!**\n\n**Heading:** ${attendData.sections[sectionIndex].heading}\n**New Content:** ${content.substring(0, 100)}${content.length > 100 ? '...' : ''}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -365,7 +380,7 @@ async function handleEditContentModal(interaction, deploymentPoller, auditLogger
         console.error('Error updating attend section:', error);
         await interaction.reply({
             content: `❌ Error updating section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -389,7 +404,7 @@ async function handleRemoveSelect(interaction, sectionIndex, deploymentPoller, a
         if (sectionIndex < 0 || sectionIndex >= attendData.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -406,7 +421,7 @@ async function handleRemoveSelect(interaction, sectionIndex, deploymentPoller, a
 
         await interaction.reply({
             content: `✅ **Section Removed Successfully!**\n\n**Removed:** ${removedSection.heading}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -431,7 +446,7 @@ async function handleRemoveSelect(interaction, sectionIndex, deploymentPoller, a
         console.error('Error removing attend section:', error);
         await interaction.reply({
             content: `❌ Error removing section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -443,7 +458,7 @@ async function handleEditSelect(interaction, sectionIndex, deploymentPoller, aud
         if (sectionIndex < 0 || sectionIndex >= data.sections.length) {
             await interaction.reply({
                 content: '❌ Section not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -480,7 +495,7 @@ async function handleEditSelect(interaction, sectionIndex, deploymentPoller, aud
         console.error('Error in handleEditSelect:', error);
         await interaction.reply({
             content: `❌ Error reading section: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }

@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, MessageFlags } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const EVENTS_FILE_PATH = 'data/times.json';
@@ -105,7 +105,7 @@ async function handleAddEvent(interaction, deploymentPoller, auditLogger) {
         if (locations.length === 0) {
             await interaction.reply({
                 content: '❌ No locations available. Please add locations first using `/locations add`.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -116,7 +116,7 @@ async function handleAddEvent(interaction, deploymentPoller, auditLogger) {
         console.error('Error in handleAddEvent:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -129,7 +129,7 @@ async function handleRemoveEvent(interaction, deploymentPoller, auditLogger) {
         if (events.length === 0) {
             await interaction.reply({
                 content: '❌ No events found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -145,7 +145,7 @@ async function handleRemoveEvent(interaction, deploymentPoller, auditLogger) {
         console.error('Error in handleRemoveEvent:', error);
         await interaction.reply({
             content: `❌ Error reading events: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -158,7 +158,7 @@ async function showLocationSelectPage(interaction, locations, page, action) {
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No locations found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -214,7 +214,7 @@ async function showLocationSelectPage(interaction, locations, page, action) {
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -227,7 +227,7 @@ async function showEventSelectPage(interaction, sortedEvents, locations, page, a
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No events found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -289,7 +289,7 @@ async function showEventSelectPage(interaction, sortedEvents, locations, page, a
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -302,7 +302,7 @@ async function handleViewEvents(interaction) {
         if (events.length === 0) {
             await interaction.reply({
                 content: '❌ No events found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -321,7 +321,7 @@ async function handleViewEvents(interaction) {
         console.error('Error in handleViewEvents:', error);
         await interaction.reply({
             content: `❌ Error reading events: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -391,7 +391,7 @@ async function showEventsPage(interaction, sortedEvents, locations, page, totalP
         await interaction.reply({
             embeds: [embed],
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -412,7 +412,7 @@ async function handleViewEventsPagination(interaction, customId) {
         console.error('Error in handleViewEventsPagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -441,7 +441,7 @@ async function handleLocationPagination(interaction, customId) {
         console.error('Error in handleLocationPagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -462,7 +462,7 @@ async function handleEventPagination(interaction, customId) {
         console.error('Error in handleEventPagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -484,7 +484,7 @@ async function handleAddEventModal(interaction, deploymentPoller, auditLogger) {
     if (!pendingEvent) {
         await interaction.reply({
             content: '❌ Session expired. Please try again.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -493,7 +493,7 @@ async function handleAddEventModal(interaction, deploymentPoller, auditLogger) {
     if (!isValidDateTime(dateTimeString)) {
         await interaction.reply({
             content: '❌ Invalid date/time format. Please use YYYY-MM-DDTHH:MM:SS format.\n\nExample: 2025-09-06T18:00:00',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -509,7 +509,7 @@ async function handleAddEventModal(interaction, deploymentPoller, auditLogger) {
         if (existingEvent) {
             await interaction.reply({
                 content: '❌ An event already exists at this location and time. Please choose a different date/time.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -531,7 +531,7 @@ async function handleAddEventModal(interaction, deploymentPoller, auditLogger) {
 
         await interaction.reply({
             content: `✅ **Event Added Successfully!**\n\n**Date & Time:** ${formatDateTime(dateTimeString)}\n**Location:** ${pendingEvent.locationName}\n**Location ID:** \`${pendingEvent.locationId}\`\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -559,7 +559,7 @@ async function handleAddEventModal(interaction, deploymentPoller, auditLogger) {
         console.error('Error adding event:', error);
         await interaction.reply({
             content: `❌ Error adding event: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -583,7 +583,7 @@ async function handleAddEventLocationSelect(interaction, locationIndex, deployme
         if (locationIndex < 0 || locationIndex >= locations.length) {
             await interaction.reply({
                 content: '❌ Location not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -620,7 +620,7 @@ async function handleAddEventLocationSelect(interaction, locationIndex, deployme
         console.error('Error in handleAddEventLocationSelect:', error);
         await interaction.reply({
             content: `❌ Error reading location: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -633,7 +633,7 @@ async function handleRemoveEventSelect(interaction, eventIndex, deploymentPoller
         if (eventIndex < 0 || eventIndex >= events.length) {
             await interaction.reply({
                 content: '❌ Event not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -652,7 +652,7 @@ async function handleRemoveEventSelect(interaction, eventIndex, deploymentPoller
 
         await interaction.reply({
             content: `✅ **Event Removed Successfully!**\n\n**Date & Time:** ${formatDateTime(removedEvent.datetime)}\n**Location:** ${locationName}\n**Location ID:** \`${removedEvent.locationId}\`\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -677,7 +677,7 @@ async function handleRemoveEventSelect(interaction, eventIndex, deploymentPoller
         console.error('Error removing event:', error);
         await interaction.reply({
             content: `❌ Error removing event: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }

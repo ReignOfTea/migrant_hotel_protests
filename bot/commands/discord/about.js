@@ -35,6 +35,21 @@ export function createAboutCommand() {
                 .setDescription('View all about sections'));
 }
 
+// Handle button interactions for about commands
+export async function handleAboutButton(interaction, deploymentPoller, auditLogger) {
+    const customId = interaction.customId;
+    
+    if (customId === 'about_view') {
+        await handleViewSections(interaction);
+    } else if (customId.startsWith('about_remove_')) {
+        const sectionIndex = parseInt(customId.split('_')[2]);
+        await handleRemoveSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('about_edit_')) {
+        const sectionIndex = parseInt(customId.split('_')[2]);
+        await handleEditSelect(interaction, sectionIndex, deploymentPoller, auditLogger);
+    }
+}
+
 export async function handleAboutCommand(interaction, deploymentPoller, auditLogger) {
     const subcommand = interaction.options.getSubcommand();
 

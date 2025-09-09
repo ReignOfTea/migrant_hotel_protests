@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
+import { MessageFlags, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const FILE_PATH = 'data/locations.json';
@@ -131,7 +131,7 @@ async function handleRemoveLocation(interaction, deploymentPoller, auditLogger) 
         if (locations.length === 0) {
             await interaction.reply({
                 content: '❌ No locations found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -147,7 +147,7 @@ async function handleRemoveLocation(interaction, deploymentPoller, auditLogger) 
         console.error('Error in handleRemoveLocation:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -160,7 +160,7 @@ async function showLocationSelectPage(interaction, sortedLocations, page, action
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No locations found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -216,7 +216,7 @@ async function showLocationSelectPage(interaction, sortedLocations, page, action
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -228,7 +228,7 @@ async function handleViewLocations(interaction) {
         if (locations.length === 0) {
             await interaction.reply({
                 content: '❌ No locations found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -247,7 +247,7 @@ async function handleViewLocations(interaction) {
         console.error('Error in handleViewLocations:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -308,7 +308,7 @@ async function showLocationsPage(interaction, sortedLocations, page, totalPages)
         await interaction.reply({
             embeds: [embed],
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -327,7 +327,7 @@ async function handleViewLocationsPagination(interaction, customId) {
         console.error('Error in handleViewLocationsPagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -357,7 +357,7 @@ async function handleLocationPagination(interaction, customId) {
         console.error('Error in handleLocationPagination:', error);
         await interaction.reply({
             content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -385,7 +385,7 @@ async function handleAddLocationModal(interaction, deploymentPoller, auditLogger
     if (!isValidCoordinate(lat, lng)) {
         await interaction.reply({
             content: '❌ Invalid coordinates. Latitude must be between -90 and 90, longitude must be between -180 and 180.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -400,7 +400,7 @@ async function handleAddLocationModal(interaction, deploymentPoller, auditLogger
         if (existingLocation) {
             await interaction.reply({
                 content: `❌ A location with this combination already exists (ID: ${id}). Please choose a different location or venue name.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -425,7 +425,7 @@ async function handleAddLocationModal(interaction, deploymentPoller, auditLogger
 
         await interaction.reply({
             content: `✅ **Location Added Successfully!**\n\n**Location:** ${location}\n**Venue:** ${venue}\n**ID:** \`${id}\`\n**Coordinates:** ${lat}, ${lng}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -450,7 +450,7 @@ async function handleAddLocationModal(interaction, deploymentPoller, auditLogger
         console.error('Error adding location:', error);
         await interaction.reply({
             content: `❌ Error adding location: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -472,7 +472,7 @@ async function handleRemoveLocationSelect(interaction, locationIndex, deployment
         if (locationIndex < 0 || locationIndex >= locations.length) {
             await interaction.reply({
                 content: '❌ Location not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -489,7 +489,7 @@ async function handleRemoveLocationSelect(interaction, locationIndex, deployment
 
         await interaction.reply({
             content: `✅ **Location Removed Successfully!**\n\n**Removed:** ${removedLocation.location} - ${removedLocation.venue}\n**ID:** \`${removedLocation.id}\`\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -514,7 +514,7 @@ async function handleRemoveLocationSelect(interaction, locationIndex, deployment
         console.error('Error removing location:', error);
         await interaction.reply({
             content: `❌ Error removing location: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
