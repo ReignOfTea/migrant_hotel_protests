@@ -329,7 +329,7 @@ function mergeEventData() {
 
             const dateTimeInfo = formatDateTime(timeEntry.datetime);
 
-            return {
+            const event = {
                 locationId: timeEntry.locationId,
                 datetime: timeEntry.datetime,
                 date: dateTimeInfo.dayBanner,
@@ -343,6 +343,13 @@ function mergeEventData() {
                 googleMapsUrl: generateGoogleMapsUrl(location.lat, location.lng),
                 what3WordsUrl: generateWhat3WordsUrl(location.lat, location.lng)
             };
+            
+            // Include the about field if it exists in the time entry
+            if (timeEntry.about) {
+                event.about = timeEntry.about;
+            }
+            
+            return event;
         }).filter(event => event !== null);
 
     filteredEvents = [...allEvents];
@@ -478,9 +485,14 @@ function renderEvents() {
                 `<td><button class="expand-btn" onclick="toggleLiveContent('${event.locationId}-${event.datetime}')">▼</button></td>` :
                 '<td></td>';
 
+            // Add info button if event has about information
+            const infoButton = event.about ? 
+                `<button class="info-button" onclick="showInfoPopup('${event.about.replace(/'/g, "\\'").replace(/\n/g, '<br>')}')" title="More info">ℹ️</button>` : 
+                '';
+                
             html += `
                 <tr${rowClass}>
-                    <td>${event.location}</td>
+                    <td>${event.location}${infoButton}</td>
                     <td>${event.venue}${badge}</td>
                     <td>${event.time}</td>
                     ${distanceCell}
@@ -528,5 +540,42 @@ function renderEvents() {
     addPulseToExpandButtons();
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', initializeEvents);
+// Show info popup with content
+function showInfoPopup(content) {
+    const popup = document.getElementById('infoPopup');
+    const popupContent = document.getElementById('popupContent');
+    
+    // Create a temporary div to parse the HTML content
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    
+    // Clear previous content and append the parsed nodes
+    popupContent.innerHTML = '';
+    while (tempDiv.firstChild) {
+        popupContent.appendChild(tempDiv.firstChild);
+    }
+    
+    popup.style.display = 'flex';
+}
+
+// Close info popup
+function closeInfoPopup() {
+    const popup = document.getElementById('infoPopup');
+    popup.style.display = 'none';
+}
+
+// Add event listeners for popup close button
+document.addEventListener('DOMContentLoaded', () => {
+    // Close popup when clicking the close button
+    document.querySelector('.close-popup').addEventListener('click', closeInfoPopup);
+    
+    // Close popup when clicking outside the content
+    document.getElementById('infoPopup').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('infoPopup')) {
+            closeInfoPopup();
+        }
+    });
+    
+    // Initialize events
+    initializeEvents();
+});
