@@ -22,5 +22,269 @@
         "time": "18:00:00",
         "enabled": true,
         "created": "2025-09-09T16:55:38.052Z"
+    },
+    {
+        "name": "Park Hotel",
+        "locationId": "chichester-park-hotel",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:46:26.819Z"
+    },
+    {
+        "name": "Royal Beach",
+        "locationId": "portsmouth-royal-beach",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:47:21.195Z"
+    },
+    {
+        "name": "Cardiff Airport - Holiday Inn",
+        "locationId": "rhoose-holiday-inn-carfiff-airport",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:48:09.539Z"
+    },
+    {
+        "name": "Highfield House",
+        "locationId": "southampton-highfield-house",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:49:28.982Z"
+    },
+    {
+        "name": "Warwick Council Offices",
+        "locationId": "warwick-county-council-offices",
+        "weekday": 5,
+        "time": "11:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:50:06.696Z"
+    },
+    {
+        "name": "Britannia Metropole",
+        "locationId": "blackpool-britannia-metropole",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:51:41.041Z"
+    },
+    {
+        "name": "Roman Hotel",
+        "locationId": "cannock-roman-hotel",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:52:13.907Z"
+    },
+    {
+        "name": "Park Hotel",
+        "locationId": "chichester-park-hotel",
+        "weekday": 6,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:53:03.685Z"
+    },
+    {
+        "name": "Crewe Arms",
+        "locationId": "crewe-arms-hotel",
+        "weekday": 6,
+        "time": "10:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:53:35.324Z"
+    },
+    {
+        "name": "Crooklands Brow",
+        "locationId": "dalton-crooklands-brow",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:56:20.284Z"
+    },
+    {
+        "name": "Hamption by Hilton",
+        "locationId": "exeter-hampton-by-hilton",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:59:57.128Z"
+    },
+    {
+        "name": "Kiln Court",
+        "locationId": "faversham-kiln-court",
+        "weekday": 6,
+        "time": "11:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:00:54.579Z"
+    },
+    {
+        "name": "Four Points Hotel",
+        "locationId": "horley-four-points-hotel",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:02:31.579Z"
+    },
+    {
+        "name": "Royal Hotel",
+        "locationId": "hull-royal-hotel",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:03:06.700Z"
+    },
+    {
+        "name": "Best Western",
+        "locationId": "long-eaton-best-western",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:03:40.955Z"
+    },
+    {
+        "name": "Wrexham Street",
+        "locationId": "mold-wrexham-hotel",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:04:28.892Z"
+    },
+    {
+        "name": "New Bridge Hotel",
+        "locationId": "newcastle-new-bridge-hotel",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:05:14.055Z"
+    },
+    {
+        "name": "Town Hall",
+        "locationId": "nuneaton-town-hall",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:05:57.284Z"
+    },
+    {
+        "name": "Ibis",
+        "locationId": "oldbury-ibis",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:06:31.359Z"
+    },
+    {
+        "name": "Carfax Tower",
+        "locationId": "oxford-carfax-tower",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:07:42.565Z"
+    },
+    {
+        "name": "Holiday Inn Express",
+        "locationId": "sheffield-holiday-inn-express",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:08:55.097Z"
+    },
+    {
+        "name": "Britannia Hotel",
+        "locationId": "stockport-britannia",
+        "weekday": 6,
+        "time": "17:30:00",
+        "enabled": true,
+        "created": "2025-09-09T18:10:09.315Z"
+    },
+    {
+        "name": "M27 Bridge",
+        "locationId": "southampton-highfield-house",
+        "weekday": 6,
+        "time": "17:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:10:57.131Z"
+    },
+    {
+        "name": "Cedar Court Hotel",
+        "locationId": "wakefield-cedar-court-hotel",
+        "weekday": 6,
+        "time": "14:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:11:51.264Z"
+    },
+    {
+        "name": "Hamilton By Hilton",
+        "locationId": "bristol-hamilton-by-hilton",
+        "weekday": 0,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:12:24.659Z"
+    },
+    {
+        "name": "Quaility Hotel",
+        "locationId": "dudley-quality-hotel",
+        "weekday": 0,
+        "time": "12:30:00",
+        "enabled": true,
+        "created": "2025-09-09T18:12:55.280Z"
+    },
+    {
+        "name": "Bell Hotel",
+        "locationId": "epping-bell-hotel",
+        "weekday": 0,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:13:18.740Z"
+    },
+    {
+        "name": "Council Union",
+        "locationId": "falkirk-falkirk-council-unison",
+        "weekday": 0,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:13:55.514Z"
+    },
+    {
+        "name": "Manchester South Hotel",
+        "locationId": "fallowfield-manchester-south",
+        "weekday": 0,
+        "time": "14:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:14:25.123Z"
+    },
+    {
+        "name": "Canary Wharf",
+        "locationId": "london-britannia-canary-wharf",
+        "weekday": 0,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:15:15.571Z"
+    },
+    {
+        "name": "The Norkie",
+        "locationId": "norwich-the-norkie",
+        "weekday": 0,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:16:02.938Z"
+    },
+    {
+        "name": "Royal Parade Sunday",
+        "locationId": "plymouth-royal-parade",
+        "weekday": 0,
+        "time": "17:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:16:53.096Z"
+    },
+    {
+        "name": "Royal Parade Tuesday",
+        "locationId": "plymouth-royal-parade",
+        "weekday": 2,
+        "time": "17:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:17:38.084Z"
     }
 ]
