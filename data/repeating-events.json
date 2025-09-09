@@ -158,5 +158,13 @@
         "time": "13:00:00",
         "enabled": true,
         "created": "2025-09-09T18:05:14.055Z"
+    },
+    {
+        "name": "Town Hall",
+        "locationId": "nuneaton-town-hall",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:05:57.284Z"
     }
 ]
