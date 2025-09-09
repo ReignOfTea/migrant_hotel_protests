@@ -278,5 +278,13 @@
         "time": "17:00:00",
         "enabled": true,
         "created": "2025-09-09T18:16:53.096Z"
+    },
+    {
+        "name": "Royal Parade Tuesday",
+        "locationId": "plymouth-royal-parade",
+        "weekday": 2,
+        "time": "17:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:17:38.084Z"
     }
 ]
