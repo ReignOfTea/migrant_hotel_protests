@@ -62,5 +62,13 @@
         "time": "11:00:00",
         "enabled": true,
         "created": "2025-09-09T17:50:06.696Z"
+    },
+    {
+        "name": "Britannia Metropole",
+        "locationId": "blackpool-britannia-metropole",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:51:41.041Z"
     }
 ]
