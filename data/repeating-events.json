@@ -102,5 +102,13 @@
         "time": "12:00:00",
         "enabled": true,
         "created": "2025-09-09T17:56:20.284Z"
+    },
+    {
+        "name": "Hamption by Hilton",
+        "locationId": "exeter-hampton-by-hilton",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:59:57.128Z"
     }
 ]
