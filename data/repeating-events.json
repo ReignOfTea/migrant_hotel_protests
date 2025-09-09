@@ -6,5 +6,13 @@
         "time": "18:00:00",
         "enabled": true,
         "created": "2025-09-06T20:52:04.688Z"
+    },
+    {
+        "name": "Roundhouse Hotel",
+        "locationId": "bournemouth-roundhouse",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T16:54:16.500Z"
     }
 ]
