@@ -182,7 +182,7 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
             });
 
             await ctx.editMessageText(
-                `Selected location: **${selectedLocation.location} - ${selectedLocation.venue}**\n\nNow enter the date and time in format: YYYY-MM-DDTHH:MM:SS\n\nExample: 2025-09-06T18:00:00`,
+                `Selected location: **${selectedLocation.location} - ${selectedLocation.venue}**\n\nNow enter the date and time in format: YYYY-MM-DDTHH:MM:SS\n\nExample: 2025-09-06T18:00:00\n\nYou'll be able to add an optional description in the next step.`,
                 { parse_mode: 'Markdown' }
             );
         } catch (error) {
@@ -307,6 +307,51 @@ export function registerEventsCommands(bot, deploymentPoller = null) {
     });
 
     // Handle noop callback (for page indicator)
+    // Handle skip about button
+    bot.callbackQuery('events_skip_about', async (ctx) => {
+        const session = sessionManager.get(ctx.from.id);
+        if (!session || session.action !== 'add_about') {
+            await ctx.answerCallbackQuery('Session expired. Please start over.');
+            return;
+        }
+
+        // Add the event without an about text
+        const { data: eventsData, sha } = await getFileContent(EVENTS_FILE_PATH);
+
+        const newEvent = {
+            locationId: session.locationId,
+            datetime: session.datetime
+        };
+
+        eventsData.push(newEvent);
+
+        const commitSha = await updateFileContent(
+            EVENTS_FILE_PATH,
+            eventsData,
+            sha,
+            `Add event: ${formatDateTime(session.datetime)} at ${session.locationName}`
+        );
+
+        const message = await ctx.editMessageText(
+            `✅ Added new event!\n\n**${formatDateTime(session.datetime)}**\n📍 ${session.locationName}\n\n🔄 Deploying to website...`,
+            { 
+                parse_mode: 'Markdown',
+                reply_markup: { inline_keyboard: [] } // Remove the buttons
+            }
+        );
+
+        if (deploymentPoller) {
+            deploymentPoller.addPendingDeployment(
+                ctx.from.id,
+                ctx.chat.id,
+                message.message_id,
+                commitSha
+            );
+        }
+
+        sessionManager.delete(ctx.from.id);
+    });
+
     bot.callbackQuery('noop', async (ctx) => {
         await ctx.answerCallbackQuery();
     });
@@ -316,7 +361,53 @@ export async function handleEventsTextInput(ctx, deploymentPoller = null) {
     const session = sessionManager.get(ctx.from.id);
 
     try {
-        if (session.action === 'add_datetime') {
+        if (session.action === 'add_about') {
+            // User is adding an about text
+            const aboutText = ctx.message.text.trim();
+            
+            // Add the event with the about text
+            const { data: eventsData, sha } = await getFileContent(EVENTS_FILE_PATH);
+
+            const newEvent = {
+                locationId: session.locationId,
+                datetime: session.datetime
+            };
+
+            // Add about field only if provided
+            if (aboutText) {
+                newEvent.about = aboutText;
+            }
+
+            eventsData.push(newEvent);
+
+            const commitSha = await updateFileContent(
+                EVENTS_FILE_PATH,
+                eventsData,
+                sha,
+                `Add event: ${formatDateTime(session.datetime)} at ${session.locationName}`
+            );
+
+            const aboutTextDisplay = aboutText ? `\n\n📝 *About:*\n${aboutText}` : '';
+            
+            const message = await ctx.reply(
+                `✅ Added new event!\n\n**${formatDateTime(session.datetime)}**\n📍 ${session.locationName}${aboutTextDisplay}\n\n🔄 Deploying to website...`,
+                { 
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: true
+                }
+            );
+
+            if (deploymentPoller) {
+                deploymentPoller.addPendingDeployment(
+                    ctx.from.id,
+                    ctx.chat.id,
+                    message.message_id,
+                    commitSha
+                );
+            }
+
+            sessionManager.delete(ctx.from.id);
+        } else if (session.action === 'add_datetime') {
             const dateTimeString = ctx.message.text.trim();
 
             if (!isValidDateTime(dateTimeString)) {
@@ -336,26 +427,21 @@ export async function handleEventsTextInput(ctx, deploymentPoller = null) {
                 return;
             }
 
-            // Add the new event
-            const { data: eventsData, sha } = await getFileContent(EVENTS_FILE_PATH);
+            // Store the datetime and ask for optional about text
+            session.action = 'add_about';
+            session.datetime = dateTimeString;
+            sessionManager.set(ctx.from.id, session);
 
-            const newEvent = {
-                locationId: session.locationId,
-                datetime: dateTimeString
-            };
+            const keyboard = new InlineKeyboard()
+                .text('Skip', 'events_skip_about')
+                .text('Cancel', 'cancel');
 
-            eventsData.push(newEvent);
-
-            const commitSha = await updateFileContent(
-                EVENTS_FILE_PATH,
-                eventsData,
-                sha,
-                `Add event: ${formatDateTime(dateTimeString)} at ${session.locationName}`
-            );
-
-            const message = await ctx.reply(
-                `✅ Added new event:\n\n**${formatDateTime(dateTimeString)}**\n📍 ${session.locationName}\n🆔 Location ID: \`${session.locationId}\`\n\n🔄 Deploying to website...`,
-                { parse_mode: 'Markdown' }
+            await ctx.reply(
+                `Great! The event is scheduled for **${formatDateTime(dateTimeString)}** at **${session.locationName}**\n\nWould you like to add an optional description? (You can include basic text formatting like *bold* or _italic_)`,
+                { 
+                    parse_mode: 'Markdown',
+                    reply_markup: keyboard 
+                }
             );
 
             if (deploymentPoller) {

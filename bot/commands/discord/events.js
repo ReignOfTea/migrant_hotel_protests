@@ -515,10 +515,16 @@ async function handleAddEventModal(interaction, deploymentPoller, auditLogger) {
         }
 
         // Add the new event
+        const aboutText = interaction.fields.getTextInputValue('about')?.trim();
         const newEvent = {
             locationId: pendingEvent.locationId,
             datetime: dateTimeString
         };
+
+        // Add about field only if provided
+        if (aboutText) {
+            newEvent.about = aboutText;
+        }
 
         events.push(newEvent);
 
@@ -591,11 +597,12 @@ async function handleAddEventLocationSelect(interaction, locationIndex, deployme
         const selectedLocation = locations[locationIndex];
         const locationName = `${selectedLocation.location} - ${selectedLocation.venue}`;
 
-        // Show modal for datetime input
+        // Show modal for event details
         const modal = new ModalBuilder()
             .setCustomId(`events_add_datetime_${Date.now()}`)
             .setTitle(`Add Event at ${selectedLocation.location}`);
 
+        // Datetime input
         const datetimeInput = new TextInputBuilder()
             .setCustomId('datetime')
             .setLabel('Date and Time (YYYY-MM-DDTHH:MM:SS)')
@@ -604,8 +611,19 @@ async function handleAddEventLocationSelect(interaction, locationIndex, deployme
             .setRequired(true)
             .setMaxLength(19);
 
-        const actionRow = new ActionRowBuilder().addComponents(datetimeInput);
-        modal.addComponents(actionRow);
+        // About input (optional)
+        const aboutInput = new TextInputBuilder()
+            .setCustomId('about')
+            .setLabel('About (optional)')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder('Add any additional information about this event...')
+            .setRequired(false)
+            .setMaxLength(1000);
+
+        const datetimeRow = new ActionRowBuilder().addComponents(datetimeInput);
+        const aboutRow = new ActionRowBuilder().addComponents(aboutInput);
+        
+        modal.addComponents(datetimeRow, aboutRow);
 
         await interaction.showModal(modal);
 
