@@ -487,7 +487,7 @@ function renderEvents() {
 
             // Add info button if event has about information
             const infoButton = event.about ? 
-                `<button class="info-button" onclick="showInfoPopup('${event.about.replace(/'/g, "\\'").replace(/\n/g, '<br>')}')" title="More info">ℹ️</button>` : 
+                `<button class="info-button" data-about="${event.about.replace(/"/g, '&quot;')}" title="More info">ℹ️</button>` : 
                 '';
                 
             html += `
@@ -573,6 +573,18 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('infoPopup').addEventListener('click', (e) => {
         if (e.target === document.getElementById('infoPopup')) {
             closeInfoPopup();
+        }
+    });
+    
+    // Handle info button clicks using event delegation
+    document.addEventListener('click', (e) => {
+        const infoButton = e.target.closest('.info-button');
+        if (infoButton) {
+            e.preventDefault();
+            const aboutContent = infoButton.getAttribute('data-about');
+            if (aboutContent) {
+                showInfoPopup(aboutContent);
+            }
         }
     });
     
