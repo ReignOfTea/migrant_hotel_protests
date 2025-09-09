@@ -38,5 +38,13 @@
         "time": "18:00:00",
         "enabled": true,
         "created": "2025-09-09T17:47:21.195Z"
+    },
+    {
+        "name": "Cardiff Airport - Holiday Inn",
+        "locationId": "rhoose-holiday-inn-carfiff-airport",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:48:09.539Z"
     }
 ]
