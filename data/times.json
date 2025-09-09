@@ -120,8 +120,48 @@
         "datetime": "2025-09-12T18:00:00"
     },
     {
+        "locationId": "bournemouth-roundhouse",
+        "datetime": "2025-09-12T18:00:00"
+    },
+    {
+        "locationId": "cheshunt-marriott-delta",
+        "datetime": "2025-09-12T18:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2025-09-19T18:00:00"
+    },
+    {
+        "locationId": "bournemouth-roundhouse",
+        "datetime": "2025-09-19T18:00:00"
+    },
+    {
+        "locationId": "cheshunt-marriott-delta",
+        "datetime": "2025-09-19T18:00:00"
+    },
+    {
         "locationId": "altrincham-cresta-court",
         "datetime": "2025-09-26T18:00:00"
+    },
+    {
+        "locationId": "bournemouth-roundhouse",
+        "datetime": "2025-09-26T18:00:00"
+    },
+    {
+        "locationId": "cheshunt-marriott-delta",
+        "datetime": "2025-09-26T18:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2025-10-03T18:00:00"
+    },
+    {
+        "locationId": "bournemouth-roundhouse",
+        "datetime": "2025-10-03T18:00:00"
+    },
+    {
+        "locationId": "cheshunt-marriott-delta",
+        "datetime": "2025-10-03T18:00:00"
     },
     {
         "locationId": "altrincham-cresta-court",
