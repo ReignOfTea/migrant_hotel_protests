@@ -94,5 +94,13 @@
         "time": "10:00:00",
         "enabled": true,
         "created": "2025-09-09T17:53:35.324Z"
+    },
+    {
+        "name": "Crooklands Brow",
+        "locationId": "dalton-crooklands-brow",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:56:20.284Z"
     }
 ]
