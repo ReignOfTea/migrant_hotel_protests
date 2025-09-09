@@ -136,37 +136,62 @@ export class EventScheduler {
             // Get current events
             const { data: currentEvents, sha } = await getFileContent(EVENTS_FILE_PATH);
 
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + (config.REPEATING_EVENT_ADVANCE_WEEKS * 7));
+            const today = new Date();
+            const endDate = new Date();
+            endDate.setDate(today.getDate() + (config.REPEATING_EVENT_ADVANCE_WEEKS * 7));
 
             let eventsAdded = 0;
             const newEvents = [...currentEvents];
+            const addedEventDetails = [];
 
             for (const repeatingEvent of repeatingEvents) {
                 if (!repeatingEvent.enabled) {
                     continue;
                 }
 
-                // Find the next occurrence of this weekday at the target time
-                const nextOccurrence = this.getNextWeekdayOccurrence(
-                    targetDate,
+                // Find ALL occurrences of this weekday within the date range
+                const occurrences = this.getAllWeekdayOccurrences(
+                    today,
+                    endDate,
                     repeatingEvent.weekday,
                     repeatingEvent.time
                 );
 
-                // Check if this event already exists
-                const eventExists = currentEvents.some(event =>
-                    event.locationId === repeatingEvent.locationId &&
-                    event.datetime === nextOccurrence.toISOString().slice(0, 19)
-                );
+                for (const occurrence of occurrences) {
+                    const eventDatetime = occurrence.toISOString().slice(0, 19);
 
-                if (!eventExists) {
-                    newEvents.push({
-                        locationId: repeatingEvent.locationId,
-                        datetime: nextOccurrence.toISOString().slice(0, 19)
-                    });
-                    eventsAdded++;
-                    console.log(`Added repeating event: ${repeatingEvent.name} on ${nextOccurrence.toISOString()}`);
+                    // Check if this event already exists
+                    const eventExists = currentEvents.some(event =>
+                        event.locationId === repeatingEvent.locationId &&
+                        event.datetime === eventDatetime
+                    );
+
+                    if (!eventExists) {
+                        newEvents.push({
+                            locationId: repeatingEvent.locationId,
+                            datetime: eventDatetime
+                        });
+                        eventsAdded++;
+
+                        // Store details for audit log
+                        addedEventDetails.push({
+                            name: repeatingEvent.name,
+                            locationId: repeatingEvent.locationId,
+                            datetime: eventDatetime,
+                            formattedDate: occurrence.toLocaleDateString('en-GB', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            }),
+                            formattedTime: occurrence.toLocaleTimeString('en-GB', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })
+                        });
+
+                        console.log(`Added repeating event: ${repeatingEvent.name} on ${occurrence.toISOString()}`);
+                    }
                 }
             }
 
@@ -184,9 +209,12 @@ export class EventScheduler {
                 console.log(`Added ${eventsAdded} repeating events`);
 
                 if (this.auditLogger) {
+                    // Create detailed audit message
+                    const auditMessage = this.formatRepeatingEventsAuditMessage(addedEventDetails, config.REPEATING_EVENT_ADVANCE_WEEKS);
+
                     await this.auditLogger.log(
                         'Repeating Events',
-                        `Automatically added ${eventsAdded} repeating events for ${config.REPEATING_EVENT_ADVANCE_WEEKS} weeks ahead`,
+                        auditMessage,
                         'system',
                         'Event Scheduler'
                     );
@@ -209,31 +237,45 @@ export class EventScheduler {
         }
     }
 
-    getNextWeekdayOccurrence(targetDate, weekday, time) {
-        // weekday: 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-        // time: "HH:MM:SS" format
+    formatRepeatingEventsAuditMessage(addedEvents, weeksAhead) {
+        const summary = `Automatically added ${addedEvents.length} repeating events for ${weeksAhead} weeks ahead:`;
 
+        const eventsList = addedEvents.map(event =>
+            `• ${event.name} - ${event.formattedDate} at ${event.formattedTime}`
+        ).join('\n');
+
+        return `${summary}\n\n${eventsList}`;
+    }
+
+    getAllWeekdayOccurrences(startDate, endDate, weekday, time) {
         const [hours, minutes, seconds] = time.split(':').map(Number);
+        const occurrences = [];
 
-        const result = new Date(targetDate);
-        result.setHours(hours, minutes, seconds, 0);
+        // Start from the beginning of the start date
+        const current = new Date(startDate);
+        current.setHours(0, 0, 0, 0);
 
-        // Calculate days until target weekday
-        const daysUntilTarget = (weekday - result.getDay() + 7) % 7;
+        // Find the first occurrence of the target weekday
+        const daysUntilTarget = (weekday - current.getDay() + 7) % 7;
+        current.setDate(current.getDate() + daysUntilTarget);
 
-        if (daysUntilTarget === 0) {
-            // If it's the same weekday, check if we've passed the time
-            const now = new Date();
-            if (result < now) {
-                // Move to next week
-                result.setDate(result.getDate() + 7);
-            }
-        } else {
-            result.setDate(result.getDate() + daysUntilTarget);
+        // Set the time
+        current.setHours(hours, minutes, seconds, 0);
+
+        // If the first occurrence is in the past (same day but time has passed), move to next week
+        if (current <= startDate) {
+            current.setDate(current.getDate() + 7);
         }
 
-        return result;
+        // Collect all occurrences within the date range
+        while (current <= endDate) {
+            occurrences.push(new Date(current));
+            current.setDate(current.getDate() + 7); // Move to next week
+        }
+
+        return occurrences;
     }
+
 
     // Manual trigger methods for testing
     async triggerCleanup() {
