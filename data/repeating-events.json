@@ -70,5 +70,13 @@
         "time": "12:00:00",
         "enabled": true,
         "created": "2025-09-09T17:51:41.041Z"
+    },
+    {
+        "name": "Roman Hotel",
+        "locationId": "cannock-roman-hotel",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2025-09-09T17:52:13.907Z"
     }
 ]
