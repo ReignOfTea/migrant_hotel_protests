@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } from 'discord.js';
+import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, MessageFlags } from 'discord.js';
 import { getFileContent, updateFileContent } from '../../utils/github.js';
 
 const REPEATING_EVENTS_FILE_PATH = 'data/repeating-events.json';
@@ -99,7 +99,7 @@ async function handleAddRepeatingEvent(interaction, deploymentPoller, auditLogge
         if (locations.length === 0) {
             await interaction.reply({
                 content: '❌ No locations available. Please add locations first using `/locations add`.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -115,7 +115,7 @@ async function handleAddRepeatingEvent(interaction, deploymentPoller, auditLogge
         console.error('Error in handleAddRepeatingEvent:', error);
         await interaction.reply({
             content: `❌ Error reading locations: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -127,7 +127,7 @@ async function handleRemoveRepeatingEvent(interaction, deploymentPoller, auditLo
         if (repeatingEvents.length === 0) {
             await interaction.reply({
                 content: '❌ No repeating events found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -143,7 +143,7 @@ async function handleRemoveRepeatingEvent(interaction, deploymentPoller, auditLo
         console.error('Error in handleRemoveRepeatingEvent:', error);
         await interaction.reply({
             content: `❌ Error reading repeating events: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -155,7 +155,7 @@ async function handleToggleRepeatingEvent(interaction, deploymentPoller, auditLo
         if (repeatingEvents.length === 0) {
             await interaction.reply({
                 content: '❌ No repeating events found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -171,7 +171,7 @@ async function handleToggleRepeatingEvent(interaction, deploymentPoller, auditLo
         console.error('Error in handleToggleRepeatingEvent:', error);
         await interaction.reply({
             content: `❌ Error reading repeating events: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -184,7 +184,7 @@ async function showLocationSelectPage(interaction, sortedLocations, page, action
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No locations found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -240,7 +240,7 @@ async function showLocationSelectPage(interaction, sortedLocations, page, action
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -253,7 +253,7 @@ async function showRepeatingEventSelectPage(interaction, sortedEvents, page, act
     if (!currentChunk || currentChunk.length === 0) {
         await interaction.reply({
             content: '❌ No repeating events found on this page.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -313,7 +313,7 @@ async function showRepeatingEventSelectPage(interaction, sortedEvents, page, act
         await interaction.reply({
             content,
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -326,7 +326,7 @@ async function handleViewRepeatingEvents(interaction) {
         if (repeatingEvents.length === 0) {
             await interaction.reply({
                 content: '❌ No repeating events found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -345,7 +345,7 @@ async function handleViewRepeatingEvents(interaction) {
         console.error('Error in handleViewRepeatingEvents:', error);
         await interaction.reply({
             content: `❌ Error reading repeating events: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -410,7 +410,7 @@ async function showRepeatingEventsPage(interaction, sortedEvents, locations, pag
         await interaction.reply({
             embeds: [embed],
             components,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -418,6 +418,7 @@ async function showRepeatingEventsPage(interaction, sortedEvents, locations, pag
 // Add this to handle the view pagination buttons
 async function handleViewRepeatingEventsPagination(interaction, customId) {
     try {
+        console.log('Handling view pagination:', customId);
         const page = parseInt(customId.split('_').pop());
 
         const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
@@ -429,10 +430,12 @@ async function handleViewRepeatingEventsPagination(interaction, customId) {
         await showRepeatingEventsPage(interaction, sortedEvents, locations, page, totalPages);
     } catch (error) {
         console.error('Error in handleViewRepeatingEventsPagination:', error);
-        await interaction.reply({
-            content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
-        });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({
+                content: `❌ Error loading page: ${error.message}`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
     }
 }
 
@@ -440,7 +443,7 @@ async function handleManualCleanup(interaction, scheduler, auditLogger) {
     if (!scheduler) {
         await interaction.reply({
             content: '❌ Scheduler not available.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -448,7 +451,7 @@ async function handleManualCleanup(interaction, scheduler, auditLogger) {
     try {
         await interaction.reply({
             content: '🧹 **Manual Event Cleanup**\n\nTriggering event cleanup process...',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         await scheduler.triggerCleanup();
@@ -469,7 +472,7 @@ async function handleManualProcess(interaction, scheduler, auditLogger) {
     if (!scheduler) {
         await interaction.reply({
             content: '❌ Scheduler not available.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -477,7 +480,7 @@ async function handleManualProcess(interaction, scheduler, auditLogger) {
     try {
         await interaction.reply({
             content: '🔄 **Manual Repeating Events Process**\n\nTriggering repeating events processing...',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         await scheduler.triggerRepeatingEvents();
@@ -498,7 +501,7 @@ async function handleSchedulerStatus(interaction, scheduler) {
     if (!scheduler) {
         await interaction.reply({
             content: '❌ Scheduler not available.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -541,14 +544,14 @@ async function handleSchedulerStatus(interaction, scheduler) {
 
         await interaction.reply({
             embeds: [embed],
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
     } catch (error) {
         console.error('Error in handleSchedulerStatus:', error);
         await interaction.reply({
             content: `❌ Error getting scheduler status: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -556,18 +559,36 @@ async function handleSchedulerStatus(interaction, scheduler) {
 // Handle button interactions for pagination
 export async function handleScheduleButton(interaction, deploymentPoller, auditLogger) {
     const customId = interaction.customId;
+    console.log('Schedule button interaction received:', customId);
 
-    if (customId.includes('_location_prev_') || customId.includes('_location_next_')) {
-        await handleLocationPagination(interaction, customId);
-    } else if (customId.includes('_event_prev_') || customId.includes('_event_next_')) {
-        await handleEventPagination(interaction, customId);
-    } else if (customId.includes('_view_prev_') || customId.includes('_view_next_')) {
-        await handleViewRepeatingEventsPagination(interaction, customId);
+    try {
+        if (customId.includes('_location_prev_') || customId.includes('_location_next_')) {
+            await handleLocationPagination(interaction, customId);
+        } else if (customId.includes('_event_prev_') || customId.includes('_event_next_')) {
+            await handleEventPagination(interaction, customId);
+        } else if (customId.includes('_view_prev_') || customId.includes('_view_next_')) {
+            await handleViewRepeatingEventsPagination(interaction, customId);
+        } else {
+            console.log('Unknown schedule button customId:', customId);
+            await interaction.reply({
+                content: '❌ Unknown button interaction.',
+                flags: MessageFlags.Ephemeral
+            });
+        }
+    } catch (error) {
+        console.error('Error in handleScheduleButton:', error);
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({
+                content: `❌ Error handling button: ${error.message}`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
     }
 }
 
 async function handleLocationPagination(interaction, customId) {
     try {
+        console.log('Handling location pagination:', customId);
         const page = parseInt(customId.split('_').pop());
 
         const { data: locations } = await getFileContent(LOCATIONS_FILE_PATH);
@@ -578,15 +599,18 @@ async function handleLocationPagination(interaction, customId) {
         await showLocationSelectPage(interaction, sortedLocations, page, 'add');
     } catch (error) {
         console.error('Error in handleLocationPagination:', error);
-        await interaction.reply({
-            content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
-        });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({
+                content: `❌ Error loading page: ${error.message}`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
     }
 }
 
 async function handleEventPagination(interaction, customId) {
     try {
+        console.log('Handling event pagination:', customId);
         const page = parseInt(customId.split('_').pop());
         const action = customId.includes('_remove_') ? 'remove' : 'toggle';
 
@@ -598,10 +622,12 @@ async function handleEventPagination(interaction, customId) {
         await showRepeatingEventSelectPage(interaction, sortedEvents, page, action);
     } catch (error) {
         console.error('Error in handleEventPagination:', error);
-        await interaction.reply({
-            content: `❌ Error loading page: ${error.message}`,
-            ephemeral: true
-        });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({
+                content: `❌ Error loading page: ${error.message}`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
     }
 }
 
@@ -624,7 +650,7 @@ async function handleAddRepeatingEventModal(interaction, deploymentPoller, audit
     if (!pendingEvent) {
         await interaction.reply({
             content: '❌ Session expired. Please try again.',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -634,7 +660,7 @@ async function handleAddRepeatingEventModal(interaction, deploymentPoller, audit
     if (weekdayIndex === -1) {
         await interaction.reply({
             content: `❌ Invalid weekday. Please use one of: ${WEEKDAYS.join(', ')}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -643,7 +669,7 @@ async function handleAddRepeatingEventModal(interaction, deploymentPoller, audit
     if (!isValidTime(time)) {
         await interaction.reply({
             content: '❌ Invalid time format. Please use HH:MM:SS format (e.g., 18:00:00)',
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         return;
     }
@@ -672,7 +698,7 @@ async function handleAddRepeatingEventModal(interaction, deploymentPoller, audit
 
         await interaction.reply({
             content: `✅ **Repeating Event Added Successfully!**\n\n**Name:** ${name}\n**Location:** ${pendingEvent.locationName}\n**Schedule:** Every ${WEEKDAYS[weekdayIndex]} at ${time}\n**Status:** ✅ Enabled\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -700,7 +726,7 @@ async function handleAddRepeatingEventModal(interaction, deploymentPoller, audit
         console.error('Error adding repeating event:', error);
         await interaction.reply({
             content: `❌ Error adding repeating event: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -726,7 +752,7 @@ async function handleAddRepeatingEventLocationSelect(interaction, locationIndex,
         if (locationIndex < 0 || locationIndex >= locations.length) {
             await interaction.reply({
                 content: '❌ Location not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -782,7 +808,7 @@ async function handleAddRepeatingEventLocationSelect(interaction, locationIndex,
         console.error('Error in handleAddRepeatingEventLocationSelect:', error);
         await interaction.reply({
             content: `❌ Error reading location: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -794,7 +820,7 @@ async function handleRemoveRepeatingEventSelect(interaction, eventIndex, deploym
         if (eventIndex < 0 || eventIndex >= repeatingEvents.length) {
             await interaction.reply({
                 content: '❌ Repeating event not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -811,7 +837,7 @@ async function handleRemoveRepeatingEventSelect(interaction, eventIndex, deploym
 
         await interaction.reply({
             content: `✅ **Repeating Event Removed Successfully!**\n\n**Name:** ${removedEvent.name}\n**Schedule:** Every ${WEEKDAYS[removedEvent.weekday]} at ${removedEvent.time}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -836,7 +862,7 @@ async function handleRemoveRepeatingEventSelect(interaction, eventIndex, deploym
         console.error('Error removing repeating event:', error);
         await interaction.reply({
             content: `❌ Error removing repeating event: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }
@@ -848,7 +874,7 @@ async function handleToggleRepeatingEventSelect(interaction, eventIndex, deploym
         if (eventIndex < 0 || eventIndex >= repeatingEvents.length) {
             await interaction.reply({
                 content: '❌ Repeating event not found.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
             return;
         }
@@ -867,7 +893,7 @@ async function handleToggleRepeatingEventSelect(interaction, eventIndex, deploym
 
         await interaction.reply({
             content: `✅ **Repeating Event ${event.enabled ? 'Enabled' : 'Disabled'} Successfully!**\n\n**Name:** ${event.name}\n**Schedule:** Every ${WEEKDAYS[event.weekday]} at ${event.time}\n**Status:** ${event.enabled ? '✅ Enabled' : '❌ Disabled'}\n\n🚀 Deploying changes...`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         // Track deployment
@@ -892,7 +918,7 @@ async function handleToggleRepeatingEventSelect(interaction, eventIndex, deploym
         console.error('Error toggling repeating event:', error);
         await interaction.reply({
             content: `❌ Error toggling repeating event: ${error.message}`,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     }
 }

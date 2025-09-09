@@ -9,7 +9,7 @@ import { createAttendCommand, handleAttendCommand, handleAttendModal, handleAtte
 import { createmoreCommand, handlemoreCommand, handlemoreModal, handlemoreSelect } from './commands/discord/more.js';
 import { createLocationsCommand, handleLocationsCommand, handleLocationsModal, handleLocationsSelect } from './commands/discord/locations.js';
 import { createEventsCommand, handleEventsCommand, handleEventsModal, handleEventsSelect } from './commands/discord/events.js';
-import { createScheduleCommand, handleScheduleCommand, handleScheduleModal, handleScheduleSelect } from './commands/discord/schedule.js';
+import { createScheduleCommand, handleScheduleCommand, handleScheduleModal, handleScheduleSelect, handleScheduleButton } from './commands/discord/schedule.js';
 import { createLiveCommand, handleLiveCommand, handleLiveModal, handleLiveSelect } from './commands/discord/live.js';
 
 // Initialize Discord client
@@ -184,6 +184,35 @@ client.on('interactionCreate', async interaction => {
         await handleLiveModal(interaction, deploymentPoller, auditLogger);
     }
 });
+
+// Handle button interactions
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isButton()) return;
+
+    if (!isAuthorized(interaction)) {
+        await interaction.reply({
+            content: '❌ You are not authorized to use this bot.',
+            ephemeral: true
+        });
+        return;
+    }
+
+    try {
+        if (interaction.customId.startsWith('schedule_')) {
+            await handleScheduleButton(interaction, deploymentPoller, auditLogger);
+        }
+        // Add other button handlers as needed for other commands
+    } catch (error) {
+        console.error('Error handling button interaction:', error);
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({
+                content: '❌ An error occurred while processing your request.',
+                ephemeral: true
+            });
+        }
+    }
+});
+
 
 // Handle select menu interactions
 client.on('interactionCreate', async interaction => {
