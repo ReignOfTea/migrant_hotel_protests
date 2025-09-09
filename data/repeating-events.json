@@ -110,5 +110,13 @@
         "time": "12:00:00",
         "enabled": true,
         "created": "2025-09-09T17:59:57.128Z"
+    },
+    {
+        "name": "Kiln Court",
+        "locationId": "faversham-kiln-court",
+        "weekday": 6,
+        "time": "11:00:00",
+        "enabled": true,
+        "created": "2025-09-09T18:00:54.579Z"
     }
 ]
