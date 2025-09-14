@@ -1,37 +1,5 @@
 [
     {
-        "locationId": "bristol-hamilton-by-hilton",
-        "datetime": "2025-09-07T12:00:00"
-    },
-    {
-        "locationId": "falkirk-falkirk-council-unison",
-        "datetime": "2025-09-07T12:00:00"
-    },
-    {
-        "locationId": "dudley-quality-hotel",
-        "datetime": "2025-09-07T12:30:00"
-    },
-    {
-        "locationId": "london-britannia-canary-wharf",
-        "datetime": "2025-09-07T13:00:00"
-    },
-    {
-        "locationId": "norwich-the-norkie",
-        "datetime": "2025-09-07T13:00:00"
-    },
-    {
-        "locationId": "fallowfield-manchester-south",
-        "datetime": "2025-09-07T14:00:00"
-    },
-    {
-        "locationId": "plymouth-royal-parade",
-        "datetime": "2025-09-07T17:00:00"
-    },
-    {
-        "locationId": "epping-bell-hotel",
-        "datetime": "2025-09-07T18:00:00"
-    },
-    {
         "locationId": "plymouth-royal-parade",
         "datetime": "2025-09-09T17:00:00"
     },
