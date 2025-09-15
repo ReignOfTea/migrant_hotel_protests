@@ -257,5 +257,12 @@
         "venue": "BRITANNIA HOTEL",
         "lat": 51.5018377,
         "lng": -0.0235568
+    },
+    {
+        "id": "westminster-westminster",
+        "location": "WESTMINSTER",
+        "venue": "WESTMINSTER",
+        "lat": 51.4999639,
+        "lng": -0.1279826
     }
 ]
