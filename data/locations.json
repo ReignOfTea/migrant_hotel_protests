@@ -250,5 +250,12 @@
         "venue": "BLACKFRIARS STATION TO WATERLOO",
         "lat": 51.50840675750345,
         "lng": -0.1042574236504912
+    },
+    {
+        "id": "163-marsh-wall-london-e14-9sj-britannia-hotel",
+        "location": "163 MARSH WALL, LONDON, E14 9SJ",
+        "venue": "BRITANNIA HOTEL",
+        "lat": 51.5018377,
+        "lng": -0.0235568
     }
 ]
