@@ -281,5 +281,13 @@
         "time": "17:00:00",
         "enabled": true,
         "created": "2025-09-09T18:17:38.084Z"
+    },
+    {
+        "name": "Highfield House Hotel",
+        "locationId": "southampton-highfield-house",
+        "weekday": 5,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-09-15T21:16:58.913Z"
     }
 ]
