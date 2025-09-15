@@ -30,6 +30,15 @@ function isValidTime(timeString) {
     return timeRegex.test(timeString);
 }
 
+// Validate date format (YYYY-MM-DD)
+function isValidDate(dateString) {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) return false;
+
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date) && date.toISOString().slice(0, 10) === dateString;
+}
+
 export function createScheduleCommand() {
     return new SlashCommandBuilder()
         .setName('schedule')
@@ -50,6 +59,14 @@ export function createScheduleCommand() {
             subcommand
                 .setName('view')
                 .setDescription('View all repeating events'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('exclude')
+                .setDescription('Add excluded dates to a repeating event'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('unexclude')
+                .setDescription('Remove excluded dates from a repeating event'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('cleanup')
@@ -80,6 +97,12 @@ export async function handleScheduleCommand(interaction, deploymentPoller, audit
         case 'view':
             await handleViewRepeatingEvents(interaction);
             break;
+        case 'exclude':
+            await handleExcludeDates(interaction, deploymentPoller, auditLogger);
+            break;
+        case 'unexclude':
+            await handleUnexcludeDates(interaction, deploymentPoller, auditLogger);
+            break;
         case 'cleanup':
             await handleManualCleanup(interaction, scheduler, auditLogger);
             break;
@@ -89,6 +112,75 @@ export async function handleScheduleCommand(interaction, deploymentPoller, audit
         case 'status':
             await handleSchedulerStatus(interaction, scheduler);
             break;
+    }
+}
+
+async function handleExcludeDates(interaction, deploymentPoller, auditLogger) {
+    try {
+        const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+        if (repeatingEvents.length === 0) {
+            await interaction.reply({
+                content: '❌ No repeating events found.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const sortedEvents = repeatingEvents
+            .map((event, originalIndex) => ({ ...event, originalIndex }))
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        await showRepeatingEventSelectPage(interaction, sortedEvents, 0, 'exclude');
+
+    } catch (error) {
+        console.error('Error in handleExcludeDates:', error);
+        await interaction.reply({
+            content: `❌ Error reading repeating events: ${error.message}`,
+            flags: MessageFlags.Ephemeral
+        });
+    }
+}
+
+async function handleUnexcludeDates(interaction, deploymentPoller, auditLogger) {
+    try {
+        const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+        if (repeatingEvents.length === 0) {
+            await interaction.reply({
+                content: '❌ No repeating events found.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const eventsWithExclusions = repeatingEvents.filter(event =>
+            event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0
+        );
+
+        if (eventsWithExclusions.length === 0) {
+            await interaction.reply({
+                content: '❌ No repeating events with excluded dates found.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const sortedEvents = eventsWithExclusions
+            .map(event => {
+                const originalIndex = repeatingEvents.findIndex(e => e === event);
+                return { ...event, originalIndex };
+            })
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        await showRepeatingEventSelectPage(interaction, sortedEvents, 0, 'unexclude');
+
+    } catch (error) {
+        console.error('Error in handleUnexcludeDates:', error);
+        await interaction.reply({
+            content: `❌ Error reading repeating events: ${error.message}`,
+            flags: MessageFlags.Ephemeral
+        });
     }
 }
 
@@ -264,7 +356,13 @@ async function showRepeatingEventSelectPage(interaction, sortedEvents, page, act
         .setPlaceholder(`Select a repeating event to ${action} (Page ${page + 1}/${totalPages})`)
         .addOptions(
             currentChunk.map((event) => {
-                const status = action === 'toggle' ? (event.enabled ? '✅' : '❌') : '';
+                let status = '';
+                if (action === 'toggle') {
+                    status = event.enabled ? '✅' : '❌';
+                } else if (action === 'unexclude') {
+                    status = `📅 ${event.excludedDates?.length || 0} excluded`;
+                }
+
                 return {
                     label: truncateForSelectMenu(`${status} ${event.name}`),
                     value: event.originalIndex.toString(),
@@ -300,7 +398,13 @@ async function showRepeatingEventSelectPage(interaction, sortedEvents, page, act
         components.push(navigationRow);
     }
 
-    const actionText = action === 'remove' ? 'Remove Repeating Event' : 'Toggle Repeating Event';
+    const actionText = {
+        'remove': 'Remove Repeating Event',
+        'toggle': 'Toggle Repeating Event',
+        'exclude': 'Exclude Dates',
+        'unexclude': 'Remove Excluded Dates'
+    }[action] || 'Manage Repeating Event';
+
     const content = `**🔄 ${actionText}**\n\nSelect the repeating event you want to ${action} (Page ${page + 1} of ${totalPages}):`;
 
     if (interaction.replied || interaction.deferred) {
@@ -366,9 +470,15 @@ async function showRepeatingEventsPage(interaction, sortedEvents, locations, pag
         const locationName = location ? `${location.location} - ${location.venue}` : `Unknown (${event.locationId})`;
         const status = event.enabled ? '✅ Enabled' : '❌ Disabled';
 
+        let excludedInfo = '';
+        if (event.excludedDates && event.excludedDates.length > 0) {
+            const sortedExcluded = [...event.excludedDates].sort();
+            excludedInfo = `\n🚫 **Excluded Dates:** ${sortedExcluded.join(', ')}`;
+        }
+
         embed.addFields({
             name: `${startIndex + index + 1}. ${event.name}`,
-            value: `📍 **Location:** ${locationName}\n📅 **Schedule:** Every ${WEEKDAYS[event.weekday]} at ${event.time}\n🔄 **Status:** ${status}\n🆔 **Location ID:** \`${event.locationId}\``,
+            value: `📍 **Location:** ${locationName}\n📅 **Schedule:** Every ${WEEKDAYS[event.weekday]} at ${event.time}\n🔄 **Status:** ${status}\n🆔 **Location ID:** \`${event.locationId}\`${excludedInfo}`,
             inline: false
         });
     });
@@ -612,11 +722,24 @@ async function handleEventPagination(interaction, customId) {
     try {
         console.log('Handling event pagination:', customId);
         const page = parseInt(customId.split('_').pop());
-        const action = customId.includes('_remove_') ? 'remove' : 'toggle';
+        const action = customId.includes('_remove_') ? 'remove' :
+            customId.includes('_toggle_') ? 'toggle' :
+                customId.includes('_exclude_') ? 'exclude' : 'unexclude';
 
         const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
-        const sortedEvents = repeatingEvents
-            .map((event, originalIndex) => ({ ...event, originalIndex }))
+
+        let filteredEvents = repeatingEvents;
+        if (action === 'unexclude') {
+            filteredEvents = repeatingEvents.filter(event =>
+                event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0
+            );
+        }
+
+        const sortedEvents = filteredEvents
+            .map(event => {
+                const originalIndex = repeatingEvents.findIndex(e => e === event);
+                return { ...event, originalIndex };
+            })
             .sort((a, b) => a.name.localeCompare(b.name));
 
         await showRepeatingEventSelectPage(interaction, sortedEvents, page, action);
@@ -637,6 +760,10 @@ export async function handleScheduleModal(interaction, deploymentPoller, auditLo
 
     if (customId.startsWith('schedule_add_details_')) {
         await handleAddRepeatingEventModal(interaction, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('schedule_exclude_dates_')) {
+        await handleExcludeDatesModal(interaction, deploymentPoller, auditLogger);
+    } else if (customId.startsWith('schedule_unexclude_dates_')) {
+        await handleUnexcludeDatesModal(interaction, deploymentPoller, auditLogger);
     }
 }
 
@@ -731,6 +858,245 @@ async function handleAddRepeatingEventModal(interaction, deploymentPoller, audit
     }
 }
 
+async function handleExcludeDatesModal(interaction, deploymentPoller, auditLogger) {
+    const datesInput = interaction.fields.getTextInputValue('dates').trim();
+
+    const pendingExclusion = interaction.client.pendingExclusions?.get(interaction.user.id);
+    if (!pendingExclusion) {
+        await interaction.reply({
+            content: '❌ Session expired. Please try again.',
+            flags: MessageFlags.Ephemeral
+        });
+        return;
+    }
+
+    // Parse and validate dates
+    const dateStrings = datesInput.split(/[,\s]+/).filter(d => d.length > 0);
+    const validDates = [];
+    const invalidDates = [];
+
+    for (const dateStr of dateStrings) {
+        if (isValidDate(dateStr)) {
+            validDates.push(dateStr);
+        } else {
+            invalidDates.push(dateStr);
+        }
+    }
+
+    if (invalidDates.length > 0) {
+        await interaction.reply({
+            content: `❌ Invalid date format(s): ${invalidDates.join(', ')}\n\nPlease use YYYY-MM-DD format (e.g., 2025-12-25)`,
+            flags: MessageFlags.Ephemeral
+        });
+        return;
+    }
+
+    if (validDates.length === 0) {
+        await interaction.reply({
+            content: '❌ No valid dates provided.',
+            flags: MessageFlags.Ephemeral
+        });
+        return;
+    }
+
+    try {
+        const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+        const event = repeatingEvents[pendingExclusion.eventIndex];
+
+        if (!event) {
+            await interaction.reply({
+                content: '❌ Event not found.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        // Initialize excludedDates if it doesn't exist
+        if (!event.excludedDates) {
+            event.excludedDates = [];
+        }
+
+        // Add new dates, avoiding duplicates
+        const newDates = validDates.filter(date => !event.excludedDates.includes(date));
+        event.excludedDates.push(...newDates);
+        event.excludedDates.sort();
+
+        const commitSha = await updateFileContent(
+            REPEATING_EVENTS_FILE_PATH,
+            repeatingEvents,
+            sha,
+            `Add excluded dates to "${event.name}": ${newDates.join(', ')}`
+        );
+
+        await interaction.reply({
+            content: `✅ **Excluded Dates Added Successfully!**\n\n**Event:** ${event.name}\n**Added Dates:** ${newDates.join(', ')}\n**Total Excluded:** ${event.excludedDates.length}\n\n🚀 Deploying changes...`,
+            flags: MessageFlags.Ephemeral
+        });
+
+        // Track deployment
+        deploymentPoller.addPendingDeployment(
+            interaction.user.id,
+            interaction.channel.id,
+            interaction,
+            commitSha,
+            interaction.user.username,
+            'discord'
+        );
+
+        // Log audit
+        await auditLogger.log(
+            'Excluded Dates Added',
+            `Added excluded dates to "${event.name}": ${newDates.join(', ')}`,
+            interaction.user.id,
+            interaction.user.username
+        );
+
+        // Clean up
+        interaction.client.pendingExclusions.delete(interaction.user.id);
+
+    } catch (error) {
+        console.error('Error adding excluded dates:', error);
+        await interaction.reply({
+            content: `❌ Error adding excluded dates: ${error.message}`,
+            flags: MessageFlags.Ephemeral
+        });
+    }
+}
+
+async function handleUnexcludeDatesModal(interaction, deploymentPoller, auditLogger) {
+    const datesInput = interaction.fields.getTextInputValue('dates').trim();
+
+    const pendingExclusion = interaction.client.pendingExclusions?.get(interaction.user.id);
+    if (!pendingExclusion) {
+        await interaction.reply({
+            content: '❌ Session expired. Please try again.',
+            flags: MessageFlags.Ephemeral
+        });
+        return;
+    }
+
+    try {
+        const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+        const event = repeatingEvents[pendingExclusion.eventIndex];
+
+        if (!event || !event.excludedDates) {
+            await interaction.reply({
+                content: '❌ Event not found or has no excluded dates.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        if (datesInput.toLowerCase() === 'all') {
+            // Remove all excluded dates
+            const removedCount = event.excludedDates.length;
+            event.excludedDates = [];
+
+            const commitSha = await updateFileContent(
+                REPEATING_EVENTS_FILE_PATH,
+                repeatingEvents,
+                sha,
+                `Remove all excluded dates from "${event.name}"`
+            );
+
+            await interaction.reply({
+                content: `✅ **All Excluded Dates Removed Successfully!**\n\n**Event:** ${event.name}\n**Removed:** ${removedCount} dates\n\n🚀 Deploying changes...`,
+                flags: MessageFlags.Ephemeral
+            });
+
+            // Track deployment
+            deploymentPoller.addPendingDeployment(
+                interaction.user.id,
+                interaction.channel.id,
+                interaction,
+                commitSha,
+                interaction.user.username,
+                'discord'
+            );
+
+            // Log audit
+            await auditLogger.log(
+                'All Excluded Dates Removed',
+                `Removed all ${removedCount} excluded dates from "${event.name}"`,
+                interaction.user.id,
+                interaction.user.username
+            );
+
+        } else {
+            // Parse specific dates to remove
+            const dateStrings = datesInput.split(/[,\s]+/).filter(d => d.length > 0);
+            const removedDates = [];
+            const notFoundDates = [];
+
+            for (const dateStr of dateStrings) {
+                const index = event.excludedDates.indexOf(dateStr);
+                if (index > -1) {
+                    event.excludedDates.splice(index, 1);
+                    removedDates.push(dateStr);
+                } else {
+                    notFoundDates.push(dateStr);
+                }
+            }
+
+            if (removedDates.length === 0) {
+                await interaction.reply({
+                    content: `❌ None of the specified dates were found in the excluded list.\n\nCurrent excluded dates: ${event.excludedDates.join(', ') || 'None'}`,
+                    flags: MessageFlags.Ephemeral
+                });
+                return;
+            }
+
+            const commitSha = await updateFileContent(
+                REPEATING_EVENTS_FILE_PATH,
+                repeatingEvents,
+                sha,
+                `Remove excluded dates from "${event.name}": ${removedDates.join(', ')}`
+            );
+
+            let responseMessage = `✅ **Excluded Dates Removed Successfully!**\n\n**Event:** ${event.name}\n**Removed Dates:** ${removedDates.join(', ')}\n**Remaining Excluded:** ${event.excludedDates.length}`;
+
+            if (notFoundDates.length > 0) {
+                responseMessage += `\n**Not Found:** ${notFoundDates.join(', ')}`;
+            }
+
+            responseMessage += '\n\n🚀 Deploying changes...';
+
+            await interaction.reply({
+                content: responseMessage,
+                flags: MessageFlags.Ephemeral
+            });
+
+            // Track deployment
+            deploymentPoller.addPendingDeployment(
+                interaction.user.id,
+                interaction.channel.id,
+                interaction,
+                commitSha,
+                interaction.user.username,
+                'discord'
+            );
+
+            // Log audit
+            await auditLogger.log(
+                'Excluded Dates Removed',
+                `Removed excluded dates from "${event.name}": ${removedDates.join(', ')}`,
+                interaction.user.id,
+                interaction.user.username
+            );
+        }
+
+        // Clean up
+        interaction.client.pendingExclusions.delete(interaction.user.id);
+
+    } catch (error) {
+        console.error('Error removing excluded dates:', error);
+        await interaction.reply({
+            content: `❌ Error removing excluded dates: ${error.message}`,
+            flags: MessageFlags.Ephemeral
+        });
+    }
+}
+
 // Handle select menu interactions
 export async function handleScheduleSelect(interaction, deploymentPoller, auditLogger) {
     const customId = interaction.customId;
@@ -742,6 +1108,116 @@ export async function handleScheduleSelect(interaction, deploymentPoller, auditL
         await handleRemoveRepeatingEventSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
     } else if (customId === 'schedule_toggle_select') {
         await handleToggleRepeatingEventSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
+    } else if (customId === 'schedule_exclude_select') {
+        await handleExcludeRepeatingEventSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
+    } else if (customId === 'schedule_unexclude_select') {
+        await handleUnexcludeRepeatingEventSelect(interaction, selectedIndex, deploymentPoller, auditLogger);
+    }
+}
+
+async function handleExcludeRepeatingEventSelect(interaction, eventIndex, deploymentPoller, auditLogger) {
+    try {
+        const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+        if (eventIndex < 0 || eventIndex >= repeatingEvents.length) {
+            await interaction.reply({
+                content: '❌ Repeating event not found.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const event = repeatingEvents[eventIndex];
+
+        // Show modal for date input
+        const modal = new ModalBuilder()
+            .setCustomId(`schedule_exclude_dates_${Date.now()}`)
+            .setTitle(`Exclude Dates - ${event.name}`);
+
+        const datesInput = new TextInputBuilder()
+            .setCustomId('dates')
+            .setLabel('Dates to Exclude (YYYY-MM-DD)')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder('2025-12-25, 2025-12-26, 2026-01-01')
+            .setRequired(true)
+            .setMaxLength(1000);
+
+        const actionRow = new ActionRowBuilder().addComponents(datesInput);
+        modal.addComponents(actionRow);
+
+        await interaction.showModal(modal);
+
+        // Store the event info for when modal is submitted
+        interaction.client.pendingExclusions = interaction.client.pendingExclusions || new Map();
+        interaction.client.pendingExclusions.set(interaction.user.id, {
+            eventIndex: eventIndex,
+            eventName: event.name
+        });
+
+    } catch (error) {
+        console.error('Error in handleExcludeRepeatingEventSelect:', error);
+        await interaction.reply({
+            content: `❌ Error reading event: ${error.message}`,
+            flags: MessageFlags.Ephemeral
+        });
+    }
+}
+
+async function handleUnexcludeRepeatingEventSelect(interaction, eventIndex, deploymentPoller, auditLogger) {
+    try {
+        const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+        if (eventIndex < 0 || eventIndex >= repeatingEvents.length) {
+            await interaction.reply({
+                content: '❌ Repeating event not found.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        const event = repeatingEvents[eventIndex];
+
+        if (!event.excludedDates || event.excludedDates.length === 0) {
+            await interaction.reply({
+                content: '❌ This event has no excluded dates.',
+                flags: MessageFlags.Ephemeral
+            });
+            return;
+        }
+
+        // Show modal for date removal input
+        const modal = new ModalBuilder()
+            .setCustomId(`schedule_unexclude_dates_${Date.now()}`)
+            .setTitle(`Remove Excluded Dates - ${event.name}`);
+
+        const currentExcluded = event.excludedDates.sort().join(', ');
+
+        const datesInput = new TextInputBuilder()
+            .setCustomId('dates')
+            .setLabel('Dates to Remove (or "all" for all dates)')
+            .setStyle(TextInputStyle.Paragraph)
+            .setPlaceholder(`Current: ${currentExcluded}\n\nEnter specific dates or "all"`)
+            .setRequired(true)
+            .setMaxLength(1000);
+
+        const actionRow = new ActionRowBuilder().addComponents(datesInput);
+        modal.addComponents(actionRow);
+
+        await interaction.showModal(modal);
+
+        // Store the event info for when modal is submitted
+        interaction.client.pendingExclusions = interaction.client.pendingExclusions || new Map();
+        interaction.client.pendingExclusions.set(interaction.user.id, {
+            eventIndex: eventIndex,
+            eventName: event.name
+        });
+
+    } catch (error) {
+        console.error('Error in handleUnexcludeRepeatingEventSelect:', error);
+        await interaction.reply({
+            content: `❌ Error reading event: ${error.message}`,
+            flags: MessageFlags.Ephemeral
+        });
     }
 }
 

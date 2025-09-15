@@ -24,6 +24,7 @@ export class EventScheduler {
         const cleanupJob = cron.schedule('0 0 * * *', async () => {
             console.log('Running daily event cleanup...');
             await this.cleanupOldEvents();
+            await this.cleanupOldExcludedDates();
         }, {
             scheduled: false,
             timezone: 'Europe/London'
@@ -123,6 +124,80 @@ export class EventScheduler {
         }
     }
 
+    async cleanupOldExcludedDates() {
+        try {
+            const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            if (!Array.isArray(repeatingEvents) || repeatingEvents.length === 0) {
+                console.log('No repeating events to process for excluded dates cleanup');
+                return;
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let totalCleaned = 0;
+            let hasChanges = false;
+
+            const updatedRepeatingEvents = repeatingEvents.map(event => {
+                if (!event.excludedDates || !Array.isArray(event.excludedDates)) {
+                    return event;
+                }
+
+                const initialCount = event.excludedDates.length;
+                const filteredDates = event.excludedDates.filter(dateStr => {
+                    const excludedDate = new Date(dateStr);
+                    excludedDate.setHours(0, 0, 0, 0);
+                    return excludedDate >= today;
+                });
+
+                const cleanedCount = initialCount - filteredDates.length;
+                totalCleaned += cleanedCount;
+
+                if (cleanedCount > 0) {
+                    hasChanges = true;
+                    return { ...event, excludedDates: filteredDates };
+                }
+
+                return event;
+            });
+
+            if (hasChanges) {
+                await updateFileContent(
+                    REPEATING_EVENTS_FILE_PATH,
+                    updatedRepeatingEvents,
+                    sha,
+                    `Cleanup: Remove ${totalCleaned} old excluded date(s)`
+                );
+
+                console.log(`Cleaned up ${totalCleaned} old excluded dates`);
+
+                if (this.auditLogger) {
+                    await this.auditLogger.log(
+                        'Excluded Dates Cleanup',
+                        `Automatically removed ${totalCleaned} excluded dates that have passed`,
+                        'system',
+                        'Event Scheduler'
+                    );
+                }
+            } else {
+                console.log('No old excluded dates to cleanup');
+            }
+
+        } catch (error) {
+            console.error('Error during excluded dates cleanup:', error);
+
+            if (this.auditLogger) {
+                await this.auditLogger.logError(
+                    error,
+                    'Excluded Dates Cleanup Error',
+                    'system',
+                    'Event Scheduler'
+                );
+            }
+        }
+    }
+
     async processRepeatingEvents() {
         try {
             // Get repeating events configuration
@@ -141,13 +216,47 @@ export class EventScheduler {
             endDate.setDate(today.getDate() + (config.REPEATING_EVENT_ADVANCE_WEEKS * 7));
 
             let eventsAdded = 0;
-            const newEvents = [...currentEvents];
+            let eventsRemoved = 0;
+            let newEvents = [...currentEvents];
             const addedEventDetails = [];
+            const removedEventDetails = [];
 
             for (const repeatingEvent of repeatingEvents) {
                 if (!repeatingEvent.enabled) {
                     continue;
                 }
+
+                const excludedDates = repeatingEvent.excludedDates || [];
+                const excludedDateStrings = excludedDates.map(date => new Date(date).toISOString().slice(0, 10));
+
+                // Remove existing events that match excluded dates
+                const initialEventCount = newEvents.length;
+                newEvents = newEvents.filter(event => {
+                    if (event.locationId !== repeatingEvent.locationId) {
+                        return true;
+                    }
+
+                    const eventDateString = new Date(event.datetime).toISOString().slice(0, 10);
+                    const isExcluded = excludedDateStrings.includes(eventDateString);
+
+                    if (isExcluded) {
+                        removedEventDetails.push({
+                            name: repeatingEvent.name,
+                            locationId: repeatingEvent.locationId,
+                            datetime: event.datetime,
+                            formattedDate: new Date(event.datetime).toLocaleDateString('en-GB', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                            })
+                        });
+                        console.log(`Removed excluded event: ${repeatingEvent.name} on ${event.datetime}`);
+                    }
+
+                    return !isExcluded;
+                });
+                eventsRemoved += initialEventCount - newEvents.length;
 
                 // Find ALL occurrences of this weekday within the date range
                 const occurrences = this.getAllWeekdayOccurrences(
@@ -159,9 +268,15 @@ export class EventScheduler {
 
                 for (const occurrence of occurrences) {
                     const eventDatetime = occurrence.toISOString().slice(0, 19);
+                    const eventDateString = occurrence.toISOString().slice(0, 10);
+
+                    // Skip if this date is excluded
+                    if (excludedDateStrings.includes(eventDateString)) {
+                        continue;
+                    }
 
                     // Check if this event already exists
-                    const eventExists = currentEvents.some(event =>
+                    const eventExists = newEvents.some(event =>
                         event.locationId === repeatingEvent.locationId &&
                         event.datetime === eventDatetime
                     );
@@ -195,22 +310,30 @@ export class EventScheduler {
                 }
             }
 
-            if (eventsAdded > 0) {
+            if (eventsAdded > 0 || eventsRemoved > 0) {
                 // Sort events by datetime
                 newEvents.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+                const commitMessage = [];
+                if (eventsAdded > 0) commitMessage.push(`add ${eventsAdded} repeating event(s)`);
+                if (eventsRemoved > 0) commitMessage.push(`remove ${eventsRemoved} excluded event(s)`);
 
                 await updateFileContent(
                     EVENTS_FILE_PATH,
                     newEvents,
                     sha,
-                    `Auto-add ${eventsAdded} repeating event(s) for ${config.REPEATING_EVENT_ADVANCE_WEEKS} weeks ahead`
+                    `Auto-process repeating events: ${commitMessage.join(', ')}`
                 );
 
-                console.log(`Added ${eventsAdded} repeating events`);
+                console.log(`Processed repeating events: ${eventsAdded} added, ${eventsRemoved} removed`);
 
                 if (this.auditLogger) {
                     // Create detailed audit message
-                    const auditMessage = this.formatRepeatingEventsAuditMessage(addedEventDetails, config.REPEATING_EVENT_ADVANCE_WEEKS);
+                    const auditMessage = this.formatRepeatingEventsAuditMessage(
+                        addedEventDetails,
+                        removedEventDetails,
+                        config.REPEATING_EVENT_ADVANCE_WEEKS
+                    );
 
                     await this.auditLogger.log(
                         'Repeating Events',
@@ -220,7 +343,7 @@ export class EventScheduler {
                     );
                 }
             } else {
-                console.log('No new repeating events to add');
+                console.log('No repeating events changes needed');
             }
 
         } catch (error) {
@@ -237,14 +360,27 @@ export class EventScheduler {
         }
     }
 
-    formatRepeatingEventsAuditMessage(addedEvents, weeksAhead) {
-        const summary = `Automatically added ${addedEvents.length} repeating events for ${weeksAhead} weeks ahead:`;
+    formatRepeatingEventsAuditMessage(addedEvents, removedEvents, weeksAhead) {
+        const parts = [];
 
-        const eventsList = addedEvents.map(event =>
-            `• ${event.name} - ${event.formattedDate} at ${event.formattedTime}`
-        ).join('\n');
+        if (addedEvents.length > 0) {
+            parts.push(`Added ${addedEvents.length} repeating events for ${weeksAhead} weeks ahead:`);
+            const addedList = addedEvents.map(event =>
+                `• ${event.name} - ${event.formattedDate} at ${event.formattedTime}`
+            ).join('\n');
+            parts.push(addedList);
+        }
 
-        return `${summary}\n\n${eventsList}`;
+        if (removedEvents.length > 0) {
+            if (parts.length > 0) parts.push('');
+            parts.push(`Removed ${removedEvents.length} excluded events:`);
+            const removedList = removedEvents.map(event =>
+                `• ${event.name} - ${event.formattedDate}`
+            ).join('\n');
+            parts.push(removedList);
+        }
+
+        return parts.join('\n\n');
     }
 
     getAllWeekdayOccurrences(startDate, endDate, weekday, time) {
@@ -276,11 +412,11 @@ export class EventScheduler {
         return occurrences;
     }
 
-
     // Manual trigger methods for testing
     async triggerCleanup() {
         console.log('Manually triggering event cleanup...');
         await this.cleanupOldEvents();
+        await this.cleanupOldExcludedDates();
     }
 
     async triggerRepeatingEvents() {

@@ -25,6 +25,15 @@ function isValidTime(timeString) {
     return timeRegex.test(timeString);
 }
 
+// Validate date format (YYYY-MM-DD)
+function isValidDate(dateString) {
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(dateString)) return false;
+
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date) && date.toISOString().slice(0, 10) === dateString;
+}
+
 // Create paginated location keyboard
 function createLocationKeyboard(locations, page = 0) {
     const chunks = chunkArray(locations, MAX_BUTTONS_PER_PAGE);
@@ -70,6 +79,9 @@ function createRepeatingEventsKeyboard(events, action, page = 0) {
         if (action === 'toggle') {
             const status = event.enabled ? '✅' : '❌';
             buttonText = `${status} ${event.name}`;
+        } else if (action === 'unexclude') {
+            const excludedCount = event.excludedDates?.length || 0;
+            buttonText = `📅 ${event.name} (${excludedCount} excluded)`;
         }
 
         keyboard.text(buttonText, `schedule_${action}_${originalIndex}`).row();
@@ -102,6 +114,9 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
             .text('View All', 'schedule_view')
             .text('Toggle Event', 'schedule_toggle')
             .row()
+            .text('Exclude Dates', 'schedule_exclude')
+            .text('Remove Exclusions', 'schedule_unexclude')
+            .row()
             .text('Manual Cleanup', 'schedule_cleanup')
             .text('Manual Repeating', 'schedule_repeating');
 
@@ -131,7 +146,13 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
                 message += `**${index + 1}. ${event.name}**\n`;
                 message += `📍 ${locationName}\n`;
                 message += `📅 Every ${WEEKDAYS[event.weekday]} at ${event.time}\n`;
-                message += `🔄 ${status}\n\n`;
+                message += `🔄 ${status}\n`;
+
+                if (event.excludedDates && event.excludedDates.length > 0) {
+                    const sortedExcluded = [...event.excludedDates].sort();
+                    message += `🚫 Excluded: ${sortedExcluded.join(', ')}\n`;
+                }
+                message += '\n';
             });
 
             await ctx.editMessageText(message, {
@@ -160,6 +181,72 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
             const keyboard = createLocationKeyboard(sortedLocations, 0);
 
             await ctx.editMessageText('**📅 Add Repeating Event**\n\nSelect a location for the repeating event (Page 1):', {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Exclude dates from repeating event
+    bot.callbackQuery('schedule_exclude', async (ctx) => {
+        try {
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            if (repeatingEvents.length === 0) {
+                await ctx.editMessageText('No repeating events to exclude dates from.');
+                return;
+            }
+
+            // Sort events by name for better UX
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'exclude', 0);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**🚫 Exclude Dates**\n\nSelect a repeating event to exclude dates from (Page 1 of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Remove excluded dates from repeating event
+    bot.callbackQuery('schedule_unexclude', async (ctx) => {
+        try {
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            if (repeatingEvents.length === 0) {
+                await ctx.editMessageText('No repeating events found.');
+                return;
+            }
+
+            const eventsWithExclusions = repeatingEvents.filter(event =>
+                event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0
+            );
+
+            if (eventsWithExclusions.length === 0) {
+                await ctx.editMessageText('No repeating events with excluded dates found.');
+                return;
+            }
+
+            // Sort events by name for better UX
+            const sortedEvents = eventsWithExclusions
+                .map(event => {
+                    const originalIndex = repeatingEvents.findIndex(e => e === event);
+                    return { ...event, originalIndex };
+                })
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'unexclude', 0);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**📅 Remove Excluded Dates**\n\nSelect a repeating event to remove excluded dates from (Page 1 of ${totalPages}):`, {
                 reply_markup: keyboard,
                 parse_mode: 'Markdown'
             });
@@ -214,6 +301,131 @@ export function registerScheduleCommands(bot, deploymentPoller = null, scheduler
                 `Selected location: **${selectedLocation.location} - ${selectedLocation.venue}**\n\nNow enter a name for this repeating event:`,
                 { parse_mode: 'Markdown' }
             );
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle exclude event selection
+    bot.callbackQuery(/^schedule_exclude_(\d+)$/, async (ctx) => {
+        try {
+            const eventIndex = parseInt(ctx.match[1]);
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            // Get original event from sorted array
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const originalIndex = sortedEvents[eventIndex].originalIndex;
+            const event = repeatingEvents[originalIndex];
+
+            sessionManager.set(ctx.from.id, {
+                command: 'schedule',
+                action: 'exclude_dates',
+                eventIndex: originalIndex,
+                eventName: event.name
+            });
+
+            await ctx.editMessageText(
+                `Selected event: **${event.name}**\n\nEnter dates to exclude in YYYY-MM-DD format, separated by commas or spaces:\n\nExample: 2025-12-25, 2025-12-26, 2026-01-01`,
+                { parse_mode: 'Markdown' }
+            );
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle unexclude event selection
+    bot.callbackQuery(/^schedule_unexclude_(\d+)$/, async (ctx) => {
+        try {
+            const eventIndex = parseInt(ctx.match[1]);
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            // Get original event from sorted array
+            const eventsWithExclusions = repeatingEvents.filter(event =>
+                event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0
+            );
+
+            const sortedEvents = eventsWithExclusions
+                .map(event => {
+                    const originalIndex = repeatingEvents.findIndex(e => e === event);
+                    return { ...event, originalIndex };
+                })
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const originalIndex = sortedEvents[eventIndex].originalIndex;
+            const event = repeatingEvents[originalIndex];
+
+            if (!event.excludedDates || event.excludedDates.length === 0) {
+                await ctx.editMessageText('This event has no excluded dates.');
+                return;
+            }
+
+            sessionManager.set(ctx.from.id, {
+                command: 'schedule',
+                action: 'unexclude_dates',
+                eventIndex: originalIndex,
+                eventName: event.name
+            });
+
+            const currentExcluded = event.excludedDates.sort().join(', ');
+
+            await ctx.editMessageText(
+                `Selected event: **${event.name}**\n\nCurrent excluded dates: ${currentExcluded}\n\nEnter specific dates to remove (YYYY-MM-DD format, separated by commas) or type "all" to remove all excluded dates:`,
+                { parse_mode: 'Markdown' }
+            );
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle exclude pagination
+    bot.callbackQuery(/^schedule_exclude_page_(\d+)$/, async (ctx) => {
+        try {
+            const page = parseInt(ctx.match[1]);
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            const sortedEvents = repeatingEvents
+                .map((event, originalIndex) => ({ ...event, originalIndex }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'exclude', page);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**🚫 Exclude Dates**\n\nSelect a repeating event to exclude dates from (Page ${page + 1} of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
+        } catch (error) {
+            await ctx.editMessageText(`Error: ${error.message}`);
+        }
+    });
+
+    // Handle unexclude pagination
+    bot.callbackQuery(/^schedule_unexclude_page_(\d+)$/, async (ctx) => {
+        try {
+            const page = parseInt(ctx.match[1]);
+            const { data: repeatingEvents } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+
+            const eventsWithExclusions = repeatingEvents.filter(event =>
+                event.excludedDates && Array.isArray(event.excludedDates) && event.excludedDates.length > 0
+            );
+
+            const sortedEvents = eventsWithExclusions
+                .map(event => {
+                    const originalIndex = repeatingEvents.findIndex(e => e === event);
+                    return { ...event, originalIndex };
+                })
+                .sort((a, b) => a.name.localeCompare(b.name));
+
+            const keyboard = createRepeatingEventsKeyboard(sortedEvents, 'unexclude', page);
+            const totalPages = Math.ceil(sortedEvents.length / MAX_BUTTONS_PER_PAGE);
+
+            await ctx.editMessageText(`**📅 Remove Excluded Dates**\n\nSelect a repeating event to remove excluded dates from (Page ${page + 1} of ${totalPages}):`, {
+                reply_markup: keyboard,
+                parse_mode: 'Markdown'
+            });
         } catch (error) {
             await ctx.editMessageText(`Error: ${error.message}`);
         }
@@ -484,6 +696,162 @@ export async function handleScheduleTextInput(ctx, deploymentPoller = null) {
                     message.message_id,
                     commitSha
                 );
+            }
+
+            sessionManager.delete(ctx.from.id);
+
+        } else if (session.action === 'exclude_dates') {
+            const datesInput = ctx.message.text.trim();
+
+            // Parse and validate dates
+            const dateStrings = datesInput.split(/[,\s]+/).filter(d => d.length > 0);
+            const validDates = [];
+            const invalidDates = [];
+
+            for (const dateStr of dateStrings) {
+                if (isValidDate(dateStr)) {
+                    validDates.push(dateStr);
+                } else {
+                    invalidDates.push(dateStr);
+                }
+            }
+
+            if (invalidDates.length > 0) {
+                await ctx.reply(`❌ Invalid date format(s): ${invalidDates.join(', ')}\n\nPlease use YYYY-MM-DD format (e.g., 2025-12-25)`);
+                return;
+            }
+
+            if (validDates.length === 0) {
+                await ctx.reply('❌ No valid dates provided.');
+                return;
+            }
+
+            const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+            const event = repeatingEvents[session.eventIndex];
+
+            if (!event) {
+                await ctx.reply('❌ Event not found.');
+                sessionManager.delete(ctx.from.id);
+                return;
+            }
+
+            // Initialize excludedDates if it doesn't exist
+            if (!event.excludedDates) {
+                event.excludedDates = [];
+            }
+
+            // Add new dates, avoiding duplicates
+            const newDates = validDates.filter(date => !event.excludedDates.includes(date));
+            event.excludedDates.push(...newDates);
+            event.excludedDates.sort();
+
+            const commitSha = await updateFileContent(
+                REPEATING_EVENTS_FILE_PATH,
+                repeatingEvents,
+                sha,
+                `Add excluded dates to "${event.name}": ${newDates.join(', ')}`
+            );
+
+            const message = await ctx.reply(
+                `✅ **Excluded Dates Added!**\n\n**Event:** ${event.name}\n**Added Dates:** ${newDates.join(', ')}\n**Total Excluded:** ${event.excludedDates.length}\n\n🔄 Deploying to website...`,
+                { parse_mode: 'Markdown' }
+            );
+
+            if (deploymentPoller) {
+                deploymentPoller.addPendingDeployment(
+                    ctx.from.id,
+                    ctx.chat.id,
+                    message.message_id,
+                    commitSha
+                );
+            }
+
+            sessionManager.delete(ctx.from.id);
+
+        } else if (session.action === 'unexclude_dates') {
+            const datesInput = ctx.message.text.trim();
+
+            const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
+            const event = repeatingEvents[session.eventIndex];
+
+            if (!event || !event.excludedDates) {
+                await ctx.reply('❌ Event not found or has no excluded dates.');
+                sessionManager.delete(ctx.from.id);
+                return;
+            }
+
+            if (datesInput.toLowerCase() === 'all') {
+                // Remove all excluded dates
+                const removedCount = event.excludedDates.length;
+                event.excludedDates = [];
+
+                const commitSha = await updateFileContent(
+                    REPEATING_EVENTS_FILE_PATH,
+                    repeatingEvents,
+                    sha,
+                    `Remove all excluded dates from "${event.name}"`
+                );
+
+                const message = await ctx.reply(
+                    `✅ **All Excluded Dates Removed!**\n\n**Event:** ${event.name}\n**Removed:** ${removedCount} dates\n\n🔄 Deploying to website...`,
+                    { parse_mode: 'Markdown' }
+                );
+
+                if (deploymentPoller) {
+                    deploymentPoller.addPendingDeployment(
+                        ctx.from.id,
+                        ctx.chat.id,
+                        message.message_id,
+                        commitSha
+                    );
+                }
+
+            } else {
+                // Parse specific dates to remove
+                const dateStrings = datesInput.split(/[,\s]+/).filter(d => d.length > 0);
+                const removedDates = [];
+                const notFoundDates = [];
+
+                for (const dateStr of dateStrings) {
+                    const index = event.excludedDates.indexOf(dateStr);
+                    if (index > -1) {
+                        event.excludedDates.splice(index, 1);
+                        removedDates.push(dateStr);
+                    } else {
+                        notFoundDates.push(dateStr);
+                    }
+                }
+
+                if (removedDates.length === 0) {
+                    await ctx.reply(`❌ None of the specified dates were found in the excluded list.\n\nCurrent excluded dates: ${event.excludedDates.join(', ') || 'None'}`);
+                    return;
+                }
+
+                const commitSha = await updateFileContent(
+                    REPEATING_EVENTS_FILE_PATH,
+                    repeatingEvents,
+                    sha,
+                    `Remove excluded dates from "${event.name}": ${removedDates.join(', ')}`
+                );
+
+                let responseMessage = `✅ **Excluded Dates Removed!**\n\n**Event:** ${event.name}\n**Removed Dates:** ${removedDates.join(', ')}\n**Remaining Excluded:** ${event.excludedDates.length}`;
+
+                if (notFoundDates.length > 0) {
+                    responseMessage += `\n**Not Found:** ${notFoundDates.join(', ')}`;
+                }
+
+                responseMessage += '\n\n🔄 Deploying to website...';
+
+                const message = await ctx.reply(responseMessage, { parse_mode: 'Markdown' });
+
+                if (deploymentPoller) {
+                    deploymentPoller.addPendingDeployment(
+                        ctx.from.id,
+                        ctx.chat.id,
+                        message.message_id,
+                        commitSha
+                    );
+                }
             }
 
             sessionManager.delete(ctx.from.id);
