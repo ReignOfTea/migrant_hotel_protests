@@ -149,6 +149,11 @@
         "datetime": "2025-09-19T11:00:00"
     },
     {
+        "locationId": "chichester-park-hotel",
+        "datetime": "2025-09-19T17:00:00",
+        "about": "March with us from Chichester Market to Park Hotel.</ br>Special guest speaker: <a href=\"https://fixupx.com/NickTenconi\">Nick Tenconi</a>!"
+    },
+    {
         "locationId": "bournemouth-roundhouse",
         "datetime": "2025-09-19T18:00:00"
     },
@@ -169,8 +174,17 @@
         "datetime": "2025-09-19T18:00:00"
     },
     {
+        "locationId": "chichester-park-hotel",
+        "datetime": "2025-09-19T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-09-20T10:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2025-09-20T10:30:00",
+        "about": "Starting at Cresta Court, we'll then march around Altringham at approx 10:45AM, finishing up back outside Cresta Court."
     },
     {
         "locationId": "faversham-kiln-court",
@@ -209,6 +223,10 @@
         "datetime": "2025-09-20T12:00:00"
     },
     {
+        "locationId": "wolverhampton-goldthorn-hotel",
+        "datetime": "2025-09-20T12:00:00"
+    },
+    {
         "locationId": "cannock-roman-hotel",
         "datetime": "2025-09-20T13:00:00"
     },
@@ -231,6 +249,10 @@
     {
         "locationId": "wakefield-cedar-court-hotel",
         "datetime": "2025-09-20T14:00:00"
+    },
+    {
+        "locationId": "163-marsh-wall-london-e14-9sj-britannia-hotel",
+        "datetime": "2025-09-20T15:00:00"
     },
     {
         "locationId": "southampton-highfield-house",
@@ -423,6 +445,11 @@
     {
         "locationId": "plymouth-royal-parade",
         "datetime": "2025-09-30T17:00:00"
+    },
+    {
+        "locationId": "westminster-westminster",
+        "datetime": "2025-10-01T10:00:00",
+        "about": "PINK PROTEST - More details to follow closer to the time."
     },
     {
         "locationId": "warwick-county-council-offices",
@@ -707,28 +734,5 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-10-12T18:00:00"
-    },
-    {
-        "locationId": "altrincham-cresta-court",
-        "datetime": "2025-09-20T10:30:00",
-        "about": "Starting at Cresta Court, we'll then march around Altringham at approx 10:45AM, finishing up back outside Cresta Court."
-    },
-    {
-        "locationId": "163-marsh-wall-london-e14-9sj-britannia-hotel",
-        "datetime": "2025-09-20T15:00:00"
-    },
-    {
-        "locationId": "westminster-westminster",
-        "datetime": "2025-10-01T10:00:00",
-        "about": "PINK PROTEST - More details to follow closer to the time."
-    },
-    {
-        "locationId": "chichester-park-hotel",
-        "datetime": "2025-09-19T17:00:00",
-        "about": "March with us from Chichester Market to Park Hotel.</ br>Special guest speaker: <a href=\"https://fixupx.com/NickTenconi\">Nick Tenconi</a>!"
-    },
-    {
-        "locationId": "wolverhampton-goldthorn-hotel",
-        "datetime": "2025-09-20T12:00:00"
     }
 ]
