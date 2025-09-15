@@ -724,5 +724,9 @@
         "locationId": "altrincham-cresta-court",
         "datetime": "2025-09-20T10:30:00",
         "about": "Starting at Cresta Court, we'll then march around Altringham at approx 10:45AM, finishing up back outside Cresta Court."
+    },
+    {
+        "locationId": "163-marsh-wall-london-e14-9sj-britannia-hotel",
+        "datetime": "2025-09-20T15:00:00"
     }
 ]
