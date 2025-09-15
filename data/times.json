@@ -726,5 +726,9 @@
         "locationId": "chichester-park-hotel",
         "datetime": "2025-09-19T17:00:00",
         "about": "March with us from Chichester Market to Park Hotel.</ br>Special guest speaker: <a href=\"https://fixupx.com/NickTenconi\">Nick Tenconi</a>!"
+    },
+    {
+        "locationId": "wolverhampton-goldthorn-hotel",
+        "datetime": "2025-09-20T12:00:00"
     }
 ]
