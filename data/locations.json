@@ -264,5 +264,12 @@
         "venue": "WESTMINSTER",
         "lat": 51.4999639,
         "lng": -0.1279826
+    },
+    {
+        "id": "wolverhampton-goldthorn-hotel",
+        "location": "WOLVERHAMPTON",
+        "venue": "GOLDTHORN HOTEL",
+        "lat": 52.5747378,
+        "lng": -2.1372016
     }
 ]
