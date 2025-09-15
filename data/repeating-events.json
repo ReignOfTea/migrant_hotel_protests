@@ -51,14 +51,6 @@
         "created": "2025-09-09T17:48:09.539Z"
     },
     {
-        "name": "Highfield House",
-        "locationId": "southampton-highfield-house",
-        "weekday": 5,
-        "time": "18:00:00",
-        "enabled": true,
-        "created": "2025-09-09T17:49:28.982Z"
-    },
-    {
         "name": "Warwick Council Offices",
         "locationId": "warwick-county-council-offices",
         "weekday": 5,
