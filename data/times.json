@@ -251,6 +251,10 @@
         "datetime": "2025-09-20T15:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-09-20T17:00:00"
+    },
+    {
         "locationId": "stockport-britannia",
         "datetime": "2025-09-20T17:30:00"
     },
@@ -383,8 +387,17 @@
         "datetime": "2025-09-27T13:00:00"
     },
     {
+        "locationId": "wigan-moon-under-water",
+        "datetime": "2025-09-27T13:30:00",
+        "about": "Join on <a href=\"https://www.facebook.com/groups/706089058793706\">Facebook</a>"
+    },
+    {
         "locationId": "wakefield-cedar-court-hotel",
         "datetime": "2025-09-27T14:00:00"
+    },
+    {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-09-27T17:00:00"
     },
     {
         "locationId": "stockport-britannia",
@@ -532,6 +545,10 @@
         "datetime": "2025-10-04T14:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-10-04T17:00:00"
+    },
+    {
         "locationId": "stockport-britannia",
         "datetime": "2025-10-04T17:30:00"
     },
@@ -672,6 +689,10 @@
         "datetime": "2025-10-11T14:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-10-11T17:00:00"
+    },
+    {
         "locationId": "stockport-britannia",
         "datetime": "2025-10-11T17:30:00"
     },
@@ -712,8 +733,7 @@
         "datetime": "2025-10-12T18:00:00"
     },
     {
-        "locationId": "wigan-moon-under-water",
-        "datetime": "2025-09-27T13:30:00",
-        "about": "Join on <a href=\"https://www.facebook.com/groups/706089058793706\">Facebook</a>"
+        "locationId": "plymouth-royal-parade",
+        "datetime": "2025-10-14T17:00:00"
     }
 ]
