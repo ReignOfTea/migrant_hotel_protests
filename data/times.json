@@ -734,5 +734,10 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-10-12T18:00:00"
+    },
+    {
+        "locationId": "wigan-moon-under-water",
+        "datetime": "2025-09-27T13:30:00",
+        "about": "Join on <a href=\"https://www.facebook.com/groups/706089058793706\">Facebook</a>"
     }
 ]
