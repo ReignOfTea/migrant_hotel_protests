@@ -271,5 +271,12 @@
         "venue": "GOLDTHORN HOTEL",
         "lat": 52.5747378,
         "lng": -2.1372016
+    },
+    {
+        "id": "wigan-moon-under-water",
+        "location": "WIGAN",
+        "venue": "MOON UNDER WATER",
+        "lat": 53.5464007,
+        "lng": -2.6313097
     }
 ]
