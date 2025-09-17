@@ -747,5 +747,9 @@
     {
         "locationId": "oldham-the-victoria-hotel",
         "datetime": "2025-09-20T12:00:00"
+    },
+    {
+        "locationId": "widnes-the-hillcrest-hotel",
+        "datetime": "2025-09-20T13:00:00"
     }
 ]
