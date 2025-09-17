@@ -278,5 +278,12 @@
         "venue": "MOON UNDER WATER",
         "lat": 53.5464007,
         "lng": -2.6313097
+    },
+    {
+        "id": "colchester-town-hall",
+        "location": "COLCHESTER",
+        "venue": "TOWN HALL",
+        "lat": 51.8896962,
+        "lng": 0.8991485
     }
 ]
