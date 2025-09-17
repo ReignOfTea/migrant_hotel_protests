@@ -285,5 +285,12 @@
         "venue": "TOWN HALL",
         "lat": 51.8896962,
         "lng": 0.8991485
+    },
+    {
+        "id": "leeds-yorkshire-gateway-hotel",
+        "location": "LEEDS",
+        "venue": "YORKSHIRE GATEWAY HOTEL",
+        "lat": 53.7664089,
+        "lng": -1.2894901
     }
 ]
