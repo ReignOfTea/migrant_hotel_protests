@@ -313,5 +313,12 @@
         "venue": "DRAGONFLY HOTEL",
         "lat": 52.5711644,
         "lng": -0.2676234
+    },
+    {
+        "id": "hillingdon-mulberry-parade",
+        "location": "HILLINGDON",
+        "venue": "MULBERRY PARADE",
+        "lat": 51.5045665,
+        "lng": -0.4574819
     }
 ]
