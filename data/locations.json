@@ -306,5 +306,12 @@
         "venue": "THE HILLCREST HOTEL",
         "lat": 53.3899447,
         "lng": -2.7431592
+    },
+    {
+        "id": "peterborough-dragonfly-hotel",
+        "location": "PETERBOROUGH",
+        "venue": "DRAGONFLY HOTEL",
+        "lat": 52.5711644,
+        "lng": -0.2676234
     }
 ]
