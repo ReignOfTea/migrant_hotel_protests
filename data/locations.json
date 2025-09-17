@@ -292,5 +292,12 @@
         "venue": "YORKSHIRE GATEWAY HOTEL",
         "lat": 53.7664089,
         "lng": -1.2894901
+    },
+    {
+        "id": "oldham-the-victoria-hotel",
+        "location": "OLDHAM",
+        "venue": "THE VICTORIA HOTEL",
+        "lat": 53.522357,
+        "lng": -2.156139
     }
 ]
