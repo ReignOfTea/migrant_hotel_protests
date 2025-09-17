@@ -299,5 +299,12 @@
         "venue": "THE VICTORIA HOTEL",
         "lat": 53.522357,
         "lng": -2.156139
+    },
+    {
+        "id": "widnes-the-hillcrest-hotel",
+        "location": "WIDNES",
+        "venue": "THE HILLCREST HOTEL",
+        "lat": 53.3899447,
+        "lng": -2.7431592
     }
 ]
