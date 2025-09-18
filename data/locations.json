@@ -320,5 +320,12 @@
         "venue": "MULBERRY PARADE",
         "lat": 51.5045665,
         "lng": -0.4574819
+    },
+    {
+        "id": "cheshunt-council-offices",
+        "location": "CHESHUNT",
+        "venue": "COUNCIL OFFICES",
+        "lat": 51.7029973,
+        "lng": -0.0480176
     }
 ]
