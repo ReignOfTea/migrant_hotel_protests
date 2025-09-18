@@ -327,5 +327,12 @@
         "venue": "COUNCIL OFFICES",
         "lat": 51.7029973,
         "lng": -0.0480176
+    },
+    {
+        "id": "loughton-police-station",
+        "location": "LOUGHTON",
+        "venue": "POLICE STATION",
+        "lat": 51.6463861,
+        "lng": 0.0535654
     }
 ]
