@@ -334,5 +334,12 @@
         "venue": "POLICE STATION",
         "lat": 51.6463861,
         "lng": 0.0535654
+    },
+    {
+        "id": "stevenage-ibis-hotel",
+        "location": "STEVENAGE",
+        "venue": "IBIS HOTEL",
+        "lat": 51.90341894740491,
+        "lng": -0.20371979629010822
     }
 ]
