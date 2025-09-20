@@ -775,5 +775,10 @@
     {
         "locationId": "southampton-highfield-house",
         "datetime": "2025-10-17T18:00:00"
+    },
+    {
+        "locationId": "stevenage-ibis-hotel",
+        "datetime": "2025-10-06T18:00:00",
+        "about": "Bring your flags, bring your family and friends. 6PM - 9PM"
     }
 ]
