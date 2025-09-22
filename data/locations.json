@@ -341,5 +341,40 @@
         "venue": "IBIS HOTEL",
         "lat": 51.90341894740491,
         "lng": -0.20371979629010822
+    },
+    {
+        "id": "perth-queens-hotel",
+        "location": "PERTH",
+        "venue": "Queens Hotel",
+        "lat": 56.39274359879983,
+        "lng": -3.437447846424951
+    },
+    {
+        "id": "wrexham-guildhall",
+        "location": "WREXHAM",
+        "venue": "The Guildhall",
+        "lat": 53.04756316128925,
+        "lng": -2.9937289577466797
+    },
+    {
+        "id": "gloucester-ibis-hotel",
+        "location": "GLOUCESTER",
+        "venue": "Ibis Hotel",
+        "lat": 51.86483205190941,
+        "lng": -2.2107237039550993
+    },
+    {
+        "id": "cheltenham-citrus-hotel",
+        "location": "CHELTENHAM",
+        "venue": "Citrus Hotel",
+        "lat": 51.898065037993064,
+        "lng": -2.073172738787983
+    },
+    {
+        "id": "durham-county-hall",
+        "location": "DURHAM",
+        "venue": "County Hall",
+        "lat": 54.785551084523696,
+        "lng": -1.5856913134592934
     }
 ]
