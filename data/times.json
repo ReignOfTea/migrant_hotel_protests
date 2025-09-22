@@ -751,5 +751,9 @@
         "locationId": "perth-queens-hotel",
         "datetime": "2025-09-27T11:00:00",
         "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
+    },
+    {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-09-24T18:00:00"
     }
 ]
