@@ -107,15 +107,19 @@ function formatDateTime(datetimeString) {
 
     const dayWithOrdinal = getOrdinal(dayNumber);
 
-    // Format time
+    // Format time with minutes
     let hours = date.getHours();
+    const minutes = date.getMinutes();
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12;
     hours = hours ? hours : 12; // 0 should be 12
 
+    // Include minutes if thee are any
+    const timeDisplay = minutes > 0 ? `${hours}.${minutes.toString().padStart(2, '0')}${ampm}` : `${hours}${ampm}`;
+
     return {
         dayBanner: `${dayName} ${dayWithOrdinal} ${monthName}`,
-        timeDisplay: `${hours}${ampm}`,
+        timeDisplay: timeDisplay,
         sortKey: date.getTime()
     };
 }
