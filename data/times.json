@@ -102,16 +102,16 @@
         "datetime": "2025-09-20T12:00:00"
     },
     {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2025-09-20T12:00:00"
+    },
+    {
         "locationId": "cannock-roman-hotel",
         "datetime": "2025-09-20T13:00:00"
     },
     {
         "locationId": "hull-royal-hotel",
         "datetime": "2025-09-20T13:00:00"
-    },
-    {
-        "locationId": "newcastle-new-bridge-hotel",
-        "datetime": "2025-09-20T12:00:00"
     },
     {
         "locationId": "nuneaton-town-hall",
@@ -182,6 +182,10 @@
         "datetime": "2025-09-23T17:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-09-24T18:00:00"
+    },
+    {
         "locationId": "warwick-county-council-offices",
         "datetime": "2025-09-26T11:00:00"
     },
@@ -210,12 +214,21 @@
         "datetime": "2025-09-26T18:00:00"
     },
     {
+        "locationId": "durham-county-hall",
+        "datetime": "2025-09-26T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-09-27T10:00:00"
     },
     {
         "locationId": "faversham-kiln-court",
         "datetime": "2025-09-27T11:00:00"
+    },
+    {
+        "locationId": "perth-queens-hotel",
+        "datetime": "2025-09-27T11:00:00",
+        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
     },
     {
         "locationId": "blackpool-britannia-metropole",
@@ -250,16 +263,16 @@
         "datetime": "2025-09-27T12:00:00"
     },
     {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2025-09-27T12:00:00"
+    },
+    {
         "locationId": "cannock-roman-hotel",
         "datetime": "2025-09-27T13:00:00"
     },
     {
         "locationId": "hull-royal-hotel",
         "datetime": "2025-09-27T13:00:00"
-    },
-    {
-        "locationId": "newcastle-new-bridge-hotel",
-        "datetime": "2025-09-27T12:00:00"
     },
     {
         "locationId": "nuneaton-town-hall",
@@ -305,6 +318,11 @@
     {
         "locationId": "norwich-the-norkie",
         "datetime": "2025-09-28T13:00:00"
+    },
+    {
+        "locationId": "wrexham-guildhall",
+        "datetime": "2025-09-28T13:00:00",
+        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
     },
     {
         "locationId": "fallowfield-manchester-south",
@@ -356,6 +374,10 @@
         "datetime": "2025-10-03T18:00:00"
     },
     {
+        "locationId": "durham-county-hall",
+        "datetime": "2025-10-03T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-10-04T10:00:00"
     },
@@ -396,16 +418,16 @@
         "datetime": "2025-10-04T12:00:00"
     },
     {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2025-10-04T12:00:00"
+    },
+    {
         "locationId": "cannock-roman-hotel",
         "datetime": "2025-10-04T13:00:00"
     },
     {
         "locationId": "hull-royal-hotel",
         "datetime": "2025-10-04T13:00:00"
-    },
-    {
-        "locationId": "newcastle-new-bridge-hotel",
-        "datetime": "2025-10-04T12:00:00"
     },
     {
         "locationId": "nuneaton-town-hall",
@@ -446,6 +468,16 @@
     {
         "locationId": "norwich-the-norkie",
         "datetime": "2025-10-05T13:00:00"
+    },
+    {
+        "locationId": "gloucester-ibis-hotel",
+        "datetime": "2025-10-05T13:00:00",
+        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a></br>Muster point: Gloucester Guild Hall GL1 1NS - March to Gloucester Shire Hall GL10 2TG"
+    },
+    {
+        "locationId": "cheltenham-citrus-hotel",
+        "datetime": "2025-10-05T13:00:00",
+        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
     },
     {
         "locationId": "fallowfield-manchester-south",
@@ -497,6 +529,10 @@
         "datetime": "2025-10-10T18:00:00"
     },
     {
+        "locationId": "durham-county-hall",
+        "datetime": "2025-10-10T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-10-11T10:00:00"
     },
@@ -537,16 +573,16 @@
         "datetime": "2025-10-11T12:00:00"
     },
     {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2025-10-11T12:00:00"
+    },
+    {
         "locationId": "cannock-roman-hotel",
         "datetime": "2025-10-11T13:00:00"
     },
     {
         "locationId": "hull-royal-hotel",
         "datetime": "2025-10-11T13:00:00"
-    },
-    {
-        "locationId": "newcastle-new-bridge-hotel",
-        "datetime": "2025-10-11T12:00:00"
     },
     {
         "locationId": "nuneaton-town-hall",
@@ -633,6 +669,10 @@
         "datetime": "2025-10-17T18:00:00"
     },
     {
+        "locationId": "durham-county-hall",
+        "datetime": "2025-10-17T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-10-18T10:00:00"
     },
@@ -673,16 +713,16 @@
         "datetime": "2025-10-18T12:00:00"
     },
     {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2025-10-18T12:00:00"
+    },
+    {
         "locationId": "cannock-roman-hotel",
         "datetime": "2025-10-18T13:00:00"
     },
     {
         "locationId": "hull-royal-hotel",
         "datetime": "2025-10-18T13:00:00"
-    },
-    {
-        "locationId": "newcastle-new-bridge-hotel",
-        "datetime": "2025-10-18T12:00:00"
     },
     {
         "locationId": "nuneaton-town-hall",
@@ -731,29 +771,5 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-10-19T18:00:00"
-    },
-    {
-        "locationId": "wrexham-guildhall",
-        "datetime": "2025-09-28T13:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
-    },
-    {
-        "locationId": "gloucester-ibis-hotel",
-        "datetime": "2025-10-05T13:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a></br>Muster point: Gloucester Guild Hall GL1 1NS - March to Gloucester Shire Hall GL10 2TG"
-    },
-    {
-        "locationId": "cheltenham-citrus-hotel",
-        "datetime": "2025-10-05T13:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
-    },
-    {
-        "locationId": "perth-queens-hotel",
-        "datetime": "2025-09-27T11:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
-    },
-    {
-        "locationId": "southampton-highfield-house",
-        "datetime": "2025-09-24T18:00:00"
     }
 ]
