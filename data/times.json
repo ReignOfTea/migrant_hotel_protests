@@ -771,5 +771,10 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-10-19T18:00:00"
+    },
+    {
+        "locationId": "wrexham-guildhall",
+        "datetime": "2025-09-28T13:00:00",
+        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
     }
 ]
