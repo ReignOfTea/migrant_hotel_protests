@@ -771,5 +771,10 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-10-19T18:00:00"
+    },
+    {
+        "locationId": "epping-bell-hotel",
+        "datetime": "2025-09-23T18:00:00",
+        "about": "Flash protest!"
     }
 ]
