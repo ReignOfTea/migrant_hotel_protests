@@ -178,6 +178,11 @@
         "datetime": "2025-09-23T17:00:00"
     },
     {
+        "locationId": "epping-bell-hotel",
+        "datetime": "2025-09-23T18:00:00",
+        "about": "Flash protest!"
+    },
+    {
         "locationId": "southampton-highfield-house",
         "datetime": "2025-09-24T18:00:00"
     },
@@ -769,8 +774,7 @@
         "datetime": "2025-10-19T18:00:00"
     },
     {
-        "locationId": "epping-bell-hotel",
-        "datetime": "2025-09-23T18:00:00",
-        "about": "Flash protest!"
+        "locationId": "plymouth-royal-parade",
+        "datetime": "2025-10-21T17:00:00"
     }
 ]
