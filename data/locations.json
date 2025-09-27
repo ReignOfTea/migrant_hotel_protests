@@ -376,5 +376,12 @@
         "venue": "County Hall",
         "lat": 54.785551084523696,
         "lng": -1.5856913134592934
+    },
+    {
+        "id": "southamption-leonardo-hotel-so15-0lg",
+        "location": "SOUTHAMPTION",
+        "venue": "LEONARDO HOTEL, SO15 0LG",
+        "lat": 50.91763523802282,
+        "lng": -1.462227845280924
     }
 ]
