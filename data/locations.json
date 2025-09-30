@@ -383,5 +383,12 @@
         "venue": "LEONARDO HOTEL, SO15 0LG",
         "lat": 50.91763523802282,
         "lng": -1.462227845280924
+    },
+    {
+        "id": "hoddeston-hoddeston-clock-tower",
+        "location": "HODDESTON",
+        "venue": "HODDESTON CLOCK TOWER",
+        "lat": 51.761585,
+        "lng": -0.0111597
     }
 ]
