@@ -367,6 +367,11 @@
         "datetime": "2025-10-11T11:00:00"
     },
     {
+        "locationId": "hoddeston-hoddeston-clock-tower",
+        "datetime": "2025-10-11T11:00:00",
+        "about": "<a href=\"https://www.facebook.com/story.php?story_fbid=1138867125098760&id=100069264487243\">Facebook</a>"
+    },
+    {
         "locationId": "blackpool-britannia-metropole",
         "datetime": "2025-10-11T12:00:00"
     },
@@ -735,8 +740,7 @@
         "datetime": "2025-10-26T18:00:00"
     },
     {
-        "locationId": "hoddeston-hoddeston-clock-tower",
-        "datetime": "2025-10-11T11:00:00",
-        "about": "<a href=\"https://www.facebook.com/story.php?story_fbid=1138867125098760&id=100069264487243\">Facebook</a>"
+        "locationId": "plymouth-royal-parade",
+        "datetime": "2025-10-28T17:00:00"
     }
 ]
