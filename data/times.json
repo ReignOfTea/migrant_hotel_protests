@@ -1,37 +1,5 @@
 [
     {
-        "locationId": "warwick-county-council-offices",
-        "datetime": "2025-09-26T11:00:00"
-    },
-    {
-        "locationId": "altrincham-cresta-court",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
-        "locationId": "bournemouth-roundhouse",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
-        "locationId": "cheshunt-marriott-delta",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
-        "locationId": "chichester-park-hotel",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
-        "locationId": "portsmouth-royal-beach",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
-        "locationId": "rhoose-holiday-inn-carfiff-airport",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
-        "locationId": "durham-county-hall",
-        "datetime": "2025-09-26T18:00:00"
-    },
-    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-09-27T10:00:00"
     },
