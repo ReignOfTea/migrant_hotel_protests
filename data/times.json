@@ -1,42 +1,5 @@
 [
     {
-        "locationId": "bristol-hamilton-by-hilton",
-        "datetime": "2025-09-28T12:00:00"
-    },
-    {
-        "locationId": "falkirk-falkirk-council-unison",
-        "datetime": "2025-09-28T12:00:00"
-    },
-    {
-        "locationId": "dudley-quality-hotel",
-        "datetime": "2025-09-28T12:30:00"
-    },
-    {
-        "locationId": "london-britannia-canary-wharf",
-        "datetime": "2025-09-28T13:00:00"
-    },
-    {
-        "locationId": "norwich-the-norkie",
-        "datetime": "2025-09-28T13:00:00"
-    },
-    {
-        "locationId": "wrexham-guildhall",
-        "datetime": "2025-09-28T13:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
-    },
-    {
-        "locationId": "fallowfield-manchester-south",
-        "datetime": "2025-09-28T14:00:00"
-    },
-    {
-        "locationId": "plymouth-royal-parade",
-        "datetime": "2025-09-28T17:00:00"
-    },
-    {
-        "locationId": "epping-bell-hotel",
-        "datetime": "2025-09-28T18:00:00"
-    },
-    {
         "locationId": "plymouth-royal-parade",
         "datetime": "2025-09-30T17:00:00"
     },
