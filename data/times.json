@@ -204,6 +204,10 @@
         "datetime": "2025-10-10T18:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-10-10T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-10-11T10:00:00"
     },
@@ -349,6 +353,10 @@
         "datetime": "2025-10-17T18:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-10-17T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-10-18T10:00:00"
     },
@@ -482,6 +490,10 @@
     },
     {
         "locationId": "durham-county-hall",
+        "datetime": "2025-10-24T18:00:00"
+    },
+    {
+        "locationId": "southampton-highfield-house",
         "datetime": "2025-10-24T18:00:00"
     },
     {
@@ -621,6 +633,10 @@
         "datetime": "2025-10-31T18:00:00"
     },
     {
+        "locationId": "southampton-highfield-house",
+        "datetime": "2025-10-31T18:00:00"
+    },
+    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-11-01T10:00:00"
     },
@@ -719,5 +735,9 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-11-02T18:00:00"
+    },
+    {
+        "locationId": "plymouth-royal-parade",
+        "datetime": "2025-11-04T17:00:00"
     }
 ]
