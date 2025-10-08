@@ -287,5 +287,13 @@
         "time": "14:00:00",
         "enabled": true,
         "created": "2025-10-08T13:32:45.256Z"
+    },
+    {
+        "name": "Royal Beach Portsmouth",
+        "locationId": "portsmouth-royal-beach",
+        "weekday": 5,
+        "time": "17:00:00",
+        "enabled": true,
+        "created": "2025-10-08T13:35:44.414Z"
     }
 ]
