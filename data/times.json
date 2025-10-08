@@ -163,6 +163,10 @@
         "datetime": "2025-10-10T11:00:00"
     },
     {
+        "locationId": "portsmouth-royal-beach",
+        "datetime": "2025-10-10T17:00:00"
+    },
+    {
         "locationId": "altrincham-cresta-court",
         "datetime": "2025-10-10T18:00:00"
     },
@@ -296,6 +300,10 @@
         "datetime": "2025-10-12T14:00:00"
     },
     {
+        "locationId": "chichester-park-hotel",
+        "datetime": "2025-10-12T14:00:00"
+    },
+    {
         "locationId": "plymouth-royal-parade",
         "datetime": "2025-10-12T17:00:00"
     },
@@ -310,6 +318,10 @@
     {
         "locationId": "warwick-county-council-offices",
         "datetime": "2025-10-17T11:00:00"
+    },
+    {
+        "locationId": "portsmouth-royal-beach",
+        "datetime": "2025-10-17T17:00:00"
     },
     {
         "locationId": "altrincham-cresta-court",
@@ -436,6 +448,10 @@
         "datetime": "2025-10-19T14:00:00"
     },
     {
+        "locationId": "chichester-park-hotel",
+        "datetime": "2025-10-19T14:00:00"
+    },
+    {
         "locationId": "plymouth-royal-parade",
         "datetime": "2025-10-19T17:00:00"
     },
@@ -450,6 +466,10 @@
     {
         "locationId": "warwick-county-council-offices",
         "datetime": "2025-10-24T11:00:00"
+    },
+    {
+        "locationId": "portsmouth-royal-beach",
+        "datetime": "2025-10-24T17:00:00"
     },
     {
         "locationId": "altrincham-cresta-court",
@@ -576,6 +596,10 @@
         "datetime": "2025-10-26T14:00:00"
     },
     {
+        "locationId": "chichester-park-hotel",
+        "datetime": "2025-10-26T14:00:00"
+    },
+    {
         "locationId": "plymouth-royal-parade",
         "datetime": "2025-10-26T17:00:00"
     },
@@ -590,6 +614,10 @@
     {
         "locationId": "warwick-county-council-offices",
         "datetime": "2025-10-31T11:00:00"
+    },
+    {
+        "locationId": "portsmouth-royal-beach",
+        "datetime": "2025-10-31T17:00:00"
     },
     {
         "locationId": "altrincham-cresta-court",
@@ -713,6 +741,10 @@
     },
     {
         "locationId": "fallowfield-manchester-south",
+        "datetime": "2025-11-02T14:00:00"
+    },
+    {
+        "locationId": "chichester-park-hotel",
         "datetime": "2025-11-02T14:00:00"
     },
     {
