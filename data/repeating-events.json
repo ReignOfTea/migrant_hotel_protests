@@ -287,5 +287,13 @@
         "time": "18:00:00",
         "enabled": true,
         "created": "2025-09-22T19:10:09.568Z"
+    },
+    {
+        "name": "Chichester sunday",
+        "locationId": "chichester-park-hotel",
+        "weekday": 0,
+        "time": "14:00:00",
+        "enabled": true,
+        "created": "2025-10-08T13:32:45.256Z"
     }
 ]
