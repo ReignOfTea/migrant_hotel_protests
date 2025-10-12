@@ -1,47 +1,5 @@
 [
     {
-        "locationId": "bristol-hamilton-by-hilton",
-        "datetime": "2025-10-05T12:00:00"
-    },
-    {
-        "locationId": "falkirk-falkirk-council-unison",
-        "datetime": "2025-10-05T12:00:00"
-    },
-    {
-        "locationId": "dudley-quality-hotel",
-        "datetime": "2025-10-05T12:30:00"
-    },
-    {
-        "locationId": "london-britannia-canary-wharf",
-        "datetime": "2025-10-05T13:00:00"
-    },
-    {
-        "locationId": "norwich-the-norkie",
-        "datetime": "2025-10-05T13:00:00"
-    },
-    {
-        "locationId": "gloucester-ibis-hotel",
-        "datetime": "2025-10-05T13:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a></br>Muster point: Gloucester Guild Hall GL1 1NS - March to Gloucester Shire Hall GL10 2TG"
-    },
-    {
-        "locationId": "cheltenham-citrus-hotel",
-        "datetime": "2025-10-05T13:00:00",
-        "about": "The Great British National Protest <a href=\"https://www.facebook.com/GBNStrike\">Facebook</a>"
-    },
-    {
-        "locationId": "fallowfield-manchester-south",
-        "datetime": "2025-10-05T14:00:00"
-    },
-    {
-        "locationId": "plymouth-royal-parade",
-        "datetime": "2025-10-05T17:00:00"
-    },
-    {
-        "locationId": "epping-bell-hotel",
-        "datetime": "2025-10-05T18:00:00"
-    },
-    {
         "locationId": "stevenage-ibis-hotel",
         "datetime": "2025-10-06T18:00:00",
         "about": "Bring your flags, bring your family and friends. 6PM - 9PM"
