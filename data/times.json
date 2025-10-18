@@ -647,5 +647,73 @@
     {
         "locationId": "durham-county-hall",
         "datetime": "2025-11-14T18:00:00"
+    },
+    {
+        "locationId": "crewe-arms-hotel",
+        "datetime": "2025-11-15T10:00:00"
+    },
+    {
+        "locationId": "faversham-kiln-court",
+        "datetime": "2025-11-15T11:00:00"
+    },
+    {
+        "locationId": "blackpool-britannia-metropole",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "dalton-crooklands-brow",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "exeter-hampton-by-hilton",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "horley-four-points-hotel",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "long-eaton-best-western",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "mold-wrexham-hotel",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "oldbury-ibis",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "oxford-carfax-tower",
+        "datetime": "2025-11-15T12:00:00"
+    },
+    {
+        "locationId": "cannock-roman-hotel",
+        "datetime": "2025-11-15T13:00:00"
+    },
+    {
+        "locationId": "hull-royal-hotel",
+        "datetime": "2025-11-15T13:00:00"
+    },
+    {
+        "locationId": "nuneaton-town-hall",
+        "datetime": "2025-11-15T13:00:00"
+    },
+    {
+        "locationId": "sheffield-holiday-inn-express",
+        "datetime": "2025-11-15T13:00:00"
+    },
+    {
+        "locationId": "wakefield-cedar-court-hotel",
+        "datetime": "2025-11-15T14:00:00"
+    },
+    {
+        "locationId": "stockport-britannia",
+        "datetime": "2025-11-15T17:30:00"
     }
 ]
