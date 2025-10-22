@@ -390,5 +390,12 @@
         "venue": "HODDESTON CLOCK TOWER",
         "lat": 51.761585,
         "lng": -0.0111597
+    },
+    {
+        "id": "chelmsford-springfield-road",
+        "location": "CHELMSFORD",
+        "venue": "SPRINGFIELD ROAD",
+        "lat": 51.7394588,
+        "lng": 0.4887645
     }
 ]
