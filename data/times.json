@@ -720,5 +720,10 @@
         "locationId": "southampton-highfield-house",
         "datetime": "2025-10-26T13:00:00",
         "about": "March to Hoglands park"
+    },
+    {
+        "locationId": "chelmsford-springfield-road",
+        "datetime": "2025-11-07T16:00:00",
+        "about": "https://x.com/DaveAtherton20/status/1980966672610500749"
     }
 ]
