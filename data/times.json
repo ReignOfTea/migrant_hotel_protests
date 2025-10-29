@@ -712,5 +712,9 @@
     {
         "locationId": "epping-bell-hotel",
         "datetime": "2025-11-23T18:00:00"
+    },
+    {
+        "locationId": "plymouth-royal-parade",
+        "datetime": "2025-11-25T17:00:00"
     }
 ]
