@@ -181,10 +181,6 @@
         "datetime": "2025-11-07T18:00:00"
     },
     {
-        "locationId": "wolvo-centre",
-        "datetime": "2025-11-07T20:00:00"
-    },
-    {
         "locationId": "crewe-arms-hotel",
         "datetime": "2025-11-08T10:00:00"
     },
@@ -251,10 +247,6 @@
     {
         "locationId": "stockport-britannia",
         "datetime": "2025-11-08T17:30:00"
-    },
-    {
-        "locationId": "wolvo-centre",
-        "datetime": "2025-11-08T20:00:00"
     },
     {
         "locationId": "bristol-hamilton-by-hilton",

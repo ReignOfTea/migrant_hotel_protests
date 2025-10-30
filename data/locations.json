@@ -385,13 +385,6 @@
         "lng": -2.1372016
     },
     {
-        "id": "wolvo-centre",
-        "location": "wolvo",
-        "venue": "centre",
-        "lat": 0.11111,
-        "lng": 0.1111
-    },
-    {
         "id": "woolston-holiday-inn",
         "location": "WOOLSTON",
         "venue": "HOLIDAY INN",
