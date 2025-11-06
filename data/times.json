@@ -1,150 +1,6 @@
 [
     {
         "locationId": "warwick-county-council-offices",
-        "datetime": "2025-10-31T11:00:00"
-    },
-    {
-        "locationId": "portsmouth-royal-beach",
-        "datetime": "2025-10-31T17:00:00"
-    },
-    {
-        "locationId": "altrincham-cresta-court",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "bournemouth-roundhouse",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "cheshunt-marriott-delta",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "chichester-park-hotel",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "rhoose-holiday-inn-carfiff-airport",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "durham-county-hall",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "southampton-highfield-house",
-        "datetime": "2025-10-31T18:00:00"
-    },
-    {
-        "locationId": "crewe-arms-hotel",
-        "datetime": "2025-11-01T10:00:00"
-    },
-    {
-        "locationId": "faversham-kiln-court",
-        "datetime": "2025-11-01T11:00:00"
-    },
-    {
-        "locationId": "blackpool-britannia-metropole",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "dalton-crooklands-brow",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "exeter-hampton-by-hilton",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "horley-four-points-hotel",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "long-eaton-best-western",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "mold-wrexham-hotel",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "newcastle-new-bridge-hotel",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "oldbury-ibis",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "oxford-carfax-tower",
-        "datetime": "2025-11-01T12:00:00"
-    },
-    {
-        "locationId": "cannock-roman-hotel",
-        "datetime": "2025-11-01T13:00:00"
-    },
-    {
-        "locationId": "hull-royal-hotel",
-        "datetime": "2025-11-01T13:00:00"
-    },
-    {
-        "locationId": "nuneaton-town-hall",
-        "datetime": "2025-11-01T13:00:00"
-    },
-    {
-        "locationId": "sheffield-holiday-inn-express",
-        "datetime": "2025-11-01T13:00:00"
-    },
-    {
-        "locationId": "wakefield-cedar-court-hotel",
-        "datetime": "2025-11-01T14:00:00"
-    },
-    {
-        "locationId": "stockport-britannia",
-        "datetime": "2025-11-01T17:30:00"
-    },
-    {
-        "locationId": "bristol-hamilton-by-hilton",
-        "datetime": "2025-11-02T12:00:00"
-    },
-    {
-        "locationId": "falkirk-falkirk-council-unison",
-        "datetime": "2025-11-02T12:00:00"
-    },
-    {
-        "locationId": "dudley-quality-hotel",
-        "datetime": "2025-11-02T12:30:00"
-    },
-    {
-        "locationId": "london-britannia-canary-wharf",
-        "datetime": "2025-11-02T13:00:00"
-    },
-    {
-        "locationId": "norwich-the-norkie",
-        "datetime": "2025-11-02T13:00:00"
-    },
-    {
-        "locationId": "fallowfield-manchester-south",
-        "datetime": "2025-11-02T14:00:00"
-    },
-    {
-        "locationId": "chichester-park-hotel",
-        "datetime": "2025-11-02T14:00:00"
-    },
-    {
-        "locationId": "plymouth-royal-parade",
-        "datetime": "2025-11-02T17:00:00"
-    },
-    {
-        "locationId": "epping-bell-hotel",
-        "datetime": "2025-11-02T18:00:00"
-    },
-    {
-        "locationId": "plymouth-royal-parade",
-        "datetime": "2025-11-04T17:00:00"
-    },
-    {
-        "locationId": "warwick-county-council-offices",
         "datetime": "2025-11-07T11:00:00"
     },
     {
@@ -247,6 +103,11 @@
     {
         "locationId": "stockport-britannia",
         "datetime": "2025-11-08T17:30:00"
+    },
+    {
+        "locationId": "southampton-bargate",
+        "datetime": "2025-11-09T10:00:00",
+        "about": "Please no flags or banners for this one the groups marching will have the correct flags for the day"
     },
     {
         "locationId": "bristol-hamilton-by-hilton",

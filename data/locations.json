@@ -315,6 +315,13 @@
         "lng": -1.462227845280924
     },
     {
+        "id": "southampton-bargate",
+        "location": "SOUTHAMPTON",
+        "venue": "BARGATE",
+        "lat": 50.902664401608476,
+        "lng": -1.4042584690466375
+    },
+    {
         "id": "southampton-highfield-house",
         "location": "SOUTHAMPTON",
         "venue": "HIGHFIELD HOUSE HOTEL",
