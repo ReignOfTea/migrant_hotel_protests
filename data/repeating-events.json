@@ -1,14 +1,5 @@
 [
     {
-        "name": "Cresta Court Weekly",
-        "locationId": "altrincham-cresta-court",
-        "weekday": 5,
-        "time": "18:00:00",
-        "enabled": true,
-        "created": "2025-09-06T20:52:04.688Z",
-        "excludedDates": []
-    },
-    {
         "name": "Roundhouse Hotel",
         "locationId": "bournemouth-roundhouse",
         "weekday": 5,
@@ -295,5 +286,14 @@
         "time": "17:00:00",
         "enabled": true,
         "created": "2025-10-08T13:35:44.414Z"
+    },
+    {
+        "name": "Cresta Court Weekly",
+        "locationId": "altrincham-cresta-court",
+        "weekday": 6,
+        "time": "14:00:00",
+        "enabled": true,
+        "created": "2025-09-06T20:52:04.688Z",
+        "excludedDates": []
     }
 ]
