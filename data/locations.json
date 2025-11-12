@@ -42,6 +42,13 @@
         "lng": -2.05299172958631
     },
     {
+        "id": "chelmsford-tindal-square",
+        "location": "Chelmsford",
+        "venue": "Tindal Square",
+        "lat": 51.734536365898244,
+        "lng": 0.47247271921252454
+    },
+    {
         "id": "chelmsford-springfield-road",
         "location": "CHELMSFORD",
         "venue": "SPRINGFIELD ROAD",
