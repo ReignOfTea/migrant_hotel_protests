@@ -662,5 +662,41 @@
     {
         "locationId": "stockport-britannia",
         "datetime": "2025-12-27T17:30:00"
+    },
+    {
+        "locationId": "bristol-hamilton-by-hilton",
+        "datetime": "2025-12-28T12:00:00"
+    },
+    {
+        "locationId": "falkirk-falkirk-council-unison",
+        "datetime": "2025-12-28T12:00:00"
+    },
+    {
+        "locationId": "dudley-quality-hotel",
+        "datetime": "2025-12-28T12:30:00"
+    },
+    {
+        "locationId": "london-britannia-canary-wharf",
+        "datetime": "2025-12-28T13:00:00"
+    },
+    {
+        "locationId": "norwich-the-norkie",
+        "datetime": "2025-12-28T13:00:00"
+    },
+    {
+        "locationId": "fallowfield-manchester-south",
+        "datetime": "2025-12-28T14:00:00"
+    },
+    {
+        "locationId": "chichester-park-hotel",
+        "datetime": "2025-12-28T14:00:00"
+    },
+    {
+        "locationId": "plymouth-royal-parade",
+        "datetime": "2025-12-28T17:00:00"
+    },
+    {
+        "locationId": "epping-bell-hotel",
+        "datetime": "2025-12-28T18:00:00"
     }
 ]
