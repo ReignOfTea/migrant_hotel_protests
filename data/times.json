@@ -626,5 +626,77 @@
     {
         "locationId": "durham-county-hall",
         "datetime": "2026-01-16T18:00:00"
+    },
+    {
+        "locationId": "crewe-arms-hotel",
+        "datetime": "2026-01-17T10:00:00"
+    },
+    {
+        "locationId": "faversham-kiln-court",
+        "datetime": "2026-01-17T11:00:00"
+    },
+    {
+        "locationId": "blackpool-britannia-metropole",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "dalton-crooklands-brow",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "exeter-hampton-by-hilton",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "horley-four-points-hotel",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "long-eaton-best-western",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "mold-wrexham-hotel",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "newcastle-new-bridge-hotel",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "oldbury-ibis",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "oxford-carfax-tower",
+        "datetime": "2026-01-17T12:00:00"
+    },
+    {
+        "locationId": "cannock-roman-hotel",
+        "datetime": "2026-01-17T13:00:00"
+    },
+    {
+        "locationId": "hull-royal-hotel",
+        "datetime": "2026-01-17T13:00:00"
+    },
+    {
+        "locationId": "nuneaton-town-hall",
+        "datetime": "2026-01-17T13:00:00"
+    },
+    {
+        "locationId": "sheffield-holiday-inn-express",
+        "datetime": "2026-01-17T13:00:00"
+    },
+    {
+        "locationId": "wakefield-cedar-court-hotel",
+        "datetime": "2026-01-17T14:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2026-01-17T14:00:00"
+    },
+    {
+        "locationId": "stockport-britannia",
+        "datetime": "2026-01-17T17:30:00"
     }
 ]
