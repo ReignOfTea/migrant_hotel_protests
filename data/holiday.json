@@ -1,0 +1,37 @@
+{
+    "holidays": [
+        {
+            "type": "Christmas",
+            "message": "<br>'Tis the season to spend time with your loved ones.<br>The protests will return in the new year.<br><br>Have a very Merry Christmas.",
+            "start": "2025-12-15T00:00:00Z",
+            "end": "2026-01-01T00:00:00Z",
+            "features": ["snow", "fireworks"],
+            "styles": {
+                "message": "font-size: 1.6em; padding: 60px 50px; background: linear-gradient(135deg, rgba(0, 50, 0, 0.8) 0%, rgba(0, 0, 0, 0.7) 50%, rgba(50, 0, 0, 0.8) 100%); letter-spacing: 2px; line-height: 2; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.2); border: 4px solid; border-image: linear-gradient(45deg, #228B22, #B22222, #228B22, #B22222) 1; border-radius: 8px; box-shadow: 0 0 20px rgba(178, 34, 34, 0.4), 0 0 40px rgba(34, 139, 34, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.5); position: relative; overflow: hidden; animation: gentleGlow 3s ease-in-out infinite;",
+                "before": "content: '🎄'; position: absolute; top: 15px; left: 20px; font-size: 2em; opacity: 0.6; animation: twinkle 2s ease-in-out infinite;",
+                "after": "content: '🎄'; position: absolute; top: 15px; right: 20px; font-size: 2em; opacity: 0.6; animation: twinkle 2s ease-in-out infinite 1s;",
+                "keyframes": {
+                    "twinkle": "0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); }",
+                    "gentleGlow": "0%, 100% { box-shadow: 0 0 20px rgba(178, 34, 34, 0.4), 0 0 40px rgba(34, 139, 34, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.5); } 50% { box-shadow: 0 0 30px rgba(178, 34, 34, 0.6), 0 0 60px rgba(34, 139, 34, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.5); }"
+                }
+            }
+        },
+        {
+            "type": "NewYear",
+            "message": "Happy New Year!<br>The protests will be back soon.<br>Wishing you all the best for the year ahead, we'll see you soon!",
+            "start": "2025-12-31T23:55:00Z",
+            "end": "2026-01-03T00:00:00Z",
+            "features": ["fireworks"],
+            "styles": {
+                "message": "font-size: 1.6em; padding: 50px 80px; background: rgba(0, 0, 0, 0.85); letter-spacing: 2px; line-height: 2; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(255, 255, 255, 0.3); border: 3px solid; border-image: linear-gradient(90deg, #002395 0%, #C8102E 50%, #002395 100%) 1; border-radius: 8px; box-shadow: 0 0 25px rgba(0, 35, 149, 0.4), 0 0 40px rgba(200, 16, 46, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.6); position: relative; overflow: visible; animation: newYearGlow 3s ease-in-out infinite; color: #f0f0f0;",
+                "before": "content: '🕐'; position: absolute; top: 20px; left: 25px; font-size: 2em; opacity: 0.8; animation: clockTick 2s ease-in-out infinite; z-index: 1;",
+                "after": "content: '🎆'; position: absolute; top: 20px; right: 25px; font-size: 2em; opacity: 0.8; animation: sparkle 2s ease-in-out infinite 1s; z-index: 1;",
+                "keyframes": {
+                    "clockTick": "0%, 100% { opacity: 0.7; transform: scale(1) rotate(0deg); } 50% { opacity: 1; transform: scale(1.1) rotate(3deg); }",
+                    "sparkle": "0%, 100% { opacity: 0.7; transform: scale(1); filter: brightness(1); } 50% { opacity: 1; transform: scale(1.15); filter: brightness(1.4); }",
+                    "newYearGlow": "0%, 100% { box-shadow: 0 0 25px rgba(0, 35, 149, 0.4), 0 0 40px rgba(200, 16, 46, 0.3), inset 0 0 20px rgba(0, 0, 0, 0.6); } 50% { box-shadow: 0 0 35px rgba(0, 35, 149, 0.6), 0 0 55px rgba(200, 16, 46, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.6); }"
+                }
+            }
+        }
+    ]
+}

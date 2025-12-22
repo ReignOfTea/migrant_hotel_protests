@@ -4,7 +4,7 @@
         "locationId": "bournemouth-roundhouse",
         "weekday": 5,
         "time": "18:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T16:54:16.500Z"
     },
     {
@@ -12,7 +12,7 @@
         "locationId": "cheshunt-marriott-delta",
         "weekday": 5,
         "time": "18:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T16:55:38.052Z"
     },
     {
@@ -28,7 +28,7 @@
         "locationId": "rhoose-holiday-inn-carfiff-airport",
         "weekday": 5,
         "time": "18:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:48:09.539Z"
     },
     {
@@ -36,7 +36,7 @@
         "locationId": "warwick-county-council-offices",
         "weekday": 5,
         "time": "11:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:50:06.696Z"
     },
     {
@@ -44,7 +44,7 @@
         "locationId": "blackpool-britannia-metropole",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:51:41.041Z"
     },
     {
@@ -52,7 +52,7 @@
         "locationId": "cannock-roman-hotel",
         "weekday": 6,
         "time": "13:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:52:13.907Z"
     },
     {
@@ -60,7 +60,7 @@
         "locationId": "crewe-arms-hotel",
         "weekday": 6,
         "time": "10:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:53:35.324Z"
     },
     {
@@ -68,7 +68,7 @@
         "locationId": "dalton-crooklands-brow",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:56:20.284Z"
     },
     {
@@ -76,7 +76,7 @@
         "locationId": "exeter-hampton-by-hilton",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T17:59:57.128Z"
     },
     {
@@ -84,7 +84,7 @@
         "locationId": "faversham-kiln-court",
         "weekday": 6,
         "time": "11:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:00:54.579Z"
     },
     {
@@ -92,7 +92,7 @@
         "locationId": "horley-four-points-hotel",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:02:31.579Z"
     },
     {
@@ -100,7 +100,7 @@
         "locationId": "hull-royal-hotel",
         "weekday": 6,
         "time": "13:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:03:06.700Z"
     },
     {
@@ -108,7 +108,7 @@
         "locationId": "long-eaton-best-western",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:03:40.955Z"
     },
     {
@@ -116,7 +116,7 @@
         "locationId": "mold-wrexham-hotel",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:04:28.892Z"
     },
     {
@@ -124,7 +124,7 @@
         "locationId": "newcastle-new-bridge-hotel",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:05:14.055Z"
     },
     {
@@ -132,7 +132,7 @@
         "locationId": "nuneaton-town-hall",
         "weekday": 6,
         "time": "13:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:05:57.284Z"
     },
     {
@@ -140,7 +140,7 @@
         "locationId": "oldbury-ibis",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:06:31.359Z"
     },
     {
@@ -148,7 +148,7 @@
         "locationId": "oxford-carfax-tower",
         "weekday": 6,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:07:42.565Z"
     },
     {
@@ -156,7 +156,7 @@
         "locationId": "sheffield-holiday-inn-express",
         "weekday": 6,
         "time": "13:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:08:55.097Z"
     },
     {
@@ -164,7 +164,7 @@
         "locationId": "stockport-britannia",
         "weekday": 6,
         "time": "17:30:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:10:09.315Z"
     },
     {
@@ -180,7 +180,7 @@
         "locationId": "wakefield-cedar-court-hotel",
         "weekday": 6,
         "time": "14:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:11:51.264Z"
     },
     {
@@ -188,7 +188,7 @@
         "locationId": "bristol-hamilton-by-hilton",
         "weekday": 0,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:12:24.659Z"
     },
     {
@@ -196,7 +196,7 @@
         "locationId": "dudley-quality-hotel",
         "weekday": 0,
         "time": "12:30:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:12:55.280Z"
     },
     {
@@ -204,7 +204,7 @@
         "locationId": "epping-bell-hotel",
         "weekday": 0,
         "time": "18:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:13:18.740Z"
     },
     {
@@ -212,7 +212,7 @@
         "locationId": "falkirk-falkirk-council-unison",
         "weekday": 0,
         "time": "12:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:13:55.514Z"
     },
     {
@@ -220,7 +220,7 @@
         "locationId": "fallowfield-manchester-south",
         "weekday": 0,
         "time": "14:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:14:25.123Z"
     },
     {
@@ -228,7 +228,7 @@
         "locationId": "london-britannia-canary-wharf",
         "weekday": 0,
         "time": "13:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:15:15.571Z"
     },
     {
@@ -236,7 +236,7 @@
         "locationId": "norwich-the-norkie",
         "weekday": 0,
         "time": "13:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:16:02.938Z"
     },
     {
@@ -244,7 +244,7 @@
         "locationId": "plymouth-royal-parade",
         "weekday": 0,
         "time": "17:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:16:53.096Z"
     },
     {
@@ -252,7 +252,7 @@
         "locationId": "plymouth-royal-parade",
         "weekday": 2,
         "time": "17:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-09T18:17:38.084Z"
     },
     {
@@ -260,7 +260,7 @@
         "locationId": "southampton-highfield-house",
         "weekday": 5,
         "time": "18:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-15T21:16:58.913Z"
     },
     {
@@ -268,7 +268,7 @@
         "locationId": "durham-county-hall",
         "weekday": 5,
         "time": "18:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-22T19:10:09.568Z"
     },
     {
@@ -276,7 +276,7 @@
         "locationId": "chichester-park-hotel",
         "weekday": 0,
         "time": "14:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-10-08T13:32:45.256Z"
     },
     {
@@ -284,7 +284,7 @@
         "locationId": "portsmouth-royal-beach",
         "weekday": 5,
         "time": "17:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-10-08T13:35:44.414Z"
     },
     {
@@ -292,7 +292,7 @@
         "locationId": "altrincham-cresta-court",
         "weekday": 6,
         "time": "14:00:00",
-        "enabled": true,
+        "enabled": false,
         "created": "2025-09-06T20:52:04.688Z",
         "excludedDates": []
     }

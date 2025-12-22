@@ -502,6 +502,126 @@ h5 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.55);
 }
 
+.holiday-message {
+    text-align: center;
+    color: #dacbb6 !important;
+    font-size: 1.5em;
+    padding: 50px;
+    background: rgba(0, 0, 0, 0.6);
+    margin: 25px 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.55);
+    border: 2px solid rgba(178, 34, 34, 0.5);
+}
+
+/* Holiday-specific styles are injected dynamically from holiday.json */
+
+/* Snow animation for Christmas mode */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.snowflake {
+    position: absolute;
+    top: -10px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+    user-select: none;
+    will-change: transform, opacity;
+    /* Force GPU acceleration */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    contain: layout style paint;
+}
+
+/* Shared animations - much more performant than unique animations per flake */
+/* We create 4 variants for visual variety while maintaining performance */
+.snowflake.variant-1 {
+    animation: snowfall-1 linear infinite;
+}
+
+.snowflake.variant-2 {
+    animation: snowfall-2 linear infinite;
+}
+
+.snowflake.variant-3 {
+    animation: snowfall-3 linear infinite;
+}
+
+.snowflake.variant-4 {
+    animation: snowfall-4 linear infinite;
+}
+
+@keyframes snowfall-1 {
+    0% {
+        transform: translate3d(0, -10px, 0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(80px, calc(50vh), 0) rotate(180deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(150px, calc(100vh + 20px), 0) rotate(360deg);
+        opacity: 0.2;
+    }
+}
+
+@keyframes snowfall-2 {
+    0% {
+        transform: translate3d(0, -10px, 0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(-60px, calc(50vh), 0) rotate(180deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(-120px, calc(100vh + 20px), 0) rotate(360deg);
+        opacity: 0.2;
+    }
+}
+
+@keyframes snowfall-3 {
+    0% {
+        transform: translate3d(0, -10px, 0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(100px, calc(50vh), 0) rotate(180deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(200px, calc(100vh + 20px), 0) rotate(360deg);
+        opacity: 0.2;
+    }
+}
+
+@keyframes snowfall-4 {
+    0% {
+        transform: translate3d(0, -10px, 0) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translate3d(-90px, calc(50vh), 0) rotate(180deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translate3d(-180px, calc(100vh + 20px), 0) rotate(360deg);
+        opacity: 0.2;
+    }
+}
+
 /* Tablet breakpoint */
 @media (max-width: 1366px) {
     h1 {
@@ -1391,5 +1511,84 @@ h5 {
     .info-popup-content {
         max-width: 95%;
         padding: 15px;
+    }
+}
+
+/* Fireworks animation */
+.firework {
+    position: fixed;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+.firework-trail {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    animation: firework-trail linear forwards;
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    /* Create a glowing trail effect */
+    filter: blur(1px);
+}
+
+.firework-smoke {
+    position: fixed;
+    border-radius: 50%;
+    animation: firework-smoke ease-out forwards;
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+    /* Make smoke look more diffuse */
+    filter: blur(3px);
+    z-index: 9999;
+}
+
+.firework-particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: firework-explode linear forwards;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+@keyframes firework-trail {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.95;
+        transform: translate3d(calc(var(--x-distance, 0px) * 0.5), calc(var(--y-distance, -300px) * 0.5), 0) scale(1.1);
+    }
+    100% {
+        transform: translate3d(var(--x-distance, 0px), var(--y-distance, -300px), 0) scale(0.8);
+        opacity: 0.6;
+    }
+}
+
+@keyframes firework-smoke {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate3d(var(--drift, 0px), -5px, 0) scale(1.3);
+        opacity: 0.4;
+    }
+    100% {
+        transform: translate3d(calc(var(--drift, 0px) * 1.5), -15px, 0) scale(1.8);
+        opacity: 0;
+    }
+}
+
+@keyframes firework-explode {
+    0% {
+        transform: translate3d(0, 0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(var(--x-offset, 0), var(--y-offset, 0), 0) scale(0);
+        opacity: 0;
     }
 }
