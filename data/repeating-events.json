@@ -288,12 +288,12 @@
         "created": "2025-10-08T13:35:44.414Z"
     },
     {
-        "name": "Cresta Court Weekly",
+        "name": "",
         "locationId": "altrincham-cresta-court",
-        "weekday": 6,
-        "time": "14:00:00",
-        "enabled": false,
-        "created": "2025-09-06T20:52:04.688Z",
+        "weekday": 0,
+        "time": "18:00:00",
+        "enabled": true,
+        "created": "2025-12-28T22:42:26.679Z",
         "excludedDates": []
     }
 ]
