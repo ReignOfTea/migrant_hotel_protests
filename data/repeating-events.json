@@ -286,14 +286,5 @@
         "time": "17:00:00",
         "enabled": false,
         "created": "2025-10-08T13:35:44.414Z"
-    },
-    {
-        "name": "",
-        "locationId": "altrincham-cresta-court",
-        "weekday": 0,
-        "time": "18:00:00",
-        "enabled": true,
-        "created": "2025-12-28T22:42:26.679Z",
-        "excludedDates": []
     }
 ]
