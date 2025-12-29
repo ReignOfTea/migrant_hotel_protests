@@ -1,1 +1,18 @@
-[]
+[
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2026-01-04T18:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2026-01-11T18:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2026-01-18T18:00:00"
+    },
+    {
+        "locationId": "altrincham-cresta-court",
+        "datetime": "2026-01-25T18:00:00"
+    }
+]
