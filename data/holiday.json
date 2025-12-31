@@ -19,7 +19,7 @@
         {
             "type": "NewYear",
             "message": "Happy New Year!<br>The protests will be back soon.<br>Wishing you all the best for the year ahead, we'll see you soon!",
-            "start": "2025-12-31T23:55:00Z",
+            "start": "2025-12-31T23:00:00Z",
             "end": "2026-01-03T00:00:00Z",
             "features": ["fireworks"],
             "styles": {
