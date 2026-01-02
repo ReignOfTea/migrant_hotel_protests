@@ -98,6 +98,13 @@
         "lng": -2.4326039030956936
     },
     {
+        "id": "crowborough-army-barracks",
+        "location": "Crowborough",
+        "venue": "Army Barracks",
+        "lat": 51.04422840950434,
+        "lng": 0.1410757908726555
+    },
+    {
         "id": "dalton-crooklands-brow",
         "location": "DALTON",
         "venue": "CROOKLANDS BROW HOTEL",
