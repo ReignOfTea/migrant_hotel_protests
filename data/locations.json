@@ -231,6 +231,13 @@
         "lng": 0.0535654
     },
     {
+        "id": "manchester-central-park",
+        "location": "Manchester",
+        "venue": "Central Park",
+        "lat": 53.49888400124158,
+        "lng": -2.200909093704403
+    },
+    {
         "id": "mold-wrexham-hotel",
         "location": "MOLD",
         "venue": "WREXHAM STREET",
