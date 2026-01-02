@@ -286,5 +286,16 @@
         "time": "17:00:00",
         "enabled": false,
         "created": "2025-10-08T13:35:44.414Z"
+    },
+    {
+        "name": "alty",
+        "locationId": "altrincham-cresta-court",
+        "weekday": 5,
+        "time": "17:30:00",
+        "enabled": true,
+        "created": "2026-01-02T21:33:57.313Z",
+        "excludedDates": [
+            "2026-01-09"
+        ]
     }
 ]
