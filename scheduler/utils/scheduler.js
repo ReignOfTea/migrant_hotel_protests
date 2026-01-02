@@ -1,5 +1,5 @@
 import cron from 'node-cron';
-import { getFileContent, updateFileContent } from './github.js';
+import { getFileContent, updateFileContent, batchUpdateFiles } from './github.js';
 import { config } from '../config/config.js';
 
 const EVENTS_FILE_PATH = 'data/times.json';
@@ -23,8 +23,7 @@ export class EventScheduler {
         // Schedule cleanup job to run daily at midnight
         const cleanupJob = cron.schedule('0 0 * * *', async () => {
             console.log('Running daily event cleanup...');
-            await this.cleanupOldEvents();
-            await this.cleanupOldExcludedDates();
+            await this.runBatchCleanup();
         }, {
             scheduled: false,
             timezone: 'Europe/London'
@@ -70,46 +69,28 @@ export class EventScheduler {
 
     async cleanupOldEvents() {
         try {
-            const { data: events, sha } = await getFileContent(EVENTS_FILE_PATH);
-
-            if (!Array.isArray(events) || events.length === 0) {
-                console.log('No events to cleanup');
+            const change = await this.prepareEventCleanup();
+            if (!change) {
                 return;
             }
 
-            const cutoffDate = new Date();
-            cutoffDate.setDate(cutoffDate.getDate() - config.EVENT_CLEANUP_DAYS);
+            await updateFileContent(
+                EVENTS_FILE_PATH,
+                change.data,
+                change.sha,
+                change.message
+            );
 
-            const initialCount = events.length;
-            const filteredEvents = events.filter(event => {
-                const eventDate = new Date(event.datetime);
-                return eventDate >= cutoffDate;
-            });
+            console.log(`Cleaned up ${change.removedCount} old events`);
 
-            const removedCount = initialCount - filteredEvents.length;
-
-            if (removedCount > 0) {
-                await updateFileContent(
-                    EVENTS_FILE_PATH,
-                    filteredEvents,
-                    sha,
-                    `Cleanup: Remove ${removedCount} old event(s) older than ${config.EVENT_CLEANUP_DAYS} days`
+            if (this.auditLogger) {
+                await this.auditLogger.log(
+                    'Event Cleanup',
+                    `Automatically removed ${change.removedCount} events older than ${config.EVENT_CLEANUP_DAYS} days`,
+                    'system',
+                    'Event Scheduler'
                 );
-
-                console.log(`Cleaned up ${removedCount} old events`);
-
-                if (this.auditLogger) {
-                    await this.auditLogger.log(
-                        'Event Cleanup',
-                        `Automatically removed ${removedCount} events older than ${config.EVENT_CLEANUP_DAYS} days`,
-                        'system',
-                        'Event Scheduler'
-                    );
-                }
-            } else {
-                console.log('No old events to cleanup');
             }
-
         } catch (error) {
             console.error('Error during event cleanup:', error);
 
@@ -124,13 +105,87 @@ export class EventScheduler {
         }
     }
 
+    async prepareEventCleanup() {
+        try {
+            const { data: events, sha } = await getFileContent(EVENTS_FILE_PATH);
+
+            if (!Array.isArray(events) || events.length === 0) {
+                console.log('No events to cleanup');
+                return null;
+            }
+
+            const cutoffDate = new Date();
+            cutoffDate.setDate(cutoffDate.getDate() - config.EVENT_CLEANUP_DAYS);
+
+            const initialCount = events.length;
+            const filteredEvents = events.filter(event => {
+                const eventDate = new Date(event.datetime);
+                return eventDate >= cutoffDate;
+            });
+
+            const removedCount = initialCount - filteredEvents.length;
+
+            if (removedCount > 0) {
+                return {
+                    path: EVENTS_FILE_PATH,
+                    data: filteredEvents,
+                    sha: sha,
+                    message: `Cleanup: Remove ${removedCount} old event(s) older than ${config.EVENT_CLEANUP_DAYS} days`,
+                    removedCount: removedCount
+                };
+            }
+
+            return null;
+        } catch (error) {
+            throw error;
+        }
+    }
+
     async cleanupOldExcludedDates() {
+        try {
+            const change = await this.prepareExcludedDatesCleanup();
+            if (!change) {
+                return;
+            }
+
+            await updateFileContent(
+                REPEATING_EVENTS_FILE_PATH,
+                change.data,
+                change.sha,
+                change.message
+            );
+
+            console.log(`Cleaned up ${change.totalCleaned} old excluded dates`);
+
+            if (this.auditLogger) {
+                await this.auditLogger.log(
+                    'Excluded Dates Cleanup',
+                    `Automatically removed ${change.totalCleaned} excluded dates that have passed`,
+                    'system',
+                    'Event Scheduler'
+                );
+            }
+        } catch (error) {
+            console.error('Error during excluded dates cleanup:', error);
+
+            if (this.auditLogger) {
+                await this.auditLogger.logError(
+                    error,
+                    'Excluded Dates Cleanup Error',
+                    'system',
+                    'Event Scheduler'
+                );
+            }
+        }
+    }
+
+    async prepareExcludedDatesCleanup() {
         try {
             const { data: repeatingEvents, sha } = await getFileContent(REPEATING_EVENTS_FILE_PATH);
 
             if (!Array.isArray(repeatingEvents) || repeatingEvents.length === 0) {
                 console.log('No repeating events to process for excluded dates cleanup');
-                return;
+                return null;
             }
 
             const today = new Date();
@@ -163,34 +218,86 @@ export class EventScheduler {
             });
 
             if (hasChanges) {
-                await updateFileContent(
-                    REPEATING_EVENTS_FILE_PATH,
-                    updatedRepeatingEvents,
-                    sha,
-                    `Cleanup: Remove ${totalCleaned} old excluded date(s)`
-                );
+                return {
+                    path: REPEATING_EVENTS_FILE_PATH,
+                    data: updatedRepeatingEvents,
+                    sha: sha,
+                    message: `Cleanup: Remove ${totalCleaned} old excluded date(s)`,
+                    totalCleaned: totalCleaned
+                };
+            }
 
-                console.log(`Cleaned up ${totalCleaned} old excluded dates`);
+            return null;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async runBatchCleanup() {
+        try {
+            const changes = [];
+
+            // Prepare event cleanup
+            const eventCleanup = await this.prepareEventCleanup();
+            if (eventCleanup) {
+                changes.push({
+                    path: eventCleanup.path,
+                    data: eventCleanup.data,
+                    sha: eventCleanup.sha
+                });
+            }
+
+            // Prepare excluded dates cleanup
+            const excludedDatesCleanup = await this.prepareExcludedDatesCleanup();
+            if (excludedDatesCleanup) {
+                changes.push({
+                    path: excludedDatesCleanup.path,
+                    data: excludedDatesCleanup.data,
+                    sha: excludedDatesCleanup.sha
+                });
+            }
+
+            // If we have changes, commit them all at once
+            if (changes.length > 0) {
+                const commitMessages = [];
+                if (eventCleanup) {
+                    commitMessages.push(`remove ${eventCleanup.removedCount} old event(s)`);
+                }
+                if (excludedDatesCleanup) {
+                    commitMessages.push(`remove ${excludedDatesCleanup.totalCleaned} old excluded date(s)`);
+                }
+
+                const commitMessage = `Cleanup: ${commitMessages.join(', ')}`;
+                await batchUpdateFiles(changes, commitMessage);
+
+                console.log(`Batch cleanup completed: ${commitMessage}`);
 
                 if (this.auditLogger) {
+                    let auditDetails = [];
+                    if (eventCleanup) {
+                        auditDetails.push(`Removed ${eventCleanup.removedCount} events older than ${config.EVENT_CLEANUP_DAYS} days`);
+                    }
+                    if (excludedDatesCleanup) {
+                        auditDetails.push(`Removed ${excludedDatesCleanup.totalCleaned} excluded dates that have passed`);
+                    }
+
                     await this.auditLogger.log(
-                        'Excluded Dates Cleanup',
-                        `Automatically removed ${totalCleaned} excluded dates that have passed`,
+                        'Batch Cleanup',
+                        auditDetails.join('\n'),
                         'system',
                         'Event Scheduler'
                     );
                 }
             } else {
-                console.log('No old excluded dates to cleanup');
+                console.log('No cleanup changes needed');
             }
-
         } catch (error) {
-            console.error('Error during excluded dates cleanup:', error);
+            console.error('Error during batch cleanup:', error);
 
             if (this.auditLogger) {
                 await this.auditLogger.logError(
                     error,
-                    'Excluded Dates Cleanup Error',
+                    'Batch Cleanup Error',
                     'system',
                     'Event Scheduler'
                 );
@@ -282,10 +389,17 @@ export class EventScheduler {
                     );
 
                     if (!eventExists) {
-                        newEvents.push({
+                        const newEvent = {
                             locationId: repeatingEvent.locationId,
                             datetime: eventDatetime
-                        });
+                        };
+                        
+                        // Copy about field if it exists in the repeating event
+                        if (repeatingEvent.about) {
+                            newEvent.about = repeatingEvent.about;
+                        }
+                        
+                        newEvents.push(newEvent);
                         eventsAdded++;
 
                         // Store details for audit log
@@ -415,8 +529,7 @@ export class EventScheduler {
     // Manual trigger methods for testing
     async triggerCleanup() {
         console.log('Manually triggering event cleanup...');
-        await this.cleanupOldEvents();
-        await this.cleanupOldExcludedDates();
+        await this.runBatchCleanup();
     }
 
     async triggerRepeatingEvents() {
