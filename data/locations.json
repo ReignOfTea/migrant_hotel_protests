@@ -238,6 +238,13 @@
         "lng": -2.200909093704403
     },
     {
+        "id": "manchester-march-for-remigration-britain-first",
+        "location": "Manchester",
+        "venue": "March For Remigration - Britain First",
+        "lat": 53.47733340466485,
+        "lng": -2.2311521607480764
+    },
+    {
         "id": "mold-wrexham-hotel",
         "location": "MOLD",
         "venue": "WREXHAM STREET",
@@ -271,6 +278,13 @@
         "venue": "IBIS",
         "lat": 52.49121434792427,
         "lng": -2.02183243843053
+    },
+    {
+        "id": "oldham-the-victoria-migrant-hotel",
+        "location": "Oldham",
+        "venue": "The Victoria Migrant Hotel",
+        "lat": 53.522522902825564,
+        "lng": -2.1561712631773466
     },
     {
         "id": "oldham-the-victoria-hotel",

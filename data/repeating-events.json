@@ -306,5 +306,15 @@
         "created": "2026-01-02T22:41:56.344Z",
         "excludedDates": [],
         "about": "<a href=\"https://www.facebook.com/groups/1545090213162165\">Facebook Group</a>"
+    },
+    {
+        "name": "oldham victoria hotel",
+        "locationId": "oldham-the-victoria-migrant-hotel",
+        "weekday": 6,
+        "time": "13:00:00",
+        "enabled": true,
+        "created": "2026-01-27T23:07:28.016Z",
+        "excludedDates": [],
+        "about": "<a href=\"https://x.com/Jon305429850895/status/2015870227808936228/photo/1\">X Post</a>"
     }
 ]
