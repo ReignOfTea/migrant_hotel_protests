@@ -70,7 +70,11 @@ Simply visit https://asylumprotests.com to view protest information. No installa
    - Start daemon: `npm start`
    - Development mode: `npm run dev`
    - Manual cleanup: `npm run cleanup`
-   - Manual schedule processing: `npm run schedule`
+   - Manual schedule processing: `npm run schedule` or `npm run repeating`
+
+5. **Trigger repeating events when `repeating-events.json` changes** (optional):
+   - **Webhook (recommended)**: Set `GITHUB_WEBHOOK_SECRET` in `.env`, then in GitHub go to Settings → Webhooks → Add webhook. Use your public URL (e.g. `https://your-server.example.com/webhook/github`), set Content type to `application/json`, add the same secret, and choose “Just the push event”. When the repo is pushed (e.g. after editing `repeating-events.json`), the scheduler runs repeating-events processing within seconds.
+   - **Polling fallback**: If you can’t receive webhooks (e.g. behind NAT), set `REPEATING_EVENTS_POLL_SECONDS=60` (or another interval) in `.env`. The scheduler will check the file via the GitHub API every N seconds and rerun processing when it changes. Max delay is about N seconds.
 
 ## Data Structure
 

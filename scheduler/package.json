@@ -8,7 +8,8 @@
         "start": "node index.js",
         "dev": "node --watch index.js",
         "cleanup": "node index.js cleanup",
-        "schedule": "node index.js schedule"
+        "schedule": "node index.js schedule",
+        "repeating": "node index.js repeating"
     },
     "dependencies": {
         "@octokit/rest": "^20.0.2",
