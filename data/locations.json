@@ -42,6 +42,13 @@
         "lng": -2.05299172958631
     },
     {
+        "id": "chelmsford-shire-hall",
+        "location": "Chelmsford",
+        "venue": "Shire Hall",
+        "lat": 51.73455585055447,
+        "lng": 0.4730129519519228
+    },
+    {
         "id": "chelmsford-tindal-square",
         "location": "Chelmsford",
         "venue": "Tindal Square",
@@ -287,13 +294,6 @@
         "lng": -2.1561712631773466
     },
     {
-        "id": "oldham-the-victoria-hotel",
-        "location": "OLDHAM",
-        "venue": "THE VICTORIA HOTEL",
-        "lat": 53.522357,
-        "lng": -2.156139
-    },
-    {
         "id": "oxford-carfax-tower",
         "location": "OXFORD",
         "venue": "CARFAX TOWER",
@@ -404,6 +404,13 @@
         "venue": "WESTMINSTER",
         "lat": 51.4999639,
         "lng": -0.1279826
+    },
+    {
+        "id": "wethersfield-wethersfield-village-hall",
+        "location": "Wethersfield",
+        "venue": "Wethersfield Village Hall",
+        "lat": 51.95337866515027,
+        "lng": 0.4890179468083896
     },
     {
         "id": "widnes-the-hillcrest-hotel",
