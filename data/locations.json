@@ -175,6 +175,13 @@
         "lng": -2.2107237039550993
     },
     {
+        "id": "hale-altrincham-ashley-hotel",
+        "location": "Hale Altrincham",
+        "venue": "Ashley Hotel",
+        "lat": 53.37641263473526,
+        "lng": -2.3454090329607737
+    },
+    {
         "id": "hillingdon-mulberry-parade",
         "location": "HILLINGDON",
         "venue": "MULBERRY PARADE",
