@@ -40,14 +40,6 @@
         "created": "2025-09-09T17:50:06.696Z"
     },
     {
-        "name": "Britannia Metropole",
-        "locationId": "blackpool-britannia-metropole",
-        "weekday": 6,
-        "time": "12:00:00",
-        "enabled": false,
-        "created": "2025-09-09T17:51:41.041Z"
-    },
-    {
         "name": "Roman Hotel",
         "locationId": "cannock-roman-hotel",
         "weekday": 6,
@@ -316,5 +308,14 @@
         "created": "2026-01-02T22:41:56.344Z",
         "excludedDates": [],
         "about": "Visit their <a href=\"https://www.facebook.com/groups/1545090213162165\">Facebook Group</a>"
+    },
+    {
+        "name": "Britannia Metropole",
+        "locationId": "blackpool-britannia-metropole",
+        "weekday": 6,
+        "time": "12:00:00",
+        "enabled": false,
+        "created": "2025-09-09T17:51:41.041Z",
+        "about": "https://x.com/kevlondon4/status/2029417857939861676"
     }
 ]

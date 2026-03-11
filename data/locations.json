@@ -42,6 +42,20 @@
         "lng": -2.05299172958631
     },
     {
+        "id": "carlisle-market-square",
+        "location": "Carlisle",
+        "venue": "Market Square",
+        "lat": 54.89462031318583,
+        "lng": -2.9357689030541847
+    },
+    {
+        "id": "chelmsford-central-park",
+        "location": "Chelmsford",
+        "venue": "Central Park",
+        "lat": 51.7336729707602,
+        "lng": 0.4667655031403105
+    },
+    {
         "id": "chelmsford-shire-hall",
         "location": "Chelmsford",
         "venue": "Shire Hall",
@@ -257,6 +271,13 @@
         "venue": "March For Remigration - Britain First",
         "lat": 53.47733340466485,
         "lng": -2.2311521607480764
+    },
+    {
+        "id": "manchester-picadilly-station",
+        "location": "Manchester",
+        "venue": "Picadilly Station",
+        "lat": 53.478337963123195,
+        "lng": -2.2305222638493367
     },
     {
         "id": "mold-wrexham-hotel",
